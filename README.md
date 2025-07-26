@@ -4,11 +4,12 @@ Um comparador de preços para jogos retrô que faz scraping automaticamente de d
 
 ## 🚀 Funcionalidades
 
-- ✅ Busca automática em múltiplos sites (MercadoLivre, OLX, Amazon)
+- ✅ Busca automática em múltiplos sites (MercadoLivre, OLX, Amazon, Nas Sutromi Blog)
 - ✅ Comparação de preços em tempo real
 - ✅ Interface simples e intuitiva
 - ✅ Resultados ordenados por preço
 - ✅ Links diretos para os produtos
+- ✅ Suporte a jogos retrô portugueses (Nas Sutromi Blog)
 
 ## 🛠️ Instalação
 
@@ -67,6 +68,7 @@ src/
 │   │   ├── mercadolivre.ts       # Scraper MercadoLivre
 │   │   ├── olx.ts                # Scraper OLX
 │   │   ├── amazon.ts             # Scraper Amazon
+│   │   ├── nassutromi.ts         # Scraper Nas Sutromi Blog (PT)
 │   │   └── index.ts              # Coordenador dos scrapers
 │   ├── utils/
 │   │   ├── formatters.ts         # Formatação de dados

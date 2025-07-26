@@ -1,6 +1,7 @@
 import { scrapeOLX } from "./olx";
 import { scrapeMercadoLivre } from "./mercadolivre";
 import { scrapeAmazon } from "./amazon";
+import { scrapeNasSutromiBlog } from "./nassutromi";
 import { GameResult } from "@/lib/types";
 import { validateGameName, sanitizeSearchTerm } from "@/lib/utils/validators";
 import { isValidPrice } from "@/lib/utils/formatters";
@@ -26,6 +27,10 @@ export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
     {
       name: "Amazon",
       scraper: scrapeAmazon,
+    },
+    {
+      name: "Nas Sutromi Blog",
+      scraper: scrapeNasSutromiBlog,
     },
   ];
 
@@ -53,4 +58,4 @@ export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
 }
 
 // Exportar scrapers individuais
-export { scrapeOLX, scrapeMercadoLivre, scrapeAmazon };
+export { scrapeOLX, scrapeMercadoLivre, scrapeAmazon, scrapeNasSutromiBlog };

@@ -33,13 +33,17 @@ export default function Home() {
       </button>
 
       <div className="mt-8 space-y-4">
-        {resultados.length > 0 && <h2 className="text-xl font-semibold text-gray-400">Resultados encontrados:</h2>}
+        {resultados.length > 0 && <h2 className="text-xl font-semibold text-gray-800">Resultados encontrados:</h2>}
         {resultados.map((r, i) => (
-          <div key={i} className="bg-white p-4 shadow rounded">
-            <a href={r.link} target="_blank" rel="noopener noreferrer" className="text-blue-700 font-semibold">
-              {r.title}
-            </a>
-            <p className="text-gray-700">{r.priceText}</p>
+          <div key={i} className="bg-white p-4 shadow rounded border-l-4 border-blue-500">
+            <div className="flex justify-between items-start mb-2">
+              <a href={r.link} target="_blank" rel="noopener noreferrer" className="text-blue-700 font-semibold hover:text-blue-900 flex-1">
+                {r.title}
+              </a>
+              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded ml-2 whitespace-nowrap">{r.site}</span>
+            </div>
+            <p className="text-green-600 font-bold text-lg">{r.priceText}</p>
+            {r.image && <img src={r.image} alt={r.title} className="mt-2 h-16 w-16 object-cover rounded" />}
           </div>
         ))}
       </div>
