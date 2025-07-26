@@ -4,7 +4,7 @@ const { scrapeNasSutromiBlog } = require("./src/lib/scrapers/nassutromi.ts");
 async function testarNasSutromi() {
   console.log("🧪 Testando scraper do Nas Sutromi Blog...\n");
 
-  const jogosParaTestar = ["R-Type", "Final Fantasy", "Resident Evil", "Prince of Persia", "Devil May Cry"];
+  const jogosParaTestar = ["Hello Kitty", "R-Type", "Final Fantasy", "Resident Evil", "Prince of Persia", "Devil May Cry"];
 
   for (const jogo of jogosParaTestar) {
     console.log(`🔍 Buscando: ${jogo}`);
