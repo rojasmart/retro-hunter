@@ -2,6 +2,7 @@ import { scrapeOLX } from "./olx";
 import { scrapeMercadoLivre } from "./mercadolivre";
 import { scrapeAmazon } from "./amazon";
 import { scrapeNasSutromiBlog } from "./nassutromi";
+import { scrapeWebBuy } from "./webuy";
 import { GameResult } from "@/lib/types";
 import { validateGameName, sanitizeSearchTerm } from "@/lib/utils/validators";
 import { isValidPrice } from "@/lib/utils/formatters";
@@ -27,6 +28,10 @@ export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
     {
       name: "Amazon",
       scraper: scrapeAmazon,
+    },
+    {
+      name: "WebBuy Portugal",
+      scraper: scrapeWebBuy,
     },
     {
       name: "Nas Sutromi Blog",

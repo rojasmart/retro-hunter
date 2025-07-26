@@ -65,9 +65,10 @@ src/
 │   └── globals.css
 ├── lib/
 │   ├── scrapers/
-│   │   ├── mercadolivre.ts       # Scraper MercadoLivre
 │   │   ├── olx.ts                # Scraper OLX
+│   │   ├── mercadolivre.ts       # Scraper MercadoLivre
 │   │   ├── amazon.ts             # Scraper Amazon
+│   │   ├── webuy.ts              # Scraper WebBuy Portugal
 │   │   ├── nassutromi.ts         # Scraper Nas Sutromi Blog (PT)
 │   │   └── index.ts              # Coordenador dos scrapers
 │   ├── utils/
@@ -120,8 +121,13 @@ GET /api/comparar?nome=R-Type Final
 
 ## ⚠️ Limitações Atuais
 
-- Os scrapers estão configurados com dados mockados para demonstração
-- Para implementação real, você precisa:
+- **Scrapers Implementados:**
+
+  - ✅ **WebBuy Portugal**: Scraping real com Cheerio
+  - ✅ **Nas Sutromi Blog**: Multi-year pagination com parsing real
+  - ⚠️ **OLX, MercadoLivre, Amazon**: Dados mockados para demonstração
+
+- **Para implementação completa dos scrapers mockados:**
   - Configurar parsing HTML com cheerio
   - Implementar rate limiting adequado
   - Considerar proxies para evitar bloqueios
@@ -129,9 +135,40 @@ GET /api/comparar?nome=R-Type Final
 
 ## 🔄 Próximas Melhorias
 
-- [ ] Implementar parsing real do HTML
-- [ ] Adicionar mais sites (Shopee, Americanas, etc.)
-- [ ] Sistema de cache Redis
+## 🇵🇹 WebBuy Portugal Scraper
+
+O scraper do WebBuy Portugal é totalmente funcional e implementa:
+
+### Características
+
+- **Parsing HTML Real**: Usa Cheerio para extrair dados reais
+- **Múltiplas Estratégias**: 3 métodos de busca diferentes
+- **Paginação Automática**: Procura em até 3 páginas automaticamente
+- **Rate Limiting**: Delays respeitosos entre requisições
+- **Filtros Específicos**: Foca especificamente em PlayStation 2
+- **Busca por SKU**: Pode buscar produtos específicos por código
+
+### URLs Suportadas
+
+```
+https://pt.webuy.com/search?categoryIds=1077&stext=JOGO     # PS2 específico
+https://pt.webuy.com/search?stext=JOGO                     # Busca geral
+https://pt.webuy.com/product/SKU                           # Produto específico
+```
+
+### Teste do WebBuy
+
+```bash
+node test-webuy.js
+```
+
+## 🚀 Roadmap
+
+- [x] Scraper WebBuy Portugal
+- [x] Scraper Nas Sutromi Blog com paginação
+- [ ] Scraper OLX com parsing real
+- [ ] Scraper MercadoLivre com parsing real
+- [ ] Scraper Amazon com parsing real
 - [ ] Filtros avançados (preço, condição, etc.)
 - [ ] Histórico de preços
 - [ ] Alertas de preço

@@ -410,15 +410,24 @@ function isGameMatch(title: string, searchTerm: string): boolean {
   const titleLower = title.toLowerCase();
   const searchLower = searchTerm.toLowerCase();
 
+  // Normalizar números romanos para números árabes
+  const normalizedTitle = normalizeRomanNumerals(titleLower);
+  const normalizedSearch = normalizeRomanNumerals(searchLower);
+
   // Busca exata
-  if (titleLower.includes(searchLower)) {
+  if (normalizedTitle.includes(normalizedSearch) || titleLower.includes(searchLower)) {
+    return true;
+  }
+
+  // Busca cruzada (título com romanos vs busca com números)
+  if (normalizedTitle.includes(searchLower) || titleLower.includes(normalizedSearch)) {
     return true;
   }
 
   // Busca por palavras (mínimo 3 caracteres)
-  const searchWords = searchLower.split(" ").filter((word) => word.length >= 3);
+  const searchWords = normalizedSearch.split(" ").filter((word) => word.length >= 3);
   if (searchWords.length > 0) {
-    const matchedWords = searchWords.filter((word) => titleLower.includes(word));
+    const matchedWords = searchWords.filter((word) => normalizedTitle.includes(word) || titleLower.includes(word));
     // Pelo menos 50% das palavras devem corresponder
     return matchedWords.length >= Math.ceil(searchWords.length * 0.5);
   }
@@ -426,11 +435,44 @@ function isGameMatch(title: string, searchTerm: string): boolean {
   return false;
 }
 
+// Função auxiliar para normalizar números romanos
+function normalizeRomanNumerals(text: string): string {
+  const romanToArabic: { [key: string]: string } = {
+    " iii": " 3",
+    " ii": " 2",
+    " iv": " 4",
+    " v": " 5",
+    " vi": " 6",
+    " vii": " 7",
+    " viii": " 8",
+    " ix": " 9",
+    " x": " 10",
+    " xi": " 11",
+    " xii": " 12",
+    " xiii": " 13",
+    " xiv": " 14",
+    " xv": " 15",
+    " xvi": " 16",
+    " xvii": " 17",
+    " xviii": " 18",
+    " xix": " 19",
+    " xx": " 20",
+  };
+
+  let normalized = text;
+  for (const [roman, arabic] of Object.entries(romanToArabic)) {
+    normalized = normalized.replace(new RegExp(roman, "g"), arabic);
+  }
+
+  return normalized;
+}
+
 // Função fallback com jogos conhecidos do blog
 function getFallbackGames(searchTerm: string): GameResult[] {
   const knownGames = [
     { title: "R-Type Final", price: 20, link: "https://nas-sutromi.blogspot.com/2021/06/r-type-final.html" },
     { title: "Hello Kitty", price: 8, link: "https://nas-sutromi.blogspot.com/2024/11/hello-kitty.html" },
+    { title: "Soul Calibur 3", price: 15, link: "https://nas-sutromi.blogspot.com/2014/10/soul-calibur-3.html" },
     { title: "Buzz Corridas Loucas", price: 14, link: "https://nas-sutromi.blogspot.com/2022/04/buzz-corridas-loucas.html" },
     {
       title: "Need For Speed Most Wanted Black Edition",
