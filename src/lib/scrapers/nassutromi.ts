@@ -13,34 +13,53 @@ export async function scrapeNasSutromiBlog(gameName: string): Promise<GameResult
       () => searchInPlaystation2Page(gameName),
       // 2. Busca usando o sistema de busca do blog
       () => searchUsingBlogSearch(gameName),
-      // 3. Busca em múltiplas páginas
-      () => searchMultiplePages(gameName),
+      // 3. Busca em múltiplas páginas com paginação automática
+      () => searchMultiplePagesAutomatic(gameName),
+      // 4. Busca em todos os anos (estratégia mais completa)
+      () => searchAllYears(gameName),
     ];
 
     let allResults: GameResult[] = [];
+    let foundResults = false;
 
-    for (const strategy of searchStrategies) {
+    // Testar estratégias em ordem de velocidade
+    for (let i = 0; i < searchStrategies.length; i++) {
       try {
-        const results = await strategy();
+        console.log(`Executando estratégia ${i + 1}...`);
+        const results = await searchStrategies[i]();
         allResults.push(...results);
 
-        // Se encontrou resultados, pode parar ou continuar para ter mais resultados
         if (results.length > 0) {
-          console.log(`Encontrados ${results.length} resultados com uma estratégia`);
+          console.log(`Estratégia ${i + 1} encontrou ${results.length} resultados`);
+          foundResults = true;
+
+          // Para busca rápida, se encontrou pode parar
+          // Para busca completa, continua para obter mais resultados
+          if (i < 2 && results.length >= 5) {
+            break; // Parar se encontrou resultados suficientes nas estratégias rápidas
+          }
         }
       } catch (error) {
-        console.error("Erro em estratégia de busca:", error);
+        console.error(`Erro na estratégia ${i + 1}:`, error);
       }
     }
 
-    // Remover duplicatas baseado no link
-    const uniqueResults = allResults.filter((result, index, self) => index === self.findIndex((r) => r.link === result.link));
+    // Se não encontrou nada com as estratégias, usar fallback
+    if (!foundResults) {
+      console.log("Usando fallback com jogos conhecidos...");
+      allResults.push(...getFallbackGames(gameName));
+    }
 
-    // Filtrar resultados válidos
-    return uniqueResults.filter((result) => result.price > 0 && isValidUrl(result.link) && result.title.length > 0);
+    // Remover duplicatas baseado no link
+    const uniqueResults = allResults.filter(
+      (result, index, self) =>
+        index === self.findIndex((r) => r.link === result.link) && result.price > 0 && isValidUrl(result.link) && result.title.length > 0
+    );
+
+    return uniqueResults;
   } catch (error) {
     console.error("Erro ao fazer scraping do blog Nas Sutromi:", error);
-    return [];
+    return getFallbackGames(gameName);
   }
 }
 
@@ -119,6 +138,183 @@ async function searchMultiplePages(gameName: string): Promise<GameResult[]> {
   }
 
   return allResults;
+}
+
+// Estratégia 3 atualizada: Buscar em múltiplas páginas com paginação automática
+async function searchMultiplePagesAutomatic(gameName: string): Promise<GameResult[]> {
+  const allResults: GameResult[] = [];
+  let currentUrl = "https://nas-sutromi.blogspot.com/search/label/Playstation%202";
+  let pageCount = 0;
+  const maxPages = 50; // Limite de segurança
+
+  while (currentUrl && pageCount < maxPages) {
+    try {
+      console.log(`Buscando página ${pageCount + 1}: ${currentUrl}`);
+
+      const response = await fetch(currentUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+      });
+
+      if (!response.ok) {
+        console.log(`Erro HTTP ${response.status} na página ${pageCount + 1}`);
+        break;
+      }
+
+      const html = await response.text();
+      const pageResults = parseNasSutromiHTML(html, gameName);
+      allResults.push(...pageResults);
+
+      // Procurar pelo link da próxima página
+      const nextPageUrl = extractNextPageUrl(html);
+
+      if (nextPageUrl && nextPageUrl !== currentUrl) {
+        currentUrl = nextPageUrl;
+        pageCount++;
+
+        // Delay entre páginas para ser respeitoso
+        await delay(1500);
+      } else {
+        console.log("Não há mais páginas para processar");
+        break;
+      }
+    } catch (error) {
+      console.error(`Erro na página ${pageCount + 1}:`, error);
+      break;
+    }
+  }
+
+  console.log(`Processadas ${pageCount + 1} páginas, encontrados ${allResults.length} resultados`);
+  return allResults;
+}
+
+// Nova função para extrair o URL da próxima página
+function extractNextPageUrl(html: string): string | null {
+  try {
+    // Padrões para encontrar o link "Mais antigos" ou "Older Posts"
+    const patterns = [
+      // Padrão 1: Link "Mais antigos" em português
+      /<a[^>]+href="([^"]*updated-max=[^"]*)"[^>]*>(?:Mais antigos|Older Posts|Publicações mais antigas)/i,
+
+      // Padrão 2: Link com classe blog-pager-older-link
+      /<a[^>]+class="[^"]*blog-pager-older-link[^"]*"[^>]+href="([^"]*)"/i,
+
+      // Padrão 3: Qualquer link com updated-max na URL
+      /<a[^>]+href="([^"]*updated-max=[^"]*max-results=\d+[^"]*)"[^>]*>/i,
+
+      // Padrão 4: Link dentro de navegação de páginas
+      /<div[^>]*class="[^"]*blog-pager[^"]*"[^>]*>[\s\S]*?<a[^>]+href="([^"]*updated-max=[^"]*)"[^>]*>/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        let url = match[1];
+
+        // Garantir que é uma URL completa
+        if (url.startsWith("/")) {
+          url = "https://nas-sutromi.blogspot.com" + url;
+        } else if (!url.startsWith("http")) {
+          url = "https://nas-sutromi.blogspot.com/" + url;
+        }
+
+        // Verificar se a URL é válida
+        if (url.includes("updated-max=") && url.includes("Playstation%202")) {
+          return url;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Erro ao extrair URL da próxima página:", error);
+    return null;
+  }
+}
+
+// Nova função para buscar por ano específico
+async function searchByYear(gameName: string, year: number): Promise<GameResult[]> {
+  const allResults: GameResult[] = [];
+
+  // Criar URL para buscar posts até o final do ano especificado
+  const endOfYear = `${year}-12-31T23:59:59-08:00`;
+  const startUrl = `https://nas-sutromi.blogspot.com/search/label/Playstation%202?updated-max=${endOfYear}&max-results=20`;
+
+  let currentUrl = startUrl;
+  let pageCount = 0;
+  const maxPagesPerYear = 20;
+
+  while (currentUrl && pageCount < maxPagesPerYear) {
+    try {
+      const response = await fetch(currentUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+      });
+
+      if (!response.ok) break;
+
+      const html = await response.text();
+
+      // Verificar se ainda estamos no ano correto
+      if (!html.includes(`${year}`) && pageCount > 0) {
+        console.log(`Saindo do ano ${year} na página ${pageCount + 1}`);
+        break;
+      }
+
+      const pageResults = parseNasSutromiHTML(html, gameName);
+      allResults.push(...pageResults);
+
+      const nextPageUrl = extractNextPageUrl(html);
+      if (nextPageUrl && nextPageUrl !== currentUrl) {
+        currentUrl = nextPageUrl;
+        pageCount++;
+        await delay(1000);
+      } else {
+        break;
+      }
+    } catch (error) {
+      console.error(`Erro no ano ${year}, página ${pageCount + 1}:`, error);
+      break;
+    }
+  }
+
+  return allResults;
+}
+
+// Nova função para buscar em todos os anos
+async function searchAllYears(gameName: string): Promise<GameResult[]> {
+  const allResults: GameResult[] = [];
+  const currentYear = new Date().getFullYear();
+  const startYear = 2010; // Ano de início do blog (ajuste conforme necessário)
+
+  console.log(`Buscando ${gameName} de ${startYear} até ${currentYear}...`);
+
+  // Buscar ano por ano, do mais recente para o mais antigo
+  for (let year = currentYear; year >= startYear; year--) {
+    try {
+      console.log(`Processando ano ${year}...`);
+      const yearResults = await searchByYear(gameName, year);
+      allResults.push(...yearResults);
+
+      // Se encontrou resultados, pode continuar ou parar dependendo da necessidade
+      if (yearResults.length > 0) {
+        console.log(`Encontrados ${yearResults.length} resultados em ${year}`);
+      }
+
+      // Delay entre anos
+      await delay(2000);
+    } catch (error) {
+      console.error(`Erro ao processar ano ${year}:`, error);
+    }
+  }
+
+  // Remover duplicatas
+  const uniqueResults = allResults.filter((result, index, self) => index === self.findIndex((r) => r.link === result.link));
+
+  console.log(`Total encontrado: ${uniqueResults.length} jogos únicos`);
+  return uniqueResults;
 }
 
 export function parseNasSutromiHTML(html: string, gameName: string): GameResult[] {
@@ -300,3 +496,6 @@ export async function searchBlogPages(gameName: string, maxPages: number = 3): P
 
   return uniqueResults;
 }
+
+// Exportar funções para teste
+export { searchAllYears, searchByYear, searchMultiplePagesAutomatic };
