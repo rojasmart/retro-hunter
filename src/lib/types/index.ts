@@ -24,3 +24,22 @@ export interface ApiResponse {
   total: number;
   error?: string;
 }
+
+export type Platform = 
+  | 'all'
+  | 'ps2'
+  | 'ps3'
+  | 'ps4'
+  | 'xbox'
+  | 'xbox360'
+  | 'nintendo-switch'
+  | 'nintendo-wii'
+  | 'nintendo-ds'
+  | 'retro';
+
+export interface PlatformConfig {
+  id: string;
+  name: string;
+  webuyCategories: string[];
+  icon: string;
+}

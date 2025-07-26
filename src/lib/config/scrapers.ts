@@ -46,6 +46,15 @@ export const SCRAPER_CONFIG = {
       country: "PT",
       currency: "EUR",
     },
+    WEBUY: {
+      name: "WebBuy Portugal",
+      baseUrl: "https://pt.webuy.com",
+      searchPath: "/search?stext={query}",
+      enabled: true,
+      priority: 3,
+      country: "PT",
+      currency: "EUR",
+    },
   },
 
   // Filtros de qualidade

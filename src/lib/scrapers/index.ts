@@ -3,11 +3,11 @@ import { scrapeMercadoLivre } from "./mercadolivre";
 import { scrapeAmazon } from "./amazon";
 import { scrapeNasSutromiBlog } from "./nassutromi";
 import { scrapeWebBuy } from "./webuy";
-import { GameResult } from "@/lib/types";
+import { GameResult, Platform } from "@/lib/types";
 import { validateGameName, sanitizeSearchTerm } from "@/lib/utils/validators";
 import { isValidPrice } from "@/lib/utils/formatters";
 
-export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
+export async function scrapeAllSites(gameName: string, platform: Platform = 'all'): Promise<GameResult[]> {
   // Validar entrada
   if (!validateGameName(gameName)) {
     throw new Error("Nome do jogo inválido");
@@ -19,23 +19,23 @@ export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
   const scrapers = [
     {
       name: "OLX",
-      scraper: scrapeOLX,
+      scraper: (name: string) => scrapeOLX(name),
     },
     {
       name: "MercadoLivre",
-      scraper: scrapeMercadoLivre,
+      scraper: (name: string) => scrapeMercadoLivre(name),
     },
     {
       name: "Amazon",
-      scraper: scrapeAmazon,
+      scraper: (name: string) => scrapeAmazon(name),
     },
     {
       name: "WebBuy Portugal",
-      scraper: scrapeWebBuy,
+      scraper: (name: string) => scrapeWebBuy(name, platform), // Passar plataforma para WebBuy
     },
     {
       name: "Nas Sutromi Blog",
-      scraper: scrapeNasSutromiBlog,
+      scraper: (name: string) => scrapeNasSutromiBlog(name),
     },
   ];
 
@@ -63,4 +63,4 @@ export async function scrapeAllSites(gameName: string): Promise<GameResult[]> {
 }
 
 // Exportar scrapers individuais
-export { scrapeOLX, scrapeMercadoLivre, scrapeAmazon, scrapeNasSutromiBlog };
+export { scrapeOLX, scrapeMercadoLivre, scrapeAmazon, scrapeNasSutromiBlog, scrapeWebBuy };

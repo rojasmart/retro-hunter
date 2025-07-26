@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeAllSites } from "@/lib/scrapers";
-import { ApiResponse } from "@/lib/types";
+import { ApiResponse, Platform } from "@/lib/types";
 import { validateGameName } from "@/lib/utils/validators";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const nome = searchParams.get("nome");
+    const platform = (searchParams.get("platform") as Platform) || 'all';
 
     // Validação de entrada
     if (!nome) {
@@ -17,17 +18,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Nome do jogo deve ter pelo menos 2 caracteres", resultados: [], total: 0 }, { status: 400 });
     }
 
-    console.log(`Buscando preços para: ${nome}`);
+    console.log(`Buscando preços para: ${nome} (Plataforma: ${platform})`);
 
-    // Executar scrapers
-    const resultados = await scrapeAllSites(nome);
+    // Executar scrapers com plataforma
+    const resultados = await scrapeAllSites(nome, platform);
 
     const response: ApiResponse = {
       resultados,
       total: resultados.length,
     };
 
-    console.log(`Encontrados ${resultados.length} resultados para: ${nome}`);
+    console.log(`Encontrados ${resultados.length} resultados para: ${nome} (${platform})`);
 
     return NextResponse.json(response, {
       headers: {
