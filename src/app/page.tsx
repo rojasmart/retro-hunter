@@ -33,7 +33,7 @@ export default function Home() {
       </button>
 
       <div className="mt-8 space-y-4">
-        {resultados.length > 0 && <h2 className="text-xl font-semibold">Resultados encontrados:</h2>}
+        {resultados.length > 0 && <h2 className="text-xl font-semibold text-gray-400">Resultados encontrados:</h2>}
         {resultados.map((r, i) => (
           <div key={i} className="bg-white p-4 shadow rounded">
             <a href={r.link} target="_blank" rel="noopener noreferrer" className="text-blue-700 font-semibold">
