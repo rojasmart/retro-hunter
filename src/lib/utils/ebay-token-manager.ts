@@ -36,6 +36,11 @@ class EbayTokenManager {
     const clientSecret = process.env.EBAY_CLIENT_SECRET;
     const isSandbox = process.env.EBAY_SANDBOX === 'true';
 
+    console.log('🔧 eBay Token Manager - Configuração:');
+    console.log(`   CLIENT_ID: ${clientId ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`   CLIENT_SECRET: ${clientSecret ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`   SANDBOX: ${isSandbox}`);
+
     if (!clientId || !clientSecret) {
       throw new Error('EBAY_CLIENT_ID e EBAY_CLIENT_SECRET são obrigatórios');
     }
@@ -45,6 +50,8 @@ class EbayTokenManager {
       : 'https://api.ebay.com';
 
     const tokenUrl = `${baseUrl}/identity/v1/oauth2/token`;
+    
+    console.log(`🔗 Solicitando token para: ${tokenUrl}`);
     
     // Codificar credenciais em Base64
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -60,7 +67,8 @@ class EbayTokenManager {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Erro ao obter token do eBay:', errorText);
+      console.error('❌ Erro ao obter token do eBay:', errorText);
+      console.error(`   Status: ${response.status} ${response.statusText}`);
       throw new Error(`Falha ao obter token: ${response.status}`);
     }
 
@@ -70,7 +78,10 @@ class EbayTokenManager {
     this.currentToken = tokenData.access_token;
     this.tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000) - 60000; // 1 min de margem
     
-    console.log(`✅ Novo token do eBay obtido. Expira em ${tokenData.expires_in} segundos`);
+    console.log(`✅ Novo token do eBay obtido com sucesso!`);
+    console.log(`   Token: ${tokenData.access_token.substring(0, 30)}...`);
+    console.log(`   Expira em: ${tokenData.expires_in} segundos`);
+    console.log(`   Tipo: ${tokenData.token_type}`);
     
     return tokenData.access_token;
   }

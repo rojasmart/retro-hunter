@@ -1,19 +1,35 @@
+require("dotenv").config({ path: ".env.local" });
+
 // Teste da API local
 async function testarAPI() {
   try {
     console.log("🧪 Testando API do RetroSniffer...\n");
 
-    const response = await fetch("http://localhost:3000/api/comparar?nome=R-Type");
-    const data = await response.json();
+    // Testar termos que funcionaram no sandbox
+    const testTerms = ["laptop", "camera", "toy"];
 
-    console.log("📊 Resposta da API:");
-    console.log(JSON.stringify(data, null, 2));
+    for (const term of testTerms) {
+      console.log(`🔍 Testando: "${term}"`);
 
-    if (data.resultados && data.resultados.length > 0) {
-      console.log("\n✅ API funcionando corretamente!");
-      console.log(`📈 Encontrados ${data.total} resultados`);
-    } else {
-      console.log("\n⚠️ API retornou sem resultados");
+      const response = await fetch(`http://localhost:3000/api/ebay?nome=${encodeURIComponent(term)}&platform=all`);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`   ✅ Status: ${response.status}`);
+        console.log(`   📊 Total: ${data.total || 0}`);
+        console.log(`   📦 Resultados: ${data.resultados?.length || 0}`);
+
+        if (data.resultados && data.resultados.length > 0) {
+          const firstItem = data.resultados[0];
+          console.log(`   🎮 Primeiro: ${firstItem.title}`);
+          console.log(`   � Preço: ${firstItem.price} ${firstItem.currency || ""}`);
+        }
+      } else {
+        const error = await response.json();
+        console.log(`   ❌ Erro ${response.status}: ${error.error || "Erro desconhecido"}`);
+      }
+
+      console.log("");
     }
   } catch (error) {
     console.error("\n❌ Erro ao testar API:", error.message);

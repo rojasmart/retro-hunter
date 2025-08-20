@@ -28,6 +28,10 @@ async function searchEbayAPI(gameName: string, platform: Platform): Promise<Game
     const baseUrl = getEbayBaseUrl();
     const headers = await getEbayHeaders();
 
+    console.log('🔧 eBay Scraper - Configuração:');
+    console.log(`   Base URL: ${baseUrl}`);
+    console.log(`   Headers: Authorization = Bearer ${headers.Authorization?.substring(0, 30)}...`);
+
     // Construir parâmetros da busca
     const searchParams = new URLSearchParams({
       q: gameName,
