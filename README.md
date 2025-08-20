@@ -1,15 +1,16 @@
 # 🎮 RetroSniffer
 
-Um comparador de preços para jogos retrô que faz scraping automaticamente de diferentes sites.
+Um comparador de preços para jogos retrô que busca automaticamente no eBay.
 
 ## 🚀 Funcionalidades
 
-- ✅ Busca automática em múltiplos sites (MercadoLivre, OLX, Amazon, Nas Sutromi Blog)
+- ✅ Busca automática no eBay usando a API oficial
 - ✅ Comparação de preços em tempo real
 - ✅ Interface simples e intuitiva
 - ✅ Resultados ordenados por preço
-- ✅ Links diretos para os produtos
-- ✅ Suporte a jogos retrô portugueses (Nas Sutromi Blog)
+- ✅ Links diretos para os produtos no eBay
+- ✅ Suporte a diferentes plataformas de jogos (PS2, PS3, PS4, Xbox, Nintendo, etc.)
+- ✅ Sistema de autenticação automática com eBay API
 
 ## 🛠️ Instalação
 
@@ -17,6 +18,7 @@ Um comparador de preços para jogos retrô que faz scraping automaticamente de d
 
 - Node.js 18+
 - npm ou yarn
+- Conta de desenvolvedor eBay (para obter as credenciais da API)
 
 ### Passos
 
@@ -33,20 +35,21 @@ cd retrosniffer
 # Se o PowerShell estiver bloqueando scripts, execute primeiro:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
-# Instalar dependências principais
+# Instalar dependências
 npm install
-
-# Instalar dependências de scraping
-npm install cheerio axios @types/cheerio
 ```
 
-3. **Execute o projeto**
+3. **Configure as credenciais do eBay**
+
+Siga as instruções no arquivo `EBAY-SETUP.md` para configurar suas credenciais da API do eBay.
+
+4. **Execute o projeto**
 
 ```bash
 npm run dev
 ```
 
-4. **Acesse no navegador**
+5. **Acesse no navegador**
 
 ```
 http://localhost:3000

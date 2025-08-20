@@ -1,18 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Platform } from "@/lib/types";
+import { Platform, GameResult } from "@/lib/types";
 import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
+import Image from "next/image";
 
 export default function Home() {
   const [nome, setNome] = useState("");
   const [platform, setPlatform] = useState<Platform>("all");
-  const [resultados, setResultados] = useState<any[]>([]);
+  const [resultados, setResultados] = useState<GameResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   const search = async () => {
     setLoading(true);
     const res = await fetch(`/api/comparar?nome=${encodeURIComponent(nome)}&platform=${platform}`);
+    const data = await res.json();
+    setResultados(data.resultados || []);
+    setLoading(false);
+  };
+
+  const searchEbayOnly = async () => {
+    setLoading(true);
+    const res = await fetch(`/api/ebay?nome=${encodeURIComponent(nome)}&platform=${platform}`);
     const data = await res.json();
     setResultados(data.resultados || []);
     setLoading(false);
@@ -70,14 +79,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Botão de busca */}
-        <button
-          onClick={search}
-          disabled={loading || !nome.trim()}
-          className="search-button text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed w-full font-medium"
-        >
-          {loading ? "🔍 Procurando..." : "🎮 Procurar Jogos"}
-        </button>
+        {/* Botões de busca */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={search}
+            disabled={loading || !nome.trim()}
+            className="search-button text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex-1 font-medium"
+          >
+            {loading ? "🔍 Procurando..." : "🎮 Procurar em Todos os Sites"}
+          </button>
+
+          <button
+            onClick={searchEbayOnly}
+            disabled={loading || !nome.trim()}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex-1 font-medium"
+          >
+            {loading ? "🔍 Procurando..." : "🛒 Apenas eBay"}
+          </button>
+        </div>
 
         {/* Info da plataforma selecionada */}
         {platform !== "all" && (
@@ -109,7 +128,7 @@ export default function Home() {
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 whitespace-nowrap">{r.site}</span>
                   </div>
                   <p className="text-green-600 font-bold text-lg mb-2">{r.priceText}</p>
-                  {r.image && <img src={r.image} alt={r.title} className="w-full h-24 object-cover rounded border" />}
+                  {r.image && <Image src={r.image} alt={r.title} width={300} height={96} className="w-full h-24 object-cover rounded border" />}
                 </div>
               ))}
             </div>
@@ -118,7 +137,7 @@ export default function Home() {
 
         {!loading && resultados.length === 0 && nome.trim() && (
           <div className="text-center py-8">
-            <p className="text-gray-500">😕 Nenhum resultado encontrado para "{nome}"</p>
+            <p className="text-gray-500">😕 Nenhum resultado encontrado para &ldquo;{nome}&rdquo;</p>
             <p className="text-sm text-gray-400 mt-1">Tente alterar a plataforma ou usar termos diferentes</p>
           </div>
         )}
