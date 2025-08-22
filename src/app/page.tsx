@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GameResult, Platform } from "@/lib/types";
 import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
+import { OCRUpload } from "@/components/OCRUpload";
 import Image from "next/image";
 
 export default function Home() {
@@ -25,10 +26,33 @@ export default function Home() {
     setLoading(false);
   };
 
+  // Função para buscar via OCR
+  const handleOCRSearch = async (extractedText: string) => {
+    if (extractedText.trim()) {
+      setNome(extractedText.trim());
+      // Buscar automaticamente após extrair o texto
+      setLoading(true);
+      const params = new URLSearchParams({
+        nome: extractedText.trim(),
+        platform: platform,
+        condition: condition,
+      });
+      const res = await fetch(`/api/ebay?${params.toString()}`);
+      const data = await res.json();
+      setResultados(data.resultados || []);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-4 text-gray-500">🎮 Retrosniffer</h1>
       <p className="mb-6 text-gray-500">Compare o preço do seu jogo</p>
+
+      {/* Componente OCR */}
+      <div className="mb-8">
+        <OCRUpload onTextExtracted={(text) => setNome(text)} onSearch={handleOCRSearch} isSearching={loading} />
+      </div>
 
       <div className="max-w-2xl space-y-4">
         {/* Campo de busca */}
