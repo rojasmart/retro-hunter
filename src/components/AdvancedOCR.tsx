@@ -5,11 +5,11 @@ import { OCRUpload } from "@/components/OCRUpload";
 import { generateGameNameVariations } from "@/lib/utils/ocr";
 
 interface AdvancedOCRProps {
-  onGameSelected: (gameName: string) => void;
-  isSearching?: boolean;
+  onGameExtracted: (gameName: string) => void;
+  isProcessing?: boolean;
 }
 
-export function AdvancedOCR({ onGameSelected, isSearching = false }: AdvancedOCRProps) {
+export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedOCRProps) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
@@ -22,16 +22,31 @@ export function AdvancedOCR({ onGameSelected, isSearching = false }: AdvancedOCR
     // Auto-selecionar a primeira variação se disponível
     if (variations.length > 0) {
       setSelectedGame(variations[0]);
+      // Automaticamente definir o nome no campo de busca
+      onGameExtracted(variations[0]);
     }
   };
 
-  const handleSearch = (gameName: string) => {
-    onGameSelected(gameName);
+  const handleGameSelection = (gameName: string) => {
+    setSelectedGame(gameName);
+    // Atualizar o campo de busca com o jogo selecionado
+    onGameExtracted(gameName);
+  };
+
+  const handleDirectSearch = () => {
+    // Esta função não faz busca automática, apenas confirma a seleção
+    if (selectedGame) {
+      onGameExtracted(selectedGame);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <OCRUpload onTextExtracted={handleTextExtracted} onSearch={handleSearch} isSearching={isSearching} />
+      <OCRUpload 
+        onTextExtracted={handleTextExtracted} 
+        onSearch={handleDirectSearch} 
+        isSearching={isProcessing} 
+      />
 
       {/* Variações do nome do jogo */}
       {gameVariations.length > 0 && (
@@ -46,7 +61,7 @@ export function AdvancedOCR({ onGameSelected, isSearching = false }: AdvancedOCR
                   name="gameSelection"
                   value={variation}
                   checked={selectedGame === variation}
-                  onChange={(e) => setSelectedGame(e.target.value)}
+                  onChange={(e) => handleGameSelection(e.target.value)}
                   className="text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor={`game-${index}`} className="flex-1 cursor-pointer hover:text-blue-700">
@@ -57,13 +72,14 @@ export function AdvancedOCR({ onGameSelected, isSearching = false }: AdvancedOCR
           </div>
 
           {selectedGame && (
-            <button
-              onClick={() => handleSearch(selectedGame)}
-              disabled={isSearching}
-              className="mt-3 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              🔍 {isSearching ? "Buscando..." : `Buscar "${selectedGame}"`}
-            </button>
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+              <p className="text-green-800 text-sm">
+                ✅ Nome selecionado: <strong>{selectedGame}</strong>
+              </p>
+              <p className="text-green-600 text-xs mt-1">
+                O nome foi automaticamente adicionado ao campo de busca acima
+              </p>
+            </div>
           )}
         </div>
       )}

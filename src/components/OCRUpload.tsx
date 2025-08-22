@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createWorker } from "tesseract.js";
+import { createWorker, PSM, OEM } from "tesseract.js";
+import { cleanOCRText, generateGameNameVariations, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
 
 interface OCRUploadProps {
@@ -29,31 +30,128 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
     setError(null);
 
     try {
-      console.log("🔍 Iniciando OCR...");
+      console.log("🔍 Iniciando OCR avançado...");
 
-      const worker = await createWorker("por+eng", 1, {
+      // Criar canvas para pré-processamento
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Não foi possível criar canvas");
+
+      // Carregar imagem no canvas
+      const img = new globalThis.Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = URL.createObjectURL(imageFile);
+      });
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Aplicar pré-processamento
+      console.log("🔧 Aplicando pré-processamento...");
+      const resizedCanvas = resizeImageForOCR(canvas);
+      const processedCanvas = preprocessImage(resizedCanvas);
+
+      // Converter canvas para blob
+      const processedBlob = await new Promise<Blob>((resolve) => {
+        processedCanvas.toBlob(
+          (blob) => {
+            resolve(blob!);
+          },
+          "image/png",
+          0.9
+        );
+      });
+
+      // Configurar Tesseract com múltiplas tentativas para melhor extração
+      const worker = await createWorker(["por", "eng"], 1, {
         logger: (m) => {
-          console.log("OCR Progress:", m);
+          console.log("OCR Progress:", m.status, Math.round(m.progress * 100) + "%");
           if (m.status === "recognizing text") {
             setProgress(Math.round(m.progress * 100));
           }
         },
       });
 
-      const {
-        data: { text },
-      } = await worker.recognize(imageFile);
+      // Tentar múltiplas configurações de OCR para melhor resultado
+      const ocrAttempts = [
+        // Configuração 1: Para texto em blocos (títulos principais)
+        {
+          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
+          tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
+          description: "SINGLE_BLOCK",
+        },
+        // Configuração 2: Para texto em linhas (labels, cartuchos)
+        {
+          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
+          tessedit_pageseg_mode: PSM.SINGLE_LINE,
+          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
+          description: "SINGLE_LINE",
+        },
+        // Configuração 3: Para texto esparso (CDs, mídia)
+        {
+          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
+          tessedit_pageseg_mode: PSM.SPARSE_TEXT,
+          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
+          description: "SPARSE_TEXT",
+        },
+      ];
+
+      let bestResult = { text: "", confidence: 0 };
+
+      // Tentar cada configuração e pegar o melhor resultado
+      for (const [index, config] of ocrAttempts.entries()) {
+        console.log(`🔧 Tentativa ${index + 1}/3 com configuração: ${config.description}`);
+
+        try {
+          await worker.setParameters({
+            tessedit_char_whitelist: config.tessedit_char_whitelist,
+            tessedit_pageseg_mode: config.tessedit_pageseg_mode,
+            tessedit_ocr_engine_mode: config.tessedit_ocr_engine_mode,
+          });
+
+          const result = await worker.recognize(processedBlob);
+
+          console.log(`📊 Resultado ${index + 1}: confiança=${Math.round(result.data.confidence)}%`);
+          console.log(`📝 Texto ${index + 1}:`, result.data.text.substring(0, 100));
+
+          if (result.data.confidence > bestResult.confidence && result.data.text.trim().length > 0) {
+            bestResult = result.data;
+            console.log(`✅ Melhor resultado atualizado: ${Math.round(bestResult.confidence)}%`);
+          }
+        } catch (attemptError) {
+          console.warn(`⚠️ Erro na tentativa ${index + 1}:`, attemptError);
+        }
+      }
 
       await worker.terminate();
 
-      const cleanedText = cleanExtractedText(text);
-      console.log("✅ Texto extraído:", cleanedText);
+      const { text, confidence } = bestResult;
 
-      setExtractedText(cleanedText);
-      onTextExtracted(cleanedText);
+      console.log(`📝 Texto bruto extraído (confiança: ${Math.round(confidence)}%):`, text);
+
+      // Limpar e gerar variações
+      const cleanedText = cleanOCRText(text);
+      const variations = generateGameNameVariations(text);
+
+      console.log("✅ Texto limpo:", cleanedText);
+      console.log("🎯 Variações:", variations);
+
+      if (cleanedText.trim()) {
+        setExtractedText(cleanedText);
+        onTextExtracted(cleanedText);
+      } else if (variations.length > 0) {
+        setExtractedText(variations[0]);
+        onTextExtracted(variations[0]);
+      } else {
+        throw new Error("Não foi possível extrair texto legível da imagem");
+      }
     } catch (err) {
       console.error("❌ Erro no OCR:", err);
-      setError("Erro ao processar a imagem. Tente novamente.");
+      setError("Erro ao processar a imagem. Tente uma imagem com texto mais claro ou tire outra foto.");
     } finally {
       setIsProcessing(false);
       setProgress(0);
@@ -61,17 +159,6 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
   };
 
   // Limpar texto extraído
-  const cleanExtractedText = (text: string): string => {
-    return text
-      .replace(/[^\w\s\-:()]/g, " ") // Remove caracteres especiais
-      .replace(/\s+/g, " ") // Remove espaços extras
-      .trim()
-      .split("\n")
-      .filter((line) => line.trim().length > 3) // Remove linhas muito curtas
-      .join(" ")
-      .substring(0, 200); // Limita tamanho
-  };
-
   // Upload de arquivo
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -243,17 +330,21 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
           <label className="block text-sm font-medium text-gray-700">Texto Reconhecido:</label>
           <textarea
             value={extractedText}
-            onChange={(e) => setExtractedText(e.target.value)}
+            onChange={(e) => {
+              setExtractedText(e.target.value);
+              onTextExtracted(e.target.value); // Atualizar o componente pai quando o texto for editado
+            }}
             className="w-full h-24 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Texto extraído aparecerá aqui..."
           />
-          <button
-            onClick={handleSearch}
-            disabled={!extractedText.trim() || isSearching}
-            className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            🔍 {isSearching ? "Buscando..." : "Buscar no eBay"}
-          </button>
+          <div className="p-3 bg-green-50 border border-green-200 rounded">
+            <p className="text-green-800 text-sm">
+              ✅ Nome extraído com sucesso! 
+            </p>
+            <p className="text-green-600 text-xs mt-1">
+              O texto foi automaticamente adicionado ao campo de busca. Você pode editá-lo acima se necessário.
+            </p>
+          </div>
         </div>
       )}
     </div>
