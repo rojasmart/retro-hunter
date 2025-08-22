@@ -1,33 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Platform, GameResult } from "@/lib/types";
-import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
+import { GameResult } from "@/lib/types";
 import Image from "next/image";
 
 export default function Home() {
   const [nome, setNome] = useState("");
-  const [platform, setPlatform] = useState<Platform>("all");
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const search = async () => {
-    setLoading(true);
-    const res = await fetch(`/api/comparar?nome=${encodeURIComponent(nome)}&platform=${platform}`);
-    const data = await res.json();
-    setResultados(data.resultados || []);
-    setLoading(false);
-  };
-
   const searchEbayOnly = async () => {
     setLoading(true);
-    const res = await fetch(`/api/ebay?nome=${encodeURIComponent(nome)}&platform=${platform}`);
+    const res = await fetch(`/api/ebay?nome=${encodeURIComponent(nome)}`);
     const data = await res.json();
     setResultados(data.resultados || []);
     setLoading(false);
   };
-
-  const platformOptions = Object.values(PLATFORM_CONFIGS);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -50,62 +38,16 @@ export default function Home() {
           />
         </div>
 
-        {/* Seleção de plataforma */}
+        {/* Botão de busca */}
         <div>
-          <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-2">
-            Plataforma
-          </label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {platformOptions.map((platformConfig) => (
-              <button
-                key={platformConfig.id}
-                type="button"
-                onClick={() => setPlatform(platformConfig.id as Platform)}
-                className={`
-                  p-3 rounded-lg border text-sm font-medium transition-colors
-                  ${
-                    platform === platformConfig.id
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                  }
-                `}
-              >
-                <div className="flex items-center justify-center space-x-1">
-                  <span>{platformConfig.icon}</span>
-                  <span className="text-xs">{platformConfig.name}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Botões de busca */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button
-            onClick={search}
-            disabled={loading || !nome.trim()}
-            className="search-button text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex-1 font-medium"
-          >
-            {loading ? "🔍 Procurando..." : "🎮 Procurar em Todos os Sites"}
-          </button>
-
           <button
             onClick={searchEbayOnly}
             disabled={loading || !nome.trim()}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex-1 font-medium"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed w-full font-medium"
           >
-            {loading ? "🔍 Procurando..." : "🛒 Apenas eBay"}
+            {loading ? "🔍 Procurando..." : "🛒 Buscar no eBay"}
           </button>
         </div>
-
-        {/* Info da plataforma selecionada */}
-        {platform !== "all" && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-sm text-blue-800">
-              <span className="font-medium">Buscando em:</span> {PLATFORM_CONFIGS[platform].name} {PLATFORM_CONFIGS[platform].icon}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Resultados */}

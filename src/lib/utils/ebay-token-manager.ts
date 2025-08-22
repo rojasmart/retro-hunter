@@ -32,58 +32,43 @@ class EbayTokenManager {
    * Este método é mais simples e adequado para busca de itens
    */
   async getApplicationToken(): Promise<string> {
-    const clientId = process.env.EBAY_CLIENT_ID;
-    const clientSecret = process.env.EBAY_CLIENT_SECRET;
-    const isSandbox = process.env.EBAY_SANDBOX === 'true';
-
-    console.log('🔧 eBay Token Manager - Configuração:');
-    console.log(`   CLIENT_ID: ${clientId ? '✅ Configurado' : '❌ Não configurado'}`);
-    console.log(`   CLIENT_SECRET: ${clientSecret ? '✅ Configurado' : '❌ Não configurado'}`);
-    console.log(`   SANDBOX: ${isSandbox}`);
-
-    if (!clientId || !clientSecret) {
-      throw new Error('EBAY_CLIENT_ID e EBAY_CLIENT_SECRET são obrigatórios');
+    if (this.currentToken && Date.now() < this.tokenExpiresAt) {
+      return this.currentToken;
     }
 
-    const baseUrl = isSandbox 
-      ? 'https://api.sandbox.ebay.com' 
-      : 'https://api.ebay.com';
+    const clientId = process.env.EBAY_CLIENT_ID;
+    const clientSecret = process.env.EBAY_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error("Credenciais eBay não encontradas");
+    }
+
+    const baseUrl = process.env.EBAY_SANDBOX === "true" ? "https://api.sandbox.ebay.com" : "https://api.ebay.com";
 
     const tokenUrl = `${baseUrl}/identity/v1/oauth2/token`;
-    
-    console.log(`🔗 Solicitando token para: ${tokenUrl}`);
-    
-    // Codificar credenciais em Base64
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
     const response = await fetch(tokenUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${credentials}`,
       },
-      body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope'
+      // USAR EXATAMENTE O MESMO ESCOPO QUE FUNCIONA NO TESTE
+      body: "grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope",
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Erro ao obter token do eBay:', errorText);
-      console.error(`   Status: ${response.status} ${response.statusText}`);
-      throw new Error(`Falha ao obter token: ${response.status}`);
+      const error = await response.text();
+      throw new Error(`Erro ao obter token eBay: ${error}`);
     }
 
-    const tokenData: TokenResponse = await response.json();
-    
-    // Atualizar token e tempo de expiração
-    this.currentToken = tokenData.access_token;
-    this.tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000) - 60000; // 1 min de margem
-    
-    console.log(`✅ Novo token do eBay obtido com sucesso!`);
-    console.log(`   Token: ${tokenData.access_token.substring(0, 30)}...`);
-    console.log(`   Expira em: ${tokenData.expires_in} segundos`);
-    console.log(`   Tipo: ${tokenData.token_type}`);
-    
-    return tokenData.access_token;
+    const data = await response.json();
+    this.currentToken = data.access_token;
+    // Token expires in seconds, convert to milliseconds and add buffer
+    this.tokenExpiresAt = Date.now() + (data.expires_in - 300) * 1000;
+
+    return this.currentToken;
   }
 
   /**
@@ -109,7 +94,7 @@ class EbayTokenManager {
     }
 
     // Gerar novo token
-    console.log('🔄 Token expirado ou inválido, obtendo novo token...');
+    console.log("🔄 Token expirado ou inválido, obtendo novo token...");
     return await this.getApplicationToken();
   }
 
@@ -117,7 +102,7 @@ class EbayTokenManager {
    * Força a obtenção de um novo token
    */
   async refreshToken(): Promise<string> {
-    console.log('🔄 Forçando renovação do token...');
+    console.log("🔄 Forçando renovação do token...");
     return await this.getApplicationToken();
   }
 
@@ -137,7 +122,7 @@ class EbayTokenManager {
     return {
       hasToken: this.currentToken !== null,
       expiresAt: this.tokenExpiresAt,
-      timeToExpiry: Math.max(0, this.tokenExpiresAt - Date.now())
+      timeToExpiry: Math.max(0, this.tokenExpiresAt - Date.now()),
     };
   }
 }

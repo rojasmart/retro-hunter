@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.amazon.com.br",
       },
+      {
+        protocol: "https",
+        hostname: "i.ebayimg.com",
+      },
     ],
   },
   async headers() {
