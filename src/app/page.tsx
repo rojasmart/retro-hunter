@@ -1,17 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { GameResult } from "@/lib/types";
+import { GameResult, Platform } from "@/lib/types";
+import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import Image from "next/image";
 
 export default function Home() {
   const [nome, setNome] = useState("");
+  const [platform, setPlatform] = useState<Platform>("all");
+  const [condition, setCondition] = useState<string>("all");
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   const searchEbayOnly = async () => {
     setLoading(true);
-    const res = await fetch(`/api/ebay?nome=${encodeURIComponent(nome)}`);
+    const params = new URLSearchParams({
+      nome: nome,
+      platform: platform,
+      condition: condition,
+    });
+    const res = await fetch(`/api/ebay?${params.toString()}`);
     const data = await res.json();
     setResultados(data.resultados || []);
     setLoading(false);
@@ -20,7 +28,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-4 text-gray-500">🎮 Retrosniffer</h1>
-      <p className="mb-6 text-gray-500">Compare o preço de jogos retro automaticamente</p>
+      <p className="mb-6 text-gray-500">Compare o preço do seu jogo</p>
 
       <div className="max-w-2xl space-y-4">
         {/* Campo de busca */}
@@ -38,6 +46,46 @@ export default function Home() {
           />
         </div>
 
+        {/* Filtros */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Seleção de plataforma */}
+          <div>
+            <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-2">
+              Plataforma
+            </label>
+            <select
+              id="platform"
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value as Platform)}
+              className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {Object.values(PLATFORM_CONFIGS).map((platformConfig) => (
+                <option key={platformConfig.id} value={platformConfig.id}>
+                  {platformConfig.icon} {platformConfig.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Seleção de condição */}
+          <div>
+            <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-2">
+              Condição
+            </label>
+            <select
+              id="condition"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">🏷️ Todas as condições</option>
+              <option value="new">🆕 Novo</option>
+              <option value="used">📦 Usado</option>
+              <option value="refurbished">🔧 Recondicionado</option>
+            </select>
+          </div>
+        </div>
+
         {/* Botão de busca */}
         <div>
           <button
@@ -48,6 +96,27 @@ export default function Home() {
             {loading ? "🔍 Procurando..." : "🛒 Buscar no eBay"}
           </button>
         </div>
+
+        {/* Info dos filtros ativos */}
+        {(platform !== "all" || condition !== "all") && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">Filtros ativos:</span>{" "}
+              {platform !== "all" && (
+                <span className="bg-blue-100 px-2 py-1 rounded mr-2">
+                  {PLATFORM_CONFIGS[platform].icon} {PLATFORM_CONFIGS[platform].name}
+                </span>
+              )}
+              {condition !== "all" && (
+                <span className="bg-blue-100 px-2 py-1 rounded">
+                  {condition === "new" && "🆕 Novo"}
+                  {condition === "used" && "📦 Usado"}
+                  {condition === "refurbished" && "🔧 Recondicionado"}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Resultados */}
@@ -70,6 +139,18 @@ export default function Home() {
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 whitespace-nowrap">{r.site}</span>
                   </div>
                   <p className="text-green-600 font-bold text-lg mb-2">{r.priceText}</p>
+
+                  {/* Tags */}
+                  {r.tags && r.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {r.tags.map((tag, tagIndex) => (
+                        <span key={tagIndex} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {r.image && <Image src={r.image} alt={r.title} width={300} height={96} className="w-full h-24 object-cover rounded border" />}
                 </div>
               ))}
@@ -80,7 +161,7 @@ export default function Home() {
         {!loading && resultados.length === 0 && nome.trim() && (
           <div className="text-center py-8">
             <p className="text-gray-500">😕 Nenhum resultado encontrado para &ldquo;{nome}&rdquo;</p>
-            <p className="text-sm text-gray-400 mt-1">Tente alterar a plataforma ou usar termos diferentes</p>
+            <p className="text-sm text-gray-400 mt-1">Tente alterar os filtros ou usar termos diferentes</p>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ export interface GameResult {
   link: string;
   site: string;
   image?: string;
+  tags?: string[]; // Tags para condição, plataforma, etc.
 }
 
 export interface ScraperConfig {
@@ -65,17 +66,7 @@ export interface EbaySearchResponse {
   }>;
 }
 
-export type Platform = 
-  | 'all'
-  | 'ps2'
-  | 'ps3'
-  | 'ps4'
-  | 'xbox'
-  | 'xbox360'
-  | 'nintendo-switch'
-  | 'nintendo-wii'
-  | 'nintendo-ds'
-  | 'retro';
+export type Platform = "all" | "ps2" | "ps3" | "ps4" | "xbox" | "xbox360" | "nintendo-switch" | "nintendo-wii" | "nintendo-ds" | "retro";
 
 export interface PlatformConfig {
   id: string;

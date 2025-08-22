@@ -1,15 +1,16 @@
-import { GameResult, EbaySearchResponse, EbayItem } from "@/lib/types";
+import { GameResult, EbaySearchResponse, EbayItem, Platform } from "@/lib/types";
 import { EBAY_CONFIG, getEbayBaseUrl, getEbayHeaders } from "@/lib/config/ebay";
+import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import { cleanText, delay } from "@/lib/utils/formatters";
 
 /**
  * Scraper para buscar jogos no eBay usando a API oficial
  */
-export async function scrapeEbay(gameName: string): Promise<GameResult[]> {
+export async function scrapeEbay(gameName: string, platform: Platform = "all", condition: string = "all"): Promise<GameResult[]> {
   try {
-    console.log(`🔍 Iniciando busca no eBay para: ${gameName}`);
+    console.log(`🔍 Iniciando busca no eBay para: ${gameName} (Plataforma: ${PLATFORM_CONFIGS[platform].name}, Condição: ${condition})`);
 
-    const results = await searchEbayAPI(gameName);
+    const results = await searchEbayAPI(gameName, platform, condition);
 
     console.log(`✅ eBay encontrou ${results.length} resultados para "${gameName}"`);
     return results;
@@ -22,7 +23,7 @@ export async function scrapeEbay(gameName: string): Promise<GameResult[]> {
 /**
  * Busca usando a API oficial do eBay
  */
-async function searchEbayAPI(gameName: string): Promise<GameResult[]> {
+async function searchEbayAPI(gameName: string, platform: Platform = "all", condition: string = "all"): Promise<GameResult[]> {
   try {
     const baseUrl = getEbayBaseUrl();
     const headers = await getEbayHeaders();
@@ -31,11 +32,37 @@ async function searchEbayAPI(gameName: string): Promise<GameResult[]> {
     console.log(`   Base URL: ${baseUrl}`);
     console.log(`   Headers: Authorization = Bearer ${headers.Authorization?.substring(0, 30)}...`);
 
-    // Construir parâmetros da busca (igual ao script de teste)
+    // Construir parâmetros da busca
     const searchParams = new URLSearchParams({
       q: gameName,
-      limit: "50", // Limite razoável
+      limit: "50",
     });
+
+    // Adicionar filtros se especificados
+    const filters: string[] = [];
+
+    // Filtro de plataforma
+    if (platform !== "all" && PLATFORM_CONFIGS[platform]?.ebayCategory) {
+      filters.push(`categoryIds:${PLATFORM_CONFIGS[platform].ebayCategory}`);
+    }
+
+    // Filtro de condição
+    if (condition !== "all") {
+      const conditionMap: Record<string, string> = {
+        new: "1000", // New
+        used: "3000|4000|5000|6000", // Used conditions
+        refurbished: "2000|2500", // Refurbished conditions
+      };
+
+      if (conditionMap[condition]) {
+        filters.push(`conditions:{${conditionMap[condition]}}`);
+      }
+    }
+
+    // Adicionar filtros aos parâmetros
+    if (filters.length > 0) {
+      searchParams.set("filter", filters.join(","));
+    }
 
     // URL da API Browse
     const apiUrl = `${baseUrl}${EBAY_CONFIG.BROWSE_API}/item_summary/search?${searchParams.toString()}`;
@@ -126,6 +153,16 @@ function parseEbayResults(data: EbaySearchResponse, gameName: string): GameResul
         finalTitle += ` - ${item.seller.feedbackPercentage}% feedback`;
       }
 
+      // Criar tags baseadas na condição
+      const tags: string[] = [];
+      if (item.condition) {
+        const conditionLower = item.condition.toLowerCase();
+        if (conditionLower.includes("new")) tags.push("🆕 Novo");
+        else if (conditionLower.includes("used")) tags.push("📦 Usado");
+        else if (conditionLower.includes("refurbished")) tags.push("🔧 Recondicionado");
+        else tags.push(`🏷️ ${item.condition}`);
+      }
+
       results.push({
         title: finalTitle,
         priceText: priceText,
@@ -133,6 +170,7 @@ function parseEbayResults(data: EbaySearchResponse, gameName: string): GameResul
         link: item.itemWebUrl,
         site: "eBay",
         image: image,
+        tags: tags.length > 0 ? tags : undefined,
       });
     } catch (error) {
       console.error(`❌ Erro ao processar item do eBay:`, error);
