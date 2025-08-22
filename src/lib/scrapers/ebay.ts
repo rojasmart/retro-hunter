@@ -41,10 +41,16 @@ async function searchEbayAPI(gameName: string, platform: Platform = "all", condi
     // Adicionar filtros se especificados
     const filters: string[] = [];
 
-    // Filtro de plataforma
+    // SEMPRE adicionar categoria de jogos
+    let gamesCategoryId = "139973"; // Default category ID for Video Games & Consoles
+
+    // Filtro de plataforma - usar categoria específica da plataforma se disponível
     if (platform !== "all" && PLATFORM_CONFIGS[platform]?.ebayCategory) {
-      filters.push(`categoryIds:${PLATFORM_CONFIGS[platform].ebayCategory}`);
+      gamesCategoryId = PLATFORM_CONFIGS[platform].ebayCategory;
     }
+
+    // Sempre aplicar filtro de categoria de jogos
+    filters.push(`categoryIds:${gamesCategoryId}`);
 
     // Filtro de condição
     if (condition !== "all") {
@@ -59,10 +65,8 @@ async function searchEbayAPI(gameName: string, platform: Platform = "all", condi
       }
     }
 
-    // Adicionar filtros aos parâmetros
-    if (filters.length > 0) {
-      searchParams.set("filter", filters.join(","));
-    }
+    // Sempre adicionar filtros já que sempre temos pelo menos o filtro de categoria
+    searchParams.set("filter", filters.join(","));
 
     // URL da API Browse
     const apiUrl = `${baseUrl}${EBAY_CONFIG.BROWSE_API}/item_summary/search?${searchParams.toString()}`;
