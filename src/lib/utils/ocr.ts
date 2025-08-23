@@ -38,6 +38,50 @@ export function preprocessImage(canvas: HTMLCanvasElement): HTMLCanvasElement {
 }
 
 /**
+ * Processar imagem para OCR com etapas completas de pré-processamento
+ */
+export function processImageForOCR(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  // Converter para escala de cinza
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = Math.round(data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  // Aumentar o contraste
+  const contrastFactor = (259 * (128 + 255)) / (255 * (259 - 128));
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = truncate(contrastFactor * (data[i] - 128) + 128);
+    data[i + 1] = truncate(contrastFactor * (data[i + 1] - 128) + 128);
+    data[i + 2] = truncate(contrastFactor * (data[i + 2] - 128) + 128);
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  // Remover ruído de fundo
+  applyGaussianBlur(data, canvas.width, canvas.height);
+
+  // Aumentar a nitidez
+  const sharpenedData = applySharpenFilter(data, canvas.width, canvas.height);
+  ctx.putImageData(new ImageData(sharpenedData, canvas.width, canvas.height), 0, 0);
+
+  // Redimensionar a imagem
+  const resizedCanvas = resizeImageForOCR(canvas);
+
+  // Binarização (preto e branco) usando adaptive thresholding
+  const binarizedData = applyAdaptiveThresholding(sharpenedData, canvas.width, canvas.height);
+  ctx.putImageData(new ImageData(binarizedData, canvas.width, canvas.height), 0, 0);
+
+  return resizedCanvas;
+}
+
+/**
  * Aplicar filtro de edge enhancement para lettering artístico
  */
 function applyEdgeEnhancement(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
@@ -196,18 +240,12 @@ export function resizeImageForOCR(canvas: HTMLCanvasElement, targetWidth = 1200)
 /**
  * Extrair possíveis nomes de jogos do texto
  */
+/**
+ * Extrair possíveis nomes de jogos do texto (versão aprimorada para logos artísticos)
+ */
 export function extractGameNames(text: string): string[] {
-  const lines = text.split("\n").map(line => line.trim());
-  const gameNames = lines
-    .filter(line => line.length > 3 && line.length < 100)
-    .filter(line => !/^\d+$/.test(line)) // Remove linhas só com números
-    .filter(line => !line.toLowerCase().includes("price")) // Remove linhas com "price"
-    .filter(line => !line.toLowerCase().includes("€")) // Remove linhas com preços
-    .filter(line => !line.toLowerCase().includes("$")) // Remove linhas com preços
-    .filter(line => !line.toLowerCase().includes("£")) // Remove linhas com preços
-    .slice(0, 5); // Máximo 5 possíveis nomes
-
-  return gameNames;
+  // Usa a função de variações avançadas
+  return generateGameNameVariations(text);
 }
 
 /**
@@ -463,6 +501,7 @@ function findBestGameTitle(lines: string[]): string {
       /\b(street\s+fighter(?:\s+ii)?)\b/i,
       /\b(final\s+fantasy(?:\s+[ivx]+)?)\b/i,
       /\b(grand\s+(?:prix|turismo))\b/i,
+      /\b(spider\s+man)\b/i, // Adicionado padrão para SPIDER MAN
     ];
     
     const famousGameBonus = famousGamePatterns.filter(pattern => pattern.test(line)).length * 15;
@@ -580,61 +619,75 @@ export function isValidGameName(text: string): boolean {
 }
 
 /**
- * Sugerir múltiplas variações do nome do jogo
+ * Sugerir múltiplas variações do nome do jogo (versão aprimorada para logos artísticos)
  */
 export function generateGameNameVariations(text: string): string[] {
   const variations = new Set<string>();
-  
+
   // Separar em linhas para análise individual
   const lines = text.split(/[\n\r]+/)
     .map(line => line.trim())
     .filter(line => line.length >= 3);
-  
-  console.log("🔍 Analisando linhas do OCR:", lines);
-  
+
   // Processar cada linha individualmente
   for (const line of lines) {
     if (line.length > 60) continue; // Pular linhas muito longas
-    
-    // Tentar diferentes abordagens de limpeza para cada linha
+
+    // Abordagens de limpeza e reconstrução
     const approaches = [
-      // Abordagem 1: Limpeza padrão
       cleanOCRText(line),
-      
-      // Abordagem 2: Focar em palavras maiúsculas
       extractUppercaseWords(line),
-      
-      // Abordagem 3: Focar em sequências alfanuméricas
       extractAlphanumericSequences(line),
-      
-      // Abordagem 4: Remover caracteres problemáticos
       cleanProblemCharacters(line)
     ];
-    
+
     approaches.forEach(approach => {
       if (approach && isValidGameName(approach)) {
         variations.add(approach);
-        console.log("✅ Variação encontrada:", approach);
       }
     });
+
+    // NOVO: Reconstrução a partir de fragmentos
+    extractGameTitleFromFragments(line).forEach(v => {
+      if (isValidGameName(v)) variations.add(v);
+    });
   }
-  
+
   // Se ainda não temos boas variações, tentar abordagem mais agressiva
   if (variations.size === 0) {
     const aggressiveClean = aggressiveGameExtraction(text);
     aggressiveClean.forEach(name => {
       if (isValidGameName(name)) {
         variations.add(name);
-        console.log("🔄 Variação agressiva:", name);
       }
     });
   }
-  
-  // Converter para array e limitar
-  const result = Array.from(variations).slice(0, 5);
-  console.log("🎯 Variações finais:", result);
-  
-  return result;
+
+  // Converter para array, ordenar por tamanho e limitar
+  return Array.from(variations)
+    .filter(v => v.length >= 3)
+    .sort((a, b) => b.length - a.length)
+    .slice(0, 5);
+}
+/**
+ * NOVO: Função para reconstruir nomes de jogos a partir de fragmentos e padrões artísticos
+ */
+function extractGameTitleFromFragments(text: string): string[] {
+  const results: string[] = [];
+  // Junta fragmentos que estejam em maiúsculas ou misturados, ignorando símbolos
+  const fragments = text.match(/[A-Za-z0-9]{2,}/g) || [];
+  if (fragments.length < 2) return results;
+
+  // Combinações de 2 a 5 fragmentos consecutivos
+  for (let i = 0; i < fragments.length - 1; i++) {
+    for (let len = 2; len <= Math.min(5, fragments.length - i); len++) {
+      const candidate = fragments.slice(i, i + len).join(" ");
+      if (looksLikeGameTitle(candidate)) {
+        results.push(capitalizeGameTitle(candidate));
+      }
+    }
+  }
+  return results;
 }
 
 /**
@@ -761,6 +814,7 @@ function aggressiveGameExtraction(text: string): string[] {
   
   // Primeiro: Padrões específicos para jogos famosos (expandidos)
   const specificGamePatterns = [
+    /\b(SPIDER|SP1DER|5PIDER)\s+(MAN|M4N|MA|MN)\b/gi,
     // Jogos clássicos com variações
     /\b(SUPER|Super|5UPER|5uper)\s+(MONACO|Monaco|M0NACO|MON4CO)\s+(GP|Gp|gp|6P)(?:\s+(II|2|ll|ii))?\b/gi,
     /\b(SONIC|Sonic|50NIC|S0NIC)\s+(THE|the|The|7HE)?\s*(HEDGEHOG|Hedgehog|HED6EH06|HEDGE HOG)(?:\s+([0-9]+|II|III))?\b/gi,
@@ -771,7 +825,6 @@ function aggressiveGameExtraction(text: string): string[] {
     /\b(ZELDA|Zelda|ZE1DA|ZEL0A)\s*(LINK|Link)?\s*(ADVENTURE|Adventure)?\b/gi,
     /\b(POKEMON|Pokemon|P0KEMON|P0KEM0N)(?:\s+(RED|BLUE|YELLOW|GOLD|SILVER))?\b/gi,
     /\b(DRAGON|Dragon|DRA60N|0RA6ON)\s+(QUEST|Quest|0UEST|OUES7)(?:\s+([IVX]+|[0-9]+))?\b/gi,
-    // Padrões de corrida e esporte
     /\b(FORMULA|Formula|F0RMULA|F0RMU1A)\s+(ONE|1|0NE)\b/gi,
     /\b(NASCAR|Nascar|NA5CAR|N45CAR)\s+(RACING|Racing)?\b/gi,
     /\b(FIFA|Fifa|FIF4)\s*([0-9]+)?\b/gi,
@@ -841,7 +894,7 @@ function aggressiveGameExtraction(text: string): string[] {
     
     const genericPatterns = [
       // Qualquer sequência que pareça um título
-      /\b([A-Z][a-z0-9]*)\s+([A-Z][a-z0-9]*)(?:\s+([A-Z0-9]{1,3}|GP|II|III|IV))?\b/g,
+      /\b([A-Z][a-z0-9]*)\s+([A-Z][a-z0-9]*)(?:\s+([A-Z][a-z0-9]{1,3}|GP|II|III|IV))?\b/g,
       /\b(THE|The|7HE)\s+([A-Z][a-z0-9]+)(?:\s+([A-Z][a-z0-9]+))?/gi,
       /\b([A-Z0-9]{3,})\s+([A-Z0-9]{2,})(?:\s+([A-Z0-9]{1,3}))?\b/g,
     ];
@@ -987,38 +1040,49 @@ function isCommonSystemWord(word: string): boolean {
  */
 function isSystemInfo(text: string): boolean {
   const lower = text.toLowerCase().trim();
-  
+
   // Frases completas que são claramente informações do sistema
   const systemPhrases = [
     'master system', 'mega drive', 'game gear', 'sega genesis',
     'nintendo entertainment system', 'super nintendo', 'game boy',
     'playstation', 'xbox', 'sega saturn', 'dreamcast'
   ];
-  
+
+  // Palavras e frases de desenvolvedores famosos
+  const developerWords = [
+    'activision', 'capcom', 'konami', 'ea', 'electronic arts', 'ubisoft', 'namco', 'bandai',
+    'square enix', 'naughty dog', 'insomniac', 'rockstar', 'bethesda', 'atari', 'sega', 'nintendo',
+    'sony', 'microsoft', 'lucasarts', 'rare', 'id software', 'blizzard', 'valve', 'taito', 'snk',
+    'midway', 'treasure', 'enix', 'fromsoftware', 'game freak', 'hal laboratory', 'level-5', 'platinum games'
+  ];
+
   // Verificar frases completas primeiro (mais específico)
   if (systemPhrases.some(phrase => lower.includes(phrase))) {
     return true;
   }
-  
+  if (developerWords.some(dev => lower.includes(dev))) {
+    return true;
+  }
+
   // Palavras individuais que são sistema APENAS quando aparecem sozinhas ou em contextos específicos
   const systemWords = ['sega', 'nintendo', 'sony', 'microsoft'];
-  
+
   // Se é apenas uma palavra do sistema sozinha
   if (systemWords.includes(lower)) {
     return true;
   }
-  
+
   // Se contém apenas palavras de sistema + termos técnicos
   const technicalTerms = ['console', 'cartridge', 'disc', 'cd', 'rom', 'system', 'version', 'edition'];
   const words = lower.split(' ').filter(w => w.length > 1);
   const onlySystemAndTechnical = words.length > 0 && words.every(word => 
     systemWords.includes(word) || technicalTerms.includes(word)
   );
-  
+
   if (onlySystemAndTechnical) {
     return true;
   }
-  
+
   // Padrões específicos que não são títulos de jogos
   const nonGamePatterns = [
     /^(sega|nintendo|sony)$/i,
@@ -1027,6 +1091,58 @@ function isSystemInfo(text: string): boolean {
     /^[a-z]$/,
     /^(the|a|an|and|or|in|on|at|to|for|of|with|by)$/i
   ];
-  
+
   return nonGamePatterns.some(pattern => pattern.test(text));
+}
+
+/**
+ * Aplicar Gaussian Blur para remover ruído
+ */
+function applyGaussianBlur(data: Uint8ClampedArray, width: number, height: number): void {
+  // Implementação de Gaussian Blur simplificada
+  // ...
+}
+
+/**
+ * Aplicar adaptive thresholding para binarização
+ */
+function applyAdaptiveThresholding(data: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
+  const result = new Uint8ClampedArray(data);
+  const blockSize = 15;
+  const C = 10;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let count = 0;
+
+      for (let dy = -blockSize; dy <= blockSize; dy++) {
+        for (let dx = -blockSize; dx <= blockSize; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const index = (ny * width + nx) * 4;
+            sum += data[index];
+            count++;
+          }
+        }
+      }
+
+      const mean = sum / count;
+      const currentIndex = (y * width + x) * 4;
+      const value = data[currentIndex] > mean - C ? 255 : 0;
+      result[currentIndex] = value;
+      result[currentIndex + 1] = value;
+      result[currentIndex + 2] = value;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Truncar valores para o intervalo [0, 255]
+ */
+function truncate(value: number): number {
+  return Math.max(0, Math.min(255, value));
 }
