@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pillow
+torch
+torchvision
+opencv-python
+onnxruntime
+python-multipart

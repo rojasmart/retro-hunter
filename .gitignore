@@ -39,3 +39,60 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# venvs
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# packaging/build
+*.egg-info/
+.eggs/
+*.egg
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+
+# tests/coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+.cache/
+
+# type checking/lint
+.mypy_cache/
+.pytype/
+.pyre/
+.ruff_cache/
+
+# jupyter/ipython
+.ipynb_checkpoints/
+.ipython/
+profile_default/
+
+# logs
+*.log
+
+# OCR/Tesseract (se baixou localmente)
+tessdata/
+*.traineddata
+
+# uploads/temp (ajuste conforme o seu app)
+uploads/
+tmp/
+temp/
