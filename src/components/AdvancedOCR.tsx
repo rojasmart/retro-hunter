@@ -14,6 +14,7 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
 
+  console.log("hello");
   const handleTextExtracted = (text: string) => {
     setExtractedText(text);
     const variations = generateGameNameVariations(text);
@@ -42,11 +43,7 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
 
   return (
     <div className="space-y-4">
-      <OCRUpload 
-        onTextExtracted={handleTextExtracted} 
-        onSearch={handleDirectSearch} 
-        isSearching={isProcessing} 
-      />
+      <OCRUpload onTextExtracted={handleTextExtracted} onSearch={handleDirectSearch} isSearching={isProcessing} />
 
       {/* Variações do nome do jogo */}
       {gameVariations.length > 0 && (
@@ -76,9 +73,7 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
               <p className="text-green-800 text-sm">
                 ✅ Nome selecionado: <strong>{selectedGame}</strong>
               </p>
-              <p className="text-green-600 text-xs mt-1">
-                O nome foi automaticamente adicionado ao campo de busca acima
-              </p>
+              <p className="text-green-600 text-xs mt-1">O nome foi automaticamente adicionado ao campo de busca acima</p>
             </div>
           )}
         </div>
