@@ -40,19 +40,70 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
 *.pyd
-*.env
-*.venv
-venv/
-ENV/
-env/
-*.egg-info/
-dist/
-build/
-*.sqlite3
+*.pyo
 
-backend/venv/
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.python-version
+
+# Packaging
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Testing / coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Editors/IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Optional: large model/data artifacts (uncomment if needed)
+# *.onnx
+# *.tflite
+# *.pb
+# *.pth
+# *.pt
+# *.bin
+# *.ckpt
+# checkpoints/
+# models/
+# runs/
+# outputs/
+# data/
+# datasets/
+# tmp/
+# temp/
