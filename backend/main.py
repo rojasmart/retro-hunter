@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from ocr_model import extract_text_from_image
+from title_matcher import fuzzy_match, titles
 from PIL import Image
 import io
 
@@ -21,9 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Endpoint que retorna texto OCR e título PS2 fuzzy matched
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
-    result = extract_text_from_image(image)
-    return {"text": result}
+    ocr_text = extract_text_from_image(image)
+    match = fuzzy_match(ocr_text, titles)
+    return {
+        "text": ocr_text,
+        "matched_title": match["title"] if match else None,
+        "score": match["score"] if match else None
+    }
