@@ -26,11 +26,21 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Função para definir o nome extraído do OCR
-  const handleOCRExtraction = (extractedText: string) => {
-    if (extractedText.trim()) {
-      setNome(extractedText.trim());
+  // Função para definir os títulos extraídos do OCR
+  const [ocrTitles, setOcrTitles] = useState<string[]>([]);
+  const [selectedOcrTitle, setSelectedOcrTitle] = useState<string>("");
+
+  // Recebe até 3 títulos do OCR
+  const handleOCRExtraction = (titles: string[] | string) => {
+    let arr: string[] = [];
+    if (Array.isArray(titles)) {
+      arr = titles.slice(0, 3);
+    } else if (typeof titles === "string" && titles.trim()) {
+      arr = [titles.trim()];
     }
+    setOcrTitles(arr);
+    setSelectedOcrTitle(arr[0] || "");
+    setNome(arr[0] || "");
   };
 
   return (
@@ -46,9 +56,6 @@ export default function Home() {
       <div className="max-w-2xl space-y-4">
         {/* Campo de busca */}
         <div>
-          <label htmlFor="game-name" className="block text-sm font-medium text-gray-700 mb-1">
-            Game Name
-          </label>
           <input
             id="game-name"
             type="text"
@@ -60,44 +67,6 @@ export default function Home() {
         </div>
 
         {/* Filtros */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Seleção de plataforma */}
-          <div>
-            <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-2">
-              Platform
-            </label>
-            <select
-              id="platform"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value as Platform)}
-              className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {Object.values(PLATFORM_CONFIGS).map((platformConfig) => (
-                <option key={platformConfig.id} value={platformConfig.id}>
-                  {platformConfig.icon} {platformConfig.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Seleção de condição */}
-          <div>
-            <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-2">
-              Condition
-            </label>
-            <select
-              id="condition"
-              value={condition}
-              onChange={(e) => setCondition(e.target.value)}
-              className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">🏷️ All conditions</option>
-              <option value="new">🆕 New</option>
-              <option value="used">📦 Used</option>
-              <option value="refurbished">🔧 Refurbished</option>
-            </select>
-          </div>
-        </div>
 
         {/* Search button */}
         <div>

@@ -262,16 +262,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       {/* Extracted Text */}
       {extractedText && (
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Recognized Text:</label>
-          <textarea
-            value={extractedText}
-            onChange={(e) => {
-              setExtractedText(e.target.value);
-              onTextExtracted(e.target.value); // Update parent component when text is edited
-            }}
-            className="w-full h-24 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Extracted text will appear here..."
-          />
+          <h3 className="font-bold text-lg text-blue-900 mb-2">{extractedText}</h3>
           <div className="p-3 bg-green-50 border border-green-200 rounded">
             <p className="text-green-800 text-sm">✅ Name extracted successfully!</p>
             <p className="text-green-600 text-xs mt-1">The text was automatically added to the search field. You can edit it above if needed.</p>
