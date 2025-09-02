@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Retrosniffer",
-  description: "Compare o preço do seu jogo retro",
+  description: "Compare your retro game prices",
 };
 
 export default function RootLayout({
