@@ -34,9 +34,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-4 text-gray-500">🎮 Retrosniffer</h1>
-      <p className="mb-6 text-gray-500">Compare o preço do seu jogo</p>
+    <div className="bg-gray-100 p-8 rounded-lg">
+      <h1 className="text-3xl font-bold mb-4 text-gray-500">Retro Hunter</h1>
+      <p className="mb-6 text-gray-500">Compare prices of your games</p>
 
       {/* Componente OCR */}
       <div className="mb-8">
@@ -47,14 +47,14 @@ export default function Home() {
         {/* Campo de busca */}
         <div>
           <label htmlFor="game-name" className="block text-sm font-medium text-gray-700 mb-1">
-            Nome do Jogo
+            Game Name
           </label>
           <input
             id="game-name"
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            placeholder="Digite o nome do jogo (ex: R-Type Final)"
+            placeholder="Enter the game name (e.g., R-Type Final)"
             className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -64,7 +64,7 @@ export default function Home() {
           {/* Seleção de plataforma */}
           <div>
             <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-2">
-              Plataforma
+              Platform
             </label>
             <select
               id="platform"
@@ -83,7 +83,7 @@ export default function Home() {
           {/* Seleção de condição */}
           <div>
             <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-2">
-              Condição
+              Condition
             </label>
             <select
               id="condition"
@@ -91,22 +91,22 @@ export default function Home() {
               onChange={(e) => setCondition(e.target.value)}
               className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="all">🏷️ Todas as condições</option>
-              <option value="new">🆕 Novo</option>
-              <option value="used">📦 Usado</option>
-              <option value="refurbished">🔧 Recondicionado</option>
+              <option value="all">🏷️ All conditions</option>
+              <option value="new">🆕 New</option>
+              <option value="used">📦 Used</option>
+              <option value="refurbished">🔧 Refurbished</option>
             </select>
           </div>
         </div>
 
-        {/* Botão de busca */}
+        {/* Search button */}
         <div>
           <button
             onClick={searchEbayOnly}
             disabled={loading || !nome.trim()}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed w-full font-medium"
           >
-            {loading ? "🔍 Procurando..." : "🛒 Buscar no eBay"}
+            {loading ? "🔍 Searching..." : "Search"}
           </button>
         </div>
 
@@ -136,7 +136,7 @@ export default function Home() {
       <div className="mt-8 space-y-4">
         {resultados.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Resultados encontrados ({resultados.length}):</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Found results ({resultados.length}):</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {resultados.map((r, i) => (
                 <div key={i} className="result-card bg-white p-4 shadow-sm rounded-lg border">

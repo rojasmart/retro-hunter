@@ -47,7 +47,7 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
       {/* Variações do nome do jogo */}
       {gameVariations.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-medium text-blue-800 mb-3">🎯 Possíveis nomes de jogos encontrados:</h3>
+          <h3 className="font-medium text-blue-800 mb-3">Possible game names found:</h3>
           <div className="space-y-2">
             {gameVariations.map((variation, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -70,9 +70,9 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
           {selectedGame && (
             <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
               <p className="text-green-800 text-sm">
-                ✅ Nome selecionado: <strong>{selectedGame}</strong>
+                ✅ Selected name: <strong>{selectedGame}</strong>
               </p>
-              <p className="text-green-600 text-xs mt-1">O nome foi automaticamente adicionado ao campo de busca acima</p>
+              <p className="text-green-600 text-xs mt-1">The name has been automatically added to the search field above</p>
             </div>
           )}
         </div>

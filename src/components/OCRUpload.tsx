@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { cleanOCRText, generateGameNameVariations, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
+import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
 
 interface OCRUploadProps {
@@ -191,8 +191,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-lg border shadow-sm p-6">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">📷 Text Recognition (OCR)</h2>
-        <p className="text-sm text-gray-600 mt-1">Take a photo or upload an image of a game to search automatically</p>
+        <h2 className="text-xl font-semibold flex items-center gap-2">Game detector</h2>
+        <p className="text-sm text-gray-600 mt-1">Take a photo, upload an image or drag and drop a game to search automatically</p>
       </div>
 
       {/* Upload/Camera Controls */}
