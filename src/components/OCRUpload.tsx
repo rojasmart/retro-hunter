@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createWorker, PSM, OEM } from "tesseract.js";
 import { cleanOCRText, generateGameNameVariations, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
 
@@ -54,98 +53,33 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       const resizedCanvas = resizeImageForOCR(canvas);
       const processedCanvas = preprocessImage(resizedCanvas);
 
+      // Definir tipo e nome do arquivo para o blob
+      const fileType = (imageFile as File).type || "image/png";
+      const fileName = (imageFile as File).name || "upload.png";
       // Converter canvas para blob
       const processedBlob = await new Promise<Blob>((resolve) => {
-        processedCanvas.toBlob(
-          (blob) => {
-            resolve(blob!);
-          },
-          "image/png",
-          0.9
-        );
+        processedCanvas.toBlob((blob) => resolve(blob!), fileType, 0.9);
       });
-
-      // Configurar Tesseract com múltiplas tentativas para melhor extração
-      const worker = await createWorker(["por", "eng"], 1, {
-        logger: (m) => {
-          console.log("OCR Progress:", m.status, Math.round(m.progress * 100) + "%");
-          if (m.status === "recognizing text") {
-            setProgress(Math.round(m.progress * 100));
-          }
-        },
-      });
-
-      // Tentar múltiplas configurações de OCR para melhor resultado
-      const ocrAttempts = [
-        // Configuração 1: Para texto em blocos (títulos principais)
-        {
-          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
-          tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
-          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
-          description: "SINGLE_BLOCK",
-        },
-        // Configuração 2: Para texto em linhas (labels, cartuchos)
-        {
-          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
-          tessedit_pageseg_mode: PSM.SINGLE_LINE,
-          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
-          description: "SINGLE_LINE",
-        },
-        // Configuração 3: Para texto esparso (CDs, mídia)
-        {
-          tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :-&'",
-          tessedit_pageseg_mode: PSM.SPARSE_TEXT,
-          tessedit_ocr_engine_mode: OEM.LSTM_ONLY,
-          description: "SPARSE_TEXT",
-        },
-      ];
-
-      let bestResult = { text: "", confidence: 0 };
-
-      // Tentar cada configuração e pegar o melhor resultado
-      for (const [index, config] of ocrAttempts.entries()) {
-        console.log(`🔧 Tentativa ${index + 1}/3 com configuração: ${config.description}`);
-
-        try {
-          await worker.setParameters({
-            tessedit_char_whitelist: config.tessedit_char_whitelist,
-            tessedit_pageseg_mode: config.tessedit_pageseg_mode,
-            tessedit_ocr_engine_mode: config.tessedit_ocr_engine_mode,
-          });
-
-          const result = await worker.recognize(processedBlob);
-
-          console.log(`📊 Resultado ${index + 1}: confiança=${Math.round(result.data.confidence)}%`);
-          console.log(`📝 Texto ${index + 1}:`, result.data.text.substring(0, 100));
-
-          if (result.data.confidence > bestResult.confidence && result.data.text.trim().length > 0) {
-            bestResult = result.data;
-            console.log(`✅ Melhor resultado atualizado: ${Math.round(bestResult.confidence)}%`);
-          }
-        } catch (attemptError) {
-          console.warn(`⚠️ Erro na tentativa ${index + 1}:`, attemptError);
-        }
+      // Enviar para /api/ocr (proxy Next.js)
+      const apiForm = new FormData();
+      apiForm.append("file", imageFile, fileName);
+      const resp = await fetch("/api/ocr", { method: "POST", body: apiForm, cache: "no-store" });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`Falha na API OCR: ${resp.status} ${txt}`);
       }
-
-      await worker.terminate();
-
-      const { text, confidence } = bestResult;
-
-      console.log(`📝 Texto bruto extraído (confiança: ${Math.round(confidence)}%):`, text);
-
-      // Limpar e gerar variações
-      const cleanedText = cleanOCRText(text);
-      const variations = generateGameNameVariations(text);
-
-      console.log("✅ Texto limpo:", cleanedText);
-      console.log("🎯 Variações:", variations);
-
-      if (cleanedText.trim()) {
-        setExtractedText(cleanedText);
-        onTextExtracted(cleanedText);
-      } else if (variations.length > 0) {
-        setExtractedText(variations[0]);
-        onTextExtracted(variations[0]);
+      const data = await resp.json();
+      // matched_title do backend
+      const text = (data.text || "").toString();
+      let bestName = "";
+      if (typeof data.matched_title === "string" && data.matched_title.trim().length > 0) {
+        bestName = data.matched_title.trim();
+      } else if (typeof data.text === "string" && data.text.trim().length > 0) {
+        bestName = cleanOCRText(data.text);
+      }
+      if (bestName.trim()) {
+        setExtractedText(bestName);
+        onTextExtracted(bestName);
       } else {
         throw new Error("Não foi possível extrair texto legível da imagem");
       }
@@ -338,9 +272,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
             placeholder="Texto extraído aparecerá aqui..."
           />
           <div className="p-3 bg-green-50 border border-green-200 rounded">
-            <p className="text-green-800 text-sm">
-              ✅ Nome extraído com sucesso! 
-            </p>
+            <p className="text-green-800 text-sm">✅ Nome extraído com sucesso!</p>
             <p className="text-green-600 text-xs mt-1">
               O texto foi automaticamente adicionado ao campo de busca. Você pode editá-lo acima se necessário.
             </p>

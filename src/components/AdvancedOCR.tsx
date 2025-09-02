@@ -14,7 +14,6 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
 
-  console.log("hello");
   const handleTextExtracted = (text: string) => {
     setExtractedText(text);
     const variations = generateGameNameVariations(text);

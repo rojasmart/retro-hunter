@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createWorker } from "tesseract.js";
-import { cleanOCRText, generateGameNameVariations } from "@/lib/utils/ocr";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("📷 API OCR chamada");
 
+    // Recebe o arquivo do frontend
     const formData = await request.formData();
-    const file = formData.get("image") as File;
+    const file = (formData.get("file") || formData.get("image")) as File | null;
 
     if (!file) {
       return NextResponse.json(
         { error: "Nenhum arquivo enviado" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof file === "string") {
+      return NextResponse.json(
+        { error: "Arquivo inválido" },
         { status: 400 }
       );
     }
@@ -30,37 +36,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔍 Processando imagem: ${file.name} (${file.size} bytes)`);
+    // Envia diretamente para o backend FastAPI
+    const backendUrl = "http://localhost:8000/ocr";
+    const pass = new FormData();
+    pass.append("file", file, (file as File).name || "upload.png");
 
-    // Converter File para Buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Processar com Tesseract
-    const worker = await createWorker("por+eng", 1, {
-      logger: (m) => console.log("OCR:", m.status, m.progress),
+    const resp = await fetch(backendUrl, {
+      method: "POST",
+      body: pass as any,
+      cache: "no-store",
     });
 
-    const {
-      data: { text, confidence },
-    } = await worker.recognize(buffer);
+    if (!resp.ok) {
+      const txt = await resp.text();
+      return NextResponse.json(
+        { error: "Falha no OCR backend", backend: txt },
+        { status: 502 }
+      );
+    }
 
-    await worker.terminate();
+    const data = await resp.json();
 
-    // Limpar e processar texto
-    const cleanedText = cleanOCRText(text);
-    const variations = generateGameNameVariations(text);
-
-    console.log(`✅ OCR concluído: confiança=${confidence}%`);
-    console.log(`📝 Texto extraído: "${cleanedText}"`);
-
-    return NextResponse.json({
-      success: true,
-      text: cleanedText,
-      rawText: text,
-      variations: variations,
-      confidence: Math.round(confidence),
-    });
-
+    // Retorna matched_title e demais campos do backend
+    return NextResponse.json({ success: true, ...data });
   } catch (error) {
     console.error("❌ Erro no OCR:", error);
     return NextResponse.json(
@@ -70,7 +68,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Configuração do Next.js para aceitar arquivos maiores
 export const config = {
   api: {
     bodyParser: {

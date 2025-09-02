@@ -27,6 +27,7 @@ app.add_middleware(
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     contents = await file.read()
+    print("Arquivo recebido:", file.filename, "Tamanho:", len(contents))  # <-- debug aqui
     image = Image.open(io.BytesIO(contents))
     ocr_text = extract_text_from_image(image)
     match = fuzzy_match(ocr_text, titles)
