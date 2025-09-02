@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Retrosniffer",
+  title: "Retro Hunter",
   description: "Compare your retro game prices",
 };
 
