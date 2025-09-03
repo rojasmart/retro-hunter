@@ -16,13 +16,11 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
 
   const handleTextExtracted = (text: string) => {
     setExtractedText(text);
-    const variations = generateGameNameVariations(text);
+    const variations = [text, ...generateGameNameVariations(text).filter((v) => v !== text)];
     setGameVariations(variations);
 
-    // Auto-selecionar a primeira variação se disponível
     if (variations.length > 0) {
       setSelectedGame(variations[0]);
-      // Automaticamente definir o nome no campo de busca
       onGameExtracted(variations[0]);
     }
   };
