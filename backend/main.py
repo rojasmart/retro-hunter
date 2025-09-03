@@ -30,7 +30,7 @@ async def ocr_endpoint(file: UploadFile = File(...)):
     print("Arquivo recebido:", file.filename, "Tamanho:", len(contents))  # <-- debug aqui
     image = Image.open(io.BytesIO(contents))
     ocr_text = extract_text_from_image(image)
-    match = fuzzy_match(ocr_text, titles)
+    match = fuzzy_match(ocr_text["text"], titles)
     return {
         "text": ocr_text,
         "matched_title": match["title"] if match else None,
