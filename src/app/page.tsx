@@ -13,10 +13,10 @@ export default function Home() {
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const searchEbayOnly = async () => {
+  const searchEbayOnly = async (searchName?: string) => {
     setLoading(true);
     const params = new URLSearchParams({
-      nome: nome,
+      nome: searchName ?? nome,
       platform: platform,
       condition: condition,
     });
@@ -41,6 +41,9 @@ export default function Home() {
     setOcrTitles(arr);
     setSelectedOcrTitle(arr[0] || "");
     setNome(arr[0] || "");
+    if (arr[0]) {
+      searchEbayOnly(arr[0]);
+    }
   };
 
   return (
