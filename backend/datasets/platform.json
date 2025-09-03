@@ -1,10 +1,118 @@
 [
   {
-    "Platform":"Playstation 2",
-    "Alias":["PS2","PlayStation 2", "PSX2", "Playstation.2", "Playstation2"]
+    "Platform": "Playstation 1",
+    "Alias": ["PS1", "PlayStation 1", "PSX", "Playstation.1", "Playstation1"]
   },
   {
-    "Platform":"Playstation 3",
-    "Alias":["PS3","PlayStation 3", "PSX3", "Playstation.3", "Playstation3"]
+    "Platform": "Playstation 2",
+    "Alias": ["PS2", "PlayStation 2", "PSX2", "Playstation.2", "Playstation2"]
+  },
+  {
+    "Platform": "Playstation 3",
+    "Alias": ["PS3", "PlayStation 3", "PSX3", "Playstation.3", "Playstation3"]
+  },
+  {
+    "Platform": "Playstation 4",
+    "Alias": ["PS4", "PlayStation 4", "PSX4", "Playstation.4", "Playstation4"]
+  },
+  {
+    "Platform": "Playstation 5",
+    "Alias": ["PS5", "PlayStation 5", "PSX5", "Playstation.5", "Playstation5"]
+  },
+  {
+    "Platform": "Xbox",
+    "Alias": ["Xbox", "Xbox Classic", "Xbox Original"]
+  },
+  {
+    "Platform": "Xbox 360",
+    "Alias": ["Xbox 360", "X360", "Xbox.360", "Xbox360"]
+  },
+  {
+    "Platform": "Xbox One",
+    "Alias": ["Xbox One", "XOne", "Xbox.One", "XboxOne"]
+  },
+  {
+    "Platform": "Xbox Series X",
+    "Alias": ["Xbox Series X", "XSX", "Xbox.Series.X", "XboxSeriesX"]
+  },
+  {
+    "Platform": "Xbox Series S",
+    "Alias": ["Xbox Series S", "XSS", "Xbox.Series.S", "XboxSeriesS"]
+  },
+  {
+    "Platform": "Nintendo Entertainment System",
+    "Alias": ["NES", "Nintendo NES", "Nintendo Entertainment System"]
+  },
+  {
+    "Platform": "Super Nintendo",
+    "Alias": ["SNES", "Super Nintendo", "Super NES", "Super Nintendo Entertainment System"]
+  },
+  {
+    "Platform": "Nintendo 64",
+    "Alias": ["N64", "Nintendo 64", "Nintendo64"]
+  },
+  {
+    "Platform": "GameCube",
+    "Alias": ["GameCube", "GC", "Nintendo GameCube"]
+  },
+  {
+    "Platform": "Wii",
+    "Alias": ["Wii", "Nintendo Wii"]
+  },
+  {
+    "Platform": "Wii U",
+    "Alias": ["Wii U", "Nintendo Wii U", "WiiU"]
+  },
+  {
+    "Platform": "Nintendo Switch",
+    "Alias": ["Switch", "Nintendo Switch", "NSwitch"]
+  },
+  {
+    "Platform": "Game Boy",
+    "Alias": ["Game Boy", "GB", "Nintendo Game Boy"]
+  },
+  {
+    "Platform": "Game Boy Color",
+    "Alias": ["Game Boy Color", "GBC", "Nintendo Game Boy Color"]
+  },
+  {
+    "Platform": "Game Boy Advance",
+    "Alias": ["Game Boy Advance", "GBA", "Nintendo Game Boy Advance"]
+  },
+  {
+    "Platform": "Nintendo DS",
+    "Alias": ["DS", "Nintendo DS", "NDS"]
+  },
+  {
+    "Platform": "Nintendo 3DS",
+    "Alias": ["3DS", "Nintendo 3DS", "N3DS"]
+  },
+  {
+    "Platform": "Playstation Portable",
+    "Alias": ["PSP", "PlayStation Portable", "Playstation.Portable"]
+  },
+  {
+    "Platform": "Playstation Vita",
+    "Alias": ["PS Vita", "PlayStation Vita", "PSVita", "Playstation.Vita"]
+  },
+  {
+    "Platform": "Sega Genesis",
+    "Alias": ["Genesis", "Mega Drive", "Sega Genesis", "Sega Mega Drive"]
+  },
+  {
+    "Platform": "Sega Saturn",
+    "Alias": ["Saturn", "Sega Saturn"]
+  },
+  {
+    "Platform": "Sega Dreamcast",
+    "Alias": ["Dreamcast", "Sega Dreamcast"]
+  },
+  {
+    "Platform": "Atari 2600",
+    "Alias": ["Atari 2600", "2600", "Atari"]
+  },
+  {
+    "Platform": "Neo Geo",
+    "Alias": ["Neo Geo", "NeoGeo", "SNK Neo Geo"]
   }
 ]
