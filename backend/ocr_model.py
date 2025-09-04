@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import torch
 from PIL import Image
-from platform_matcher import match_platform
+
 
 # Força uso do CPU ANTES de importar qualquer coisa do OpenOCR
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
@@ -86,10 +86,10 @@ def extract_text_from_image(image: Image.Image) -> dict:
         else:
             extracted_text = "Nenhum texto detectado"
             
-        platform = match_platform(extracted_text)
+        
         return {
             "text": str(extracted_text) if extracted_text else "Nenhum texto detectado",
-            "platform": platform
+            
         }
     except Exception as e:
         error_message = f"Erro durante extração de texto: {str(e)}"

@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from ocr_model import extract_text_from_image
 from title_matcher import fuzzy_match, titles
+from platform_matcher import match_platform
 from PIL import Image
 import io
 
@@ -27,12 +28,14 @@ app.add_middleware(
 @app.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     contents = await file.read()
-    print("Arquivo recebido:", file.filename, "Tamanho:", len(contents))  # <-- debug aqui
+    print("Arquivo recebido:", file.filename, "Tamanho:", len(contents))
     image = Image.open(io.BytesIO(contents))
     ocr_text = extract_text_from_image(image)
     match = fuzzy_match(ocr_text["text"], titles)
+    platform = match_platform(ocr_text["text"])
     return {
         "text": ocr_text,
         "matched_title": match["title"] if match else None,
-        "score": match["score"] if match else None
+        "score": match["score"] if match else None,
+        "platform": platform
     }
