@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Dicionário de plataforma para dataset
 platform_to_dataset = {
     "Amiga": os.path.join(BASE_DIR, "datasets", "amiga.json"),
-    "Dreamcast": os.path.join(BASE_DIR, "datasets", "dreamcast.json"),
+    "Sega Dreamcast": os.path.join(BASE_DIR, "datasets", "dreamcast.json"),
     "Gameboy Advance": os.path.join(BASE_DIR, "datasets", "gameboy_advance.json"),
     "Gameboy Color": os.path.join(BASE_DIR, "datasets", "gameboy_color.json"),
     "Gamegear": os.path.join(BASE_DIR, "datasets", "game_gear.json"),

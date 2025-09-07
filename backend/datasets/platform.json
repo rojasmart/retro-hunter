@@ -51,8 +51,8 @@
     "Platform": "Nintendo Gamecube",
     "Alias": ["GameCube", "GC", "Nintendo GameCube", "Gamecube"]
   },
-    {
-      "Platform": "Nintendo Wii",
+  {
+    "Platform": "Nintendo Wii",
     "Alias": ["Wii", "Nintendo Wii"]
   },
   {
@@ -90,6 +90,10 @@
   {
     "Platform": "Playstation Vita",
     "Alias": ["PS Vita", "PlayStation Vita", "PSVita", "Playstation.Vita"]
+  },
+  {
+    "Platform": "Sega Master System",
+    "Alias": ["Master System", "Sega Master System", "MasterSystem", "Master"]
   },
   {
     "Platform": "Sega Genesis",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
 
@@ -13,6 +13,7 @@ interface OCRUploadProps {
 export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OCRUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>("");
+  const [platform, setPlatform] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +71,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         throw new Error(`OCR API failed: ${resp.status} ${txt}`);
       }
       const data = await resp.json();
+      setExtractedText(data.text?.text || "");
+      setPlatform(data.platform || "");
       // matched_title from backend
       const text = (data.text || "").toString();
       let bestName = "";
@@ -263,6 +266,11 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       {extractedText && (
         <div className="space-y-3">
           <h3 className="font-bold text-lg text-blue-900 mb-2">{extractedText}</h3>
+          {platform && (
+            <div className="text-sm text-gray-700 mb-2">
+              <span className="font-semibold">Platform:</span> {platform}
+            </div>
+          )}
           <div className="p-3 bg-green-50 border border-green-200 rounded">
             <p className="text-green-800 text-sm">✅ Name extracted successfully!</p>
             <p className="text-green-600 text-xs mt-1">The text was automatically added to the search field. You can edit it above if needed.</p>
