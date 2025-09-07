@@ -48,15 +48,15 @@
     "Alias": ["N64", "Nintendo 64", "Nintendo64"]
   },
   {
-    "Platform": "GameCube",
-    "Alias": ["GameCube", "GC", "Nintendo GameCube"]
+    "Platform": "Nintendo Gamecube",
+    "Alias": ["GameCube", "GC", "Nintendo GameCube", "Gamecube"]
   },
-  {
-    "Platform": "Wii",
+    {
+      "Platform": "Nintendo Wii",
     "Alias": ["Wii", "Nintendo Wii"]
   },
   {
-    "Platform": "Wii U",
+    "Platform": "Nintendo Wii U",
     "Alias": ["Wii U", "Nintendo Wii U", "WiiU"]
   },
   {
@@ -68,12 +68,12 @@
     "Alias": ["Game Boy", "GB", "Nintendo Game Boy"]
   },
   {
-    "Platform": "Game Boy Color",
-    "Alias": ["Game Boy Color", "GBC", "Nintendo Game Boy Color"]
+    "Platform": "Gameboy Color",
+    "Alias": ["Gameboy Color", "GBC", "Nintendo Gameboy Color"]
   },
   {
-    "Platform": "Game Boy Advance",
-    "Alias": ["Game Boy Advance", "GBA", "Nintendo Game Boy Advance"]
+    "Platform": "Gameboy Advance",
+    "Alias": ["Gameboy Advance", "GBA", "Nintendo Gameboy Advance"]
   },
   {
     "Platform": "Nintendo DS",
@@ -84,7 +84,7 @@
     "Alias": ["3DS", "Nintendo 3DS", "N3DS"]
   },
   {
-    "Platform": "Playstation Portable",
+    "Platform": "PSP",
     "Alias": ["PSP", "PlayStation Portable", "Playstation.Portable"]
   },
   {
