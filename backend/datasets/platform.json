@@ -32,16 +32,12 @@
     "Alias": ["Xbox One", "XOne", "Xbox.One", "XboxOne"]
   },
   {
-    "Platform": "Xbox Series X",
+    "Platform": "Xbox Series",
     "Alias": ["Xbox Series X", "XSX", "Xbox.Series.X", "XboxSeriesX"]
   },
   {
-    "Platform": "Xbox Series S",
-    "Alias": ["Xbox Series S", "XSS", "Xbox.Series.S", "XboxSeriesS"]
-  },
-  {
-    "Platform": "Nintendo Entertainment System",
-    "Alias": ["NES", "Nintendo NES", "Nintendo Entertainment System"]
+    "Platform": "Nintendo",
+    "Alias": ["NES", "Nintendo NES", "Nintendo Entertainment System", "Nes"]
   },
   {
     "Platform": "Super Nintendo",
@@ -114,5 +110,9 @@
   {
     "Platform": "Neo Geo",
     "Alias": ["Neo Geo", "NeoGeo", "SNK Neo Geo"]
+  },
+  {
+    "Platform": "Zx Spectrum",
+    "Alias": ["ZX Spectrum", "ZXSpectrum", "Spectrum"]
   }
 ]
