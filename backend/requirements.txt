@@ -13,3 +13,5 @@ rapidfuzz
 google-cloud-aiplatform
 google-auth
 google-cloud-core
+google-cloud-documentai
+google-auth

@@ -1,97 +1,101 @@
 import os
-import sys
-import numpy as np
-import torch
+from google.cloud import documentai_v1
 from PIL import Image
+import io
 
-
-# Força uso do CPU ANTES de importar qualquer coisa do OpenOCR
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-torch.cuda.is_available = lambda: False
-
-# Adiciona o diretório OpenOCR ao path para importar as ferramentas
-sys.path.append(os.path.join(os.path.dirname(__file__), 'OpenOCR'))
-
-try:
-    from tools.infer_e2e import OpenOCR
-except ImportError as e:
-    print(f"Erro ao importar OpenOCR: {e}")
-    print("Certifique-se de que a pasta OpenOCR/tools está presente e as dependências estão instaladas.")
-    raise
-
-# Inicializa o sistema OCR (usando o modelo mobile por padrão)
-text_sys = None
+# Initialize Document AI client
+processor_client = None
 
 def initialize_ocr():
-    """Inicializa o sistema OCR uma única vez"""
-    global text_sys
-    if text_sys is None:
+    """Initialize Vertex AI Document AI OCR"""
+    global processor_client
+    if processor_client is None:
         try:
-            # Remove o parâmetro use_gpu que não é aceito
-            text_sys = OpenOCR(mode='mobile', drop_score=0.4)
-            print("Sistema OCR inicializado com sucesso no CPU!")
+            processor_client = documentai_v1.DocumentProcessorServiceClient()
+            print("✅ Vertex AI Document AI initialized successfully!")
         except Exception as e:
-            print(f"Erro ao inicializar OCR: {e}")
+            print(f"❌ Error initializing Vertex AI: {e}")
             raise
-    return text_sys
+    return processor_client
 
 def extract_text_from_image(image: Image.Image) -> dict:
-    """
-    Extrai texto de uma imagem usando o pipeline do OpenOCR
-    Retorna um dicionário com o texto extraído e a plataforma detectada
-    """
+    """Extract text using Vertex AI Document AI"""
     try:
-        # Inicializa o OCR se ainda não foi inicializado
-        ocr_system = initialize_ocr()
+        # Initialize client if not done
+        if processor_client is None:
+            initialize_ocr()
         
-        # Converte PIL Image para numpy array (BGR format)
-        img_array = np.array(image)
+        # Get configuration from environment
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT_ID")
+        location = os.getenv("GOOGLE_CLOUD_LOCATION", "us")
+        processor_id = os.getenv("VERTEX_AI_PROCESSOR_ID")
         
-        # Se a imagem tem 4 canais (RGBA), converte para 3 canais (RGB)
-        if img_array.shape[-1] == 4:
-            img_array = img_array[:, :, :3]
+        if not all([project_id, processor_id]):
+            raise ValueError("Missing required environment variables: GOOGLE_CLOUD_PROJECT_ID or VERTEX_AI_PROCESSOR_ID")
         
-        # Converte RGB para BGR (formato esperado pelo OpenOCR)
-        img_bgr = img_array[:, :, ::-1]
+        # Build processor name
+        processor_name = f"projects/{project_id}/locations/{location}/processors/{processor_id}"
         
-        # Executa a inferência OCR
-        results = ocr_system(img_numpy=img_bgr)
-
-        # Debug: vamos ver o formato dos resultados
-        print(f"Tipo de results: {type(results)}")
-        print(f"Conteúdo de results: {results}")
+        # Convert PIL image to bytes
+        img_bytes = io.BytesIO()
+        image.save(img_bytes, format='PNG')
+        img_bytes = img_bytes.getvalue()
         
-        # Garante que sempre retornamos uma string
-        extracted_text = ""
-
-        # Função auxiliar para varrer listas/tuplas aninhadas e coletar 'transcription'
-        def collect_transcriptions(obj):
-            texts_local = []
-            def walk(o):
-                if isinstance(o, dict):
-                    t = o.get('transcription')
-                    if isinstance(t, str) and t.strip():
-                        texts_local.append(t.strip())
-                elif isinstance(o, (list, tuple)):
-                    for x in o:
-                        walk(x)
-            walk(obj)
-            return texts_local
+        # Create raw document
+        raw_document = documentai_v1.RawDocument(
+            content=img_bytes,
+            mime_type="image/png"
+        )
         
-        # O resultado é uma tupla (detection_results, stats)
-        if isinstance(results, (tuple, list)) and len(results) > 0:
-            detection_results = results[0]  # Primeiro elemento: detecções (podem estar aninhadas)
-            texts = collect_transcriptions(detection_results)
-            extracted_text = ' '.join(texts) if texts else "Nenhum texto detectado"
-        else:
-            extracted_text = "Nenhum texto detectado"
-            
+        # Process request
+        request = documentai_v1.ProcessRequest(
+            name=processor_name,
+            raw_document=raw_document
+        )
+        
+        # Call Vertex AI
+        result = processor_client.process_document(request=request)
+        document = result.document
+        
+        # Calculate confidence
+        confidence = calculate_confidence(document)
+        
+        # Clean and process text
+        extracted_text = document.text.strip()
         
         return {
-            "text": str(extracted_text) if extracted_text else "Nenhum texto detectado",
-            
+            "text": extracted_text,
+            "confidence": confidence,
+            "raw": extracted_text
         }
+        
     except Exception as e:
-        error_message = f"Erro durante extração de texto: {str(e)}"
-        print(error_message)
-        return {"text": error_message, "platform": None}
+        print(f"❌ Vertex AI OCR error: {e}")
+        return {
+            "text": "",
+            "confidence": 0,
+            "raw": ""
+        }
+
+def calculate_confidence(document):
+    """Calculate average confidence from Vertex AI response"""
+    if not document.pages:
+        return 0.0
+    
+    total_confidence = 0.0
+    token_count = 0
+    
+    for page in document.pages:
+        if hasattr(page, 'tokens'):
+            for token in page.tokens:
+                if hasattr(token, 'detection_confidence') and token.detection_confidence:
+                    total_confidence += token.detection_confidence
+                    token_count += 1
+    
+    return round((total_confidence / token_count) * 100, 2) if token_count > 0 else 0.0
+
+# Initialize on module load
+try:
+    initialize_ocr()
+except Exception as e:
+    print(f"⚠️  Warning: Could not initialize Vertex AI on module load: {e}")
