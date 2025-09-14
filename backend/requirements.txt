@@ -1,8 +1,15 @@
+        # Web API
 fastapi
 uvicorn
+
+# Image processing
 pillow
-torch
-torchvision
-opencv-python
-onnxruntime
 python-multipart
+
+# Fuzzy string matching
+rapidfuzz
+
+# Google Cloud
+google-cloud-aiplatform
+google-auth
+google-cloud-core
