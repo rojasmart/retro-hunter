@@ -118,5 +118,9 @@
   {
     "Platform": "Zx Spectrum",
     "Alias": ["ZX Spectrum", "ZXSpectrum", "Spectrum"]
+  },
+  {
+    "Platform": "PC",
+    "Alias": ["PC", "Personal Computer", "IBM PC", "Windows PC", "Computer", "PC-cdrom", "PC CD-ROM", "PC-CDROM"]
   }
 ]
