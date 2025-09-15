@@ -6,12 +6,12 @@ uvicorn
 pillow
 python-multipart
 
-# Fuzzy string matching
-rapidfuzz
-
 # Google Cloud
 google-cloud-aiplatform
 google-auth
 google-cloud-core
 google-cloud-documentai
 google-auth
+
+# Environment variables
+python-dotenv
