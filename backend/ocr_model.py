@@ -1,4 +1,5 @@
 from google.cloud import documentai_v1 as documentai
+import os  # Adicionado para corrigir o erro
 import io
 from PIL import Image
 
