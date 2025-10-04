@@ -6,10 +6,12 @@ from dotenv import load_dotenv
 env_path = Path(__file__).parent.parent / '.env.local'
 load_dotenv(env_path)
 
+# Configurar o caminho para o arquivo de credenciais do Google Cloud
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from ocr_model import extract_text_from_image
-# from platform_matcher import match_platform  # Remover esta linha
 from PIL import Image
 import io
 
