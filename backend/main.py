@@ -1,14 +1,11 @@
-# filepath: [main.py](http://_vscodecontentref_/0)
 import logging
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from google.oauth2 import service_account
 import google.generativeai as genai
-from google.api_core import client_options
 
-# Carregar variáveis de ambiente do arquivo [.env.local](http://_vscodecontentref_/1)
+# Carregar variáveis de ambiente do arquivo .env.local
 load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retrosniffer/.env.local")
 
 # Configure o nível de log
@@ -17,32 +14,21 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Caminho para o arquivo de credenciais de conta de serviço
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-project_id = os.getenv("GOOGLE_CLOUD_PROJECT_ID")
-location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+# Usar API Key ao invés de credenciais de conta de serviço para Gemini
+api_key = os.getenv("GOOGLE_API_KEY")
 
-if not credentials_path or not os.path.exists(credentials_path):
-    logger.error(f"Credenciais não encontradas em: {credentials_path}")
-    credentials = None
+if not api_key:
+    logger.error("GOOGLE_API_KEY não está definido no arquivo .env.local")
+    genai_configured = False
 else:
     try:
-        # Carregar credenciais do arquivo JSON
-        credentials = service_account.Credentials.from_service_account_file(
-            credentials_path
-        )
-        logger.info("Credenciais de serviço carregadas com sucesso")
-        
-        # Configurar o cliente Generative AI com as credenciais
-        genai.configure(
-            credentials=credentials,
-            project_id=project_id,
-            location=location
-        )
-        logger.info("Generative AI API inicializada com sucesso")
+        # Configurar o cliente Generative AI com API Key
+        genai.configure(api_key=api_key)
+        logger.info("Generative AI API inicializada com sucesso usando API Key")
+        genai_configured = True
     except Exception as e:
-        logger.error(f"Erro ao carregar credenciais: {e}")
-        credentials = None
+        logger.error(f"Erro ao configurar Generative AI: {e}")
+        genai_configured = False
 
 # Define o modelo do agente configurado no Vertex AI Studio
 MODEL_NAME = "gemini-pro"  # Modelo padrão do Gemini
@@ -54,8 +40,8 @@ class PromptRequest(BaseModel):
 # Endpoint para enviar uma pergunta ao agente
 @app.post("/ask-agent")
 async def ask_agent(request: PromptRequest):
-    if credentials is None:
-        return {"error": "Credenciais não configuradas corretamente"}
+    if not genai_configured:
+        return {"error": "Generative AI não está configurado corretamente"}
         
     try:
         # Extrair o prompt do corpo da requisição
