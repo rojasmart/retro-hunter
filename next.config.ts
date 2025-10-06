@@ -46,6 +46,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*", // Rota no frontend
+        destination: "http://127.0.0.1:8000/:path*", // Redirecionar para o backend FastAPI
+      },
+    ];
+  },
 };
 
 export default nextConfig;
