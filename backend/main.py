@@ -1,11 +1,13 @@
 import logging
 import os
+import base64
 from typing import Any
 
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from PIL import Image
 from ocr_model import extract_text_from_image
 
@@ -18,21 +20,19 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Remover a API Key do ambiente para evitar conflitos (opcional)
-if "GOOGLE_API_KEY" in os.environ:
-    del os.environ["GOOGLE_API_KEY"]
-
 # Configurar o cliente Generative AI
 try:
-    # Configurar o cliente para usar as credenciais padrão (ADC)
-    genai.configure()
-    logger.info("Generative AI configurado com sucesso usando credenciais padrão (ADC).")
+    client = genai.Client(
+        vertexai=True,
+        api_key=os.environ.get("GOOGLE_CLOUD_API_KEY"),
+    )
+    logger.info("Cliente Generative AI configurado com sucesso.")
 except Exception as e:
     logger.error("Erro ao configurar o cliente Generative AI: %s", e)
     raise e
 
-# Modelo a ser usado (use um modelo público para testes)
-MODEL_NAME = "gemini-2.5-flash-preview-09-2025"  # Substitua pelo modelo configurado no Vertex AI
+# Modelo a ser usado
+MODEL_NAME = "gemini-2.5-flash-preview-09-2025"
 
 @app.post("/ask-agent")
 async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o título deste jogo, qual a plataforma e qual o preço médio?"):
@@ -47,17 +47,44 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
         extracted_text = ocr_result["text"]
         confidence = ocr_result["confidence"]
 
-        # Adicionar o texto extraído ao prompt
-        full_prompt = f"{prompt}\nTexto extraído da imagem: {extracted_text}"
-        logger.debug("Prompt completo enviado ao modelo: %s", full_prompt)
+        # Codificar a imagem em base64
+        file.file.seek(0)  # Resetar o ponteiro do arquivo
+        image_data = base64.b64encode(file.file.read()).decode("utf-8")
 
-        # Enviar o prompt ao modelo Generative AI
-        model = genai.GenerativeModel(model_name=MODEL_NAME)
-        response = model.generate_content(full_prompt)
+        # Criar as partes para o conteúdo
+        msg_image = types.Part.from_bytes(
+            data=base64.b64decode(image_data),
+            mime_type="image/jpeg",
+        )
+        msg_text = types.Part.from_text(text=f"{prompt}\nTexto extraído da imagem: {extracted_text}")
 
-        # Extrair o texto da resposta
-        result = response.text if hasattr(response, "text") else str(response)
-        logger.debug("Resposta do modelo: %s", result)
+        # Configurar o conteúdo e parâmetros do modelo
+        contents = [
+            types.Content(
+                role="user",
+                parts=[msg_image, msg_text],
+            ),
+        ]
+        generate_content_config = types.GenerateContentConfig(
+            temperature=1,
+            top_p=0.95,
+            max_output_tokens=65535,
+            safety_settings=[
+                types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"),
+                types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"),
+                types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"),
+                types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="OFF"),
+            ],
+        )
+
+        # Enviar o conteúdo ao modelo e processar a resposta
+        response_text = ""
+        for chunk in client.models.generate_content_stream(
+            model=MODEL_NAME,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            response_text += chunk.text
 
         # Dividir o texto extraído em linhas para obter título e plataforma
         lines = extracted_text.split("\n")
@@ -65,7 +92,7 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
         platform = lines[1] if len(lines) > 1 else "Plataforma não encontrada"
 
         return {
-            "response": result,
+            "response": response_text,
             "title": title,
             "platform": platform,
             "confidence": confidence,
