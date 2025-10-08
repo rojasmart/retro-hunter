@@ -49,8 +49,12 @@ def calculate_confidence(document):
 
     for page in document.pages:
         for token in page.tokens:
-            if token.detection_confidence:
-                total_confidence += token.detection_confidence
+            # Usar o campo correto de confiança, se existir
+            conf = getattr(token, 'confidence', None)
+            if conf is None:
+                conf = getattr(token, 'detection_confidence', None)
+            if conf is not None:
+                total_confidence += conf
                 token_count += 1
 
     return round((total_confidence / token_count) * 100, 2) if token_count > 0 else 0.0

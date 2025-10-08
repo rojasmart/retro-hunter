@@ -42,13 +42,11 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
 
         # Extrair texto da imagem usando o Document AI
         ocr_result = extract_text_from_image(image)
-
-        # Processar o texto extraído para obter título e plataforma
         extracted_text = ocr_result["text"]
         confidence = ocr_result["confidence"]
 
         # Codificar a imagem em base64
-        file.file.seek(0)  # Resetar o ponteiro do arquivo
+        file.file.seek(0)
         image_data = base64.b64encode(file.file.read()).decode("utf-8")
 
         # Criar as partes para o conteúdo
@@ -58,7 +56,7 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
         )
         msg_text = types.Part.from_text(text=f"{prompt}\nTexto extraído da imagem: {extracted_text}")
 
-        # Configurar o conteúdo e parâmetros do modelo
+        model = "gemini-2.5-flash-preview-09-2025"
         contents = [
             types.Content(
                 role="user",
@@ -68,6 +66,7 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
         generate_content_config = types.GenerateContentConfig(
             temperature=1,
             top_p=0.95,
+            seed=0,
             max_output_tokens=65535,
             safety_settings=[
                 types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"),
@@ -75,28 +74,22 @@ async def ask_agent(file: UploadFile = File(...), prompt: str = "Qual é o títu
                 types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"),
                 types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="OFF"),
             ],
+            thinking_config=types.ThinkingConfig(
+                thinking_budget=-1,
+            ),
         )
 
-        # Enviar o conteúdo ao modelo e processar a resposta
         response_text = ""
         for chunk in client.models.generate_content_stream(
-            model=MODEL_NAME,
+            model=model,
             contents=contents,
             config=generate_content_config,
         ):
             response_text += chunk.text
 
-        # Dividir o texto extraído em linhas para obter título e plataforma
-        lines = extracted_text.split("\n")
-        title = lines[0] if len(lines) > 0 else "Título não encontrado"
-        platform = lines[1] if len(lines) > 1 else "Plataforma não encontrada"
-
-        return {
-            "response": response_text,
-            "title": title,
-            "platform": platform,
-            "confidence": confidence,
-        }
+        # Montar uma string de resultado consolidada
+        result_str = f"Resposta: {response_text}\nConfiança OCR: {confidence}"
+        return {"result": result_str}
     except Exception as e:
         logger.error("Erro ao processar a solicitação: %s", e, exc_info=True)
         return {"error": f"Erro ao processar a solicitação: {str(e)}"}
