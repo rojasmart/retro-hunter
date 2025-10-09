@@ -2,6 +2,8 @@ import logging
 import os
 from typing import Any
 
+import re
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -39,26 +41,40 @@ class PromptRequest(BaseModel):
     prompt: str
 
 @app.post("/ask-agent-image")
-async def ask_agent_image(prompt: str = Form(...), file: UploadFile = File(...)):
+async def ask_agent_image(
+    prompt: str = Form("return just name and platform of this game with comma separated"),
+    file: UploadFile = File(...)
+):
     try:
-        # Ler bytes da imagem
         image_bytes = await file.read()
-
-        # Instanciar o modelo
         model = genai.GenerativeModel(model_name=MODEL_NAME)
-
-        # Criar o conteúdo para o Gemini (imagem + texto)
         contents = [
             {"role": "user", "parts": [
                 {"mime_type": file.content_type or "image/jpeg", "data": image_bytes},
                 {"text": prompt}
             ]}
         ]
-
-        # Gerar resposta
         response = model.generate_content(contents)
         result = response.text if hasattr(response, "text") else str(response)
-        return {"response": result}
+
+       # Tentar extrair título e plataforma da resposta do modelo
+        match = re.search(r"(?:Title|Nome)[:\-]?\s*(.+?)[\n\r]+(?:Platform|Plataforma)[:\-]?\s*(.+)", result, re.IGNORECASE)
+        if match:
+            titulo = match.group(1).strip()
+            plataforma = match.group(2).strip()
+        else:
+            # Novo: tentar extrair por vírgula
+            parts = [p.strip() for p in result.split(",")]
+            if len(parts) == 2:
+                titulo, plataforma = parts
+            else:
+                titulo = ""
+                plataforma = ""
+        return {
+            "titulo": titulo,
+            "plataforma": plataforma,
+            "raw": result
+        }
     except Exception as e:
         logger.error("Erro ao processar a solicitação: %s", e, exc_info=True)
         return {"error": f"Erro ao processar a solicitação: {str(e)}"}
