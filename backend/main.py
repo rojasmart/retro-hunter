@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+from fastapi import File, UploadFile, Form
+
 # Carregar variáveis de ambiente do arquivo .env.local
 load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retrosniffer/.env.local")
 
@@ -36,19 +38,26 @@ MODEL_NAME = "gemini-2.5-flash-preview-09-2025"  # Substitua pelo modelo configu
 class PromptRequest(BaseModel):
     prompt: str
 
-@app.post("/ask-agent")
-async def ask_agent(request: PromptRequest):
+@app.post("/ask-agent-image")
+async def ask_agent_image(prompt: str = Form(...), file: UploadFile = File(...)):
     try:
-        prompt = request.prompt
-        logger.debug("Enviando prompt para o modelo: %s", prompt)
+        # Ler bytes da imagem
+        image_bytes = await file.read()
 
-        # Instanciar o modelo e gerar resposta
+        # Instanciar o modelo
         model = genai.GenerativeModel(model_name=MODEL_NAME)
-        response = model.generate_content(prompt)
 
-        # Extrair o texto da resposta
+        # Criar o conteúdo para o Gemini (imagem + texto)
+        contents = [
+            {"role": "user", "parts": [
+                {"mime_type": file.content_type or "image/jpeg", "data": image_bytes},
+                {"text": prompt}
+            ]}
+        ]
+
+        # Gerar resposta
+        response = model.generate_content(contents)
         result = response.text if hasattr(response, "text") else str(response)
-        logger.debug("Resposta do modelo: %s", result)
         return {"response": result}
     except Exception as e:
         logger.error("Erro ao processar a solicitação: %s", e, exc_info=True)
