@@ -6,6 +6,31 @@ import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import { AdvancedOCR } from "@/components/AdvancedOCR";
 import Image from "next/image";
 
+// Normalização simples de nomes de plataformas para as keys do projeto
+const PLATFORM_ALIASES: Record<string, Platform> = {
+  ps2: "ps2",
+  "playstation 2": "ps2",
+  ps3: "ps3",
+  "playstation 3": "ps3",
+  ps4: "ps4",
+  "playstation 4": "ps4",
+  xbox: "xbox",
+  "xbox 360": "xbox360",
+  switch: "nintendo-switch",
+  "nintendo switch": "nintendo-switch",
+  wii: "nintendo-wii",
+  ds: "nintendo-ds",
+};
+
+function normalizePlatform(input?: string): Platform {
+  if (!input) return "all";
+  const s = input.toLowerCase().trim();
+  for (const [k, v] of Object.entries(PLATFORM_ALIASES)) {
+    if (s.includes(k)) return v;
+  }
+  return "all";
+}
+
 export default function Home() {
   const [nome, setNome] = useState("");
   const [platform, setPlatform] = useState<Platform>("all");
@@ -13,37 +38,39 @@ export default function Home() {
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const searchEbayOnly = async (searchName?: string) => {
+  const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
     setLoading(true);
-    const params = new URLSearchParams({
-      nome: searchName ?? nome,
-      platform: platform,
-      condition: condition,
-    });
-    const res = await fetch(`/api/ebay?${params.toString()}`);
-    const data = await res.json();
-    setResultados(data.resultados || []);
-    setLoading(false);
+    const platformToSend = normalizePlatform(platformParam ?? platform);
+    const params = new URLSearchParams({ nome: searchName ?? nome, platform: platformToSend, condition });
+    try {
+      const res = await fetch(`/api/ebay?${params.toString()}`);
+      const data = await res.json();
+      setResultados(data.resultados || []);
+    } catch (err) {
+      console.error("Erro eBay:", err);
+      setResultados([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Função para definir os títulos extraídos do OCR
   const [ocrTitles, setOcrTitles] = useState<string[]>([]);
   const [selectedOcrTitle, setSelectedOcrTitle] = useState<string>("");
 
-  // Recebe até 3 títulos do OCR
-  const handleOCRExtraction = (titles: string[] | string) => {
+  const handleOCRExtraction = (titles: string[] | string, plataforma?: string) => {
     let arr: string[] = [];
-    if (Array.isArray(titles)) {
-      arr = titles.slice(0, 3);
-    } else if (typeof titles === "string" && titles.trim()) {
-      arr = [titles.trim()];
+    if (Array.isArray(titles)) arr = titles.slice(0, 3);
+    else if (typeof titles === "string" && titles.trim()) arr = [titles.trim()];
+
+    if (plataforma) {
+      const normalized = normalizePlatform(plataforma);
+      if (normalized !== "all") setPlatform(normalized);
     }
+
     setOcrTitles(arr);
     setSelectedOcrTitle(arr[0] || "");
     setNome(arr[0] || "");
-    if (arr[0]) {
-      searchEbayOnly(arr[0]);
-    }
+    if (arr[0]) searchEbayOnly(arr[0], plataforma);
   };
 
   return (
@@ -51,13 +78,11 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-4 text-gray-500">Retro Hunter</h1>
       <p className="mb-6 text-gray-500">Compare prices of your games</p>
 
-      {/* Componente OCR */}
       <div className="mb-8">
         <AdvancedOCR onGameExtracted={handleOCRExtraction} isProcessing={loading} />
       </div>
 
       <div className="max-w-2xl space-y-4">
-        {/* Campo de busca */}
         <div>
           <input
             id="game-name"
@@ -69,12 +94,9 @@ export default function Home() {
           />
         </div>
 
-        {/* Filtros */}
-
-        {/* Search button */}
         <div>
           <button
-            onClick={searchEbayOnly}
+            onClick={() => searchEbayOnly()}
             disabled={loading || !nome.trim()}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed w-full font-medium"
           >
@@ -82,16 +104,20 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Info dos filtros ativos */}
         {(platform !== "all" || condition !== "all") && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
               <span className="font-medium">Filtros ativos:</span>{" "}
-              {platform !== "all" && (
-                <span className="bg-blue-100 px-2 py-1 rounded mr-2">
-                  {PLATFORM_CONFIGS[platform].icon} {PLATFORM_CONFIGS[platform].name}
-                </span>
-              )}
+              {platform !== "all" &&
+                (() => {
+                  const platformConfig = PLATFORM_CONFIGS[platform as Platform];
+                  if (!platformConfig) return <span className="bg-red-100 px-2 py-1 rounded mr-2">Plataforma desconhecida</span>;
+                  return (
+                    <span className="bg-blue-100 px-2 py-1 rounded mr-2">
+                      {platformConfig.icon} {platformConfig.name}
+                    </span>
+                  );
+                })()}
               {condition !== "all" && (
                 <span className="bg-blue-100 px-2 py-1 rounded">
                   {condition === "new" && "🆕 Novo"}
@@ -104,7 +130,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Resultados */}
       <div className="mt-8 space-y-4">
         {resultados.length > 0 && (
           <div>
@@ -124,8 +149,6 @@ export default function Home() {
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 whitespace-nowrap">{r.site}</span>
                   </div>
                   <p className="text-green-600 font-bold text-lg mb-2">{r.priceText}</p>
-
-                  {/* Tags */}
                   {r.tags && r.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {r.tags.map((tag, tagIndex) => (
@@ -135,7 +158,6 @@ export default function Home() {
                       ))}
                     </div>
                   )}
-
                   {r.image && <Image src={r.image} alt={r.title} width={300} height={96} className="w-full h-24 object-cover rounded border" />}
                 </div>
               ))}

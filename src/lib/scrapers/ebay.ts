@@ -125,9 +125,19 @@ function parseEbayResults(data: EbaySearchResponse, gameName: string): GameResul
 
   const cleanGameName = gameName.toLowerCase().trim();
 
+  const notGameKeywords = [
+    "manual", "case", "box", "cover", "replacement", "artwork", "insert", "poster", "map", "soundtrack", "disc only", "empty", "shell", "lot", "bundle", "stand", "display", "promo", "flyer", "magazine", "guide", "book", "figurine", "amiibo", "controller", "memory", "cable", "adapter", "console", "system", "accessory", "test", "repair"
+  ];
+
   for (const item of data.itemSummaries) {
     try {
       const title = cleanText(item.title);
+      const titleLower = title.toLowerCase();
+
+      // Excluir itens que não são jogos
+      if (notGameKeywords.some((kw) => titleLower.includes(kw))) {
+        continue;
+      }
 
       // Verificar se o item é relevante para a busca
       if (!isGameMatch(title, cleanGameName)) {
@@ -166,6 +176,13 @@ function parseEbayResults(data: EbaySearchResponse, gameName: string): GameResul
         else if (conditionLower.includes("refurbished")) tags.push("🔧 Recondicionado");
         else tags.push(`🏷️ ${item.condition}`);
       }
+
+      // Adicionar tag de plataforma se detectada no título
+      const platforms = [
+        "ps2", "ps3", "ps4", "xbox", "xbox 360", "nintendo switch", "switch", "wii", "ds", "gamecube", "gba", "3ds", "ps1", "playstation", "megadrive", "genesis", "dreamcast", "saturn", "nes", "snes", "super nintendo", "famicom", "atari", "retro"
+      ];
+      const foundPlatform = platforms.find(p => titleLower.includes(p));
+      if (foundPlatform) tags.push(foundPlatform);
 
       results.push({
         title: finalTitle,

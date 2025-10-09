@@ -5,7 +5,8 @@ import { OCRUpload } from "@/components/OCRUpload";
 import { generateGameNameVariations } from "@/lib/utils/ocr";
 
 interface AdvancedOCRProps {
-  onGameExtracted: (gameName: string) => void;
+  // changed to accept optional plataforma
+  onGameExtracted: (gameName: string, plataforma?: string) => void;
   isProcessing?: boolean;
 }
 
@@ -14,25 +15,26 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
 
-  const handleTextExtracted = (text: string) => {
+  // now accepts plataforma from OCRUpload
+  const handleTextExtracted = (text: string, plataforma?: string) => {
     setExtractedText(text);
     const variations = [text, ...generateGameNameVariations(text).filter((v) => v !== text)];
     setGameVariations(variations);
 
     if (variations.length > 0) {
       setSelectedGame(variations[0]);
-      onGameExtracted(variations[0]);
+      // forward platform when available
+      onGameExtracted(variations[0], plataforma);
     }
   };
 
   const handleGameSelection = (gameName: string) => {
     setSelectedGame(gameName);
-    // Atualizar o campo de busca com o jogo selecionado
+    // keep platform undefined here (will use current global platform)
     onGameExtracted(gameName);
   };
 
   const handleDirectSearch = () => {
-    // Esta função não faz busca automática, apenas confirma a seleção
     if (selectedGame) {
       onGameExtracted(selectedGame);
     }

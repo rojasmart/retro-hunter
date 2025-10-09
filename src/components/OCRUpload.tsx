@@ -5,7 +5,8 @@ import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/oc
 import Image from "next/image";
 
 interface OCRUploadProps {
-  onTextExtracted: (text: string) => void;
+  // changed to accept optional plataforma
+  onTextExtracted: (text: string, plataforma?: string) => void;
   onSearch: (gameName: string) => void;
   isSearching?: boolean;
 }
@@ -83,10 +84,17 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         bestName = data.titulo.trim();
       } else if (typeof data.text === "string" && data.text.trim().length > 0) {
         bestName = cleanOCRText(data.text);
+      } else if (typeof data.matched_title === "string" && data.matched_title.trim().length > 0) {
+        // fallback if present
+        bestName = data.matched_title.trim();
       }
+
+      const plataforma = (data.plataforma || data.platform || "").toString();
       if (bestName.trim()) {
         setExtractedText(bestName);
-        onTextExtracted(bestName);
+        // pass platform as second arg
+        onTextExtracted(bestName, plataforma || undefined);
+        onSearch(bestName);
       } else {
         throw new Error("Could not extract readable text from the image");
       }
