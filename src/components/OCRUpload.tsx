@@ -25,33 +25,71 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
 
   // Process image with OCR
   const processImage = async (imageFile: File | Blob) => {
-    try {
-      // Enviar a imagem ao backend
-      const apiForm = new FormData();
-      apiForm.append("file", imageFile);
+    setIsProcessing(true);
+    setProgress(0);
+    setError(null);
 
-      const resp = await fetch("/api/process-image", {
-        method: "POST",
-        body: apiForm,
-        cache: "no-store",
+    try {
+      console.log("🔍 Starting advanced OCR...");
+
+      // Create canvas for preprocessing
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not create canvas");
+
+      // Load image into canvas
+      const img = new globalThis.Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = URL.createObjectURL(imageFile);
       });
 
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Apply preprocessing
+      console.log("🔧 Applying preprocessing...");
+      const resizedCanvas = resizeImageForOCR(canvas);
+      const processedCanvas = preprocessImage(resizedCanvas);
+
+      // Set file type and name for blob
+      const fileType = (imageFile as File).type || "image/png";
+      const fileName = (imageFile as File).name || "upload.png";
+
+      // Convert canvas to blob
+      const processedBlob = await new Promise<Blob>((resolve) => {
+        processedCanvas.toBlob((blob) => resolve(blob!), fileType, 0.9);
+      });
+      // Send to /api/ocr (Next.js proxy)
+      const apiForm = new FormData();
+      apiForm.append("file", imageFile, fileName);
+      const resp = await fetch("/api/ocr", { method: "POST", body: apiForm, cache: "no-store" });
       if (!resp.ok) {
-        throw new Error("Erro ao processar a imagem no backend.");
+        const txt = await resp.text();
+        throw new Error(`OCR API failed: ${resp.status} ${txt}`);
       }
-
       const data = await resp.json();
-
-      // Atualizar o título e a plataforma extraídos
-      const { title, platform } = data;
-      setExtractedText(title || "Título não encontrado");
-      setPlatform(platform || "Plataforma não encontrada");
-
-      // Enviar o texto extraído para o componente pai
-      onTextExtracted(title || "Título não encontrado");
+      setExtractedText(data.text?.text || "");
+      setPlatform(data.platform || "");
+      // matched_title from backend
+      const text = (data.text || "").toString();
+      let bestName = "";
+      if (typeof data.matched_title === "string" && data.matched_title.trim().length > 0) {
+        bestName = data.matched_title.trim();
+      } else if (typeof data.text === "string" && data.text.trim().length > 0) {
+        bestName = cleanOCRText(data.text);
+      }
+      if (bestName.trim()) {
+        setExtractedText(bestName);
+        onTextExtracted(bestName);
+      } else {
+        throw new Error("Could not extract readable text from the image");
+      }
     } catch (err) {
       console.error("❌ OCR error:", err);
-      setError("Erro ao processar a imagem. Tente novamente.");
+      setError("Error processing the image. Try a clearer image or take another photo.");
     } finally {
       setIsProcessing(false);
       setProgress(0);
