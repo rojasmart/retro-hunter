@@ -42,7 +42,7 @@ class PromptRequest(BaseModel):
 
 @app.post("/ask-agent-image")
 async def ask_agent_image(
-    prompt: str = Form("return just name and platform of this game with comma separated"),
+    prompt: str = Form("return the name and platform of this game with comma separated"),
     file: UploadFile = File(...)
 ):
     try:
