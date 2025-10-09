@@ -65,7 +65,10 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       // Send to /api/ocr (Next.js proxy)
       const apiForm = new FormData();
       apiForm.append("file", imageFile, fileName);
-      const resp = await fetch("/api/ocr", { method: "POST", body: apiForm, cache: "no-store" });
+      const resp = await fetch("http://127.0.0.1:8000/ask-agent-image", {
+        method: "POST",
+        body: apiForm,
+      });
       if (!resp.ok) {
         const txt = await resp.text();
         throw new Error(`OCR API failed: ${resp.status} ${txt}`);
@@ -76,8 +79,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       // matched_title from backend
       const text = (data.text || "").toString();
       let bestName = "";
-      if (typeof data.matched_title === "string" && data.matched_title.trim().length > 0) {
-        bestName = data.matched_title.trim();
+      if (typeof data.titulo === "string" && data.titulo.trim().length > 0) {
+        bestName = data.titulo.trim();
       } else if (typeof data.text === "string" && data.text.trim().length > 0) {
         bestName = cleanOCRText(data.text);
       }

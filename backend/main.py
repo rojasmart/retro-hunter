@@ -11,6 +11,8 @@ import google.generativeai as genai
 
 from fastapi import File, UploadFile, Form
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Carregar variáveis de ambiente do arquivo .env.local
 load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retrosniffer/.env.local")
 
@@ -19,6 +21,14 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Ou ["*"] para todos (menos seguro)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Remover a API Key do ambiente para evitar conflitos (opcional)
 if "GOOGLE_API_KEY" in os.environ:
