@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const platform = (searchParams.get("platform") as Platform) || "all";
     const condition = searchParams.get("condition") || "all";
 
-    // Se for busca por item específico
+    // If requesting a specific item by ID
     if (itemId) {
       console.log(`Buscando item específico no eBay: ${itemId}`);
       const resultado = await getEbayItemById(itemId);
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(response);
     }
 
-    // Validação de entrada para busca por nome
+    // Validation for name search
     if (!nome) {
       return NextResponse.json(
         {
@@ -60,7 +60,6 @@ export async function GET(request: NextRequest) {
 
     console.log(`Buscando no eBay para: ${nome} (Plataforma: ${platform}, Condição: ${condition})`);
 
-    // Executar scraper do eBay
     const resultados = await scrapeEbay(nome, platform, condition);
 
     const response: ApiResponse = {
@@ -72,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, {
       headers: {
-        "Cache-Control": "public, max-age=300", // Cache por 5 minutos
+        "Cache-Control": "public, max-age=300",
       },
     });
   } catch (error) {
@@ -104,13 +103,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Método POST para busca avançada (opcional)
+// POST handler for advanced searches (kept for future use)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { nome, platform = "all", condition = "all", filters } = body;
 
-    // Validação
     if (!nome || !validateGameName(nome)) {
       return NextResponse.json(
         {
@@ -124,8 +122,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`Busca avançada no eBay para: ${nome} com filtros:`, filters);
 
-    // Por enquanto, usar a busca padrão
-    // No futuro, pode implementar filtros avançados
     const resultados = await scrapeEbay(nome, platform, condition);
 
     const response: ApiResponse = {
