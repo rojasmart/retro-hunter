@@ -20,17 +20,25 @@ const PLATFORM_ALIASES: Record<string, Platform> = {
   "nintendo switch": "nintendo-switch",
   wii: "nintendo-wii",
   ds: "nintendo-ds",
+  // Adicionado Dreamcast
+  dreamcast: "dreamcast",
+  "sega dreamcast": "dreamcast",
+  // fallback
+  all: "all",
 };
 
 function normalizePlatform(input?: string): Platform {
   if (!input) return "all";
   const s = input.toLowerCase().trim();
+  // check direct alias matches
+  if (PLATFORM_ALIASES[s]) return PLATFORM_ALIASES[s];
+
+  // check contains any alias key
   for (const [k, v] of Object.entries(PLATFORM_ALIASES)) {
-    if (s.includes(k)) return v;
+    if (k !== "all" && s.includes(k)) return v;
   }
   return "all";
 }
-
 export default function Home() {
   const [nome, setNome] = useState("");
   const [platform, setPlatform] = useState<Platform>("all");
@@ -40,37 +48,56 @@ export default function Home() {
 
   const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
     setLoading(true);
+
+    // priority: platformParam (from OCR) > current state platform
     const platformToSend = normalizePlatform(platformParam ?? platform);
-    const params = new URLSearchParams({ nome: searchName ?? nome, platform: platformToSend, condition });
-    try {
-      const res = await fetch(`/api/ebay?${params.toString()}`);
-      const data = await res.json();
-      setResultados(data.resultados || []);
-    } catch (err) {
-      console.error("Erro eBay:", err);
-      setResultados([]);
-    } finally {
-      setLoading(false);
-    }
+    console.log("[searchEbayOnly] searchName:", searchName ?? nome, "platformParam:", platformParam, "normalized:", platformToSend);
+
+    const params = new URLSearchParams({
+      nome: searchName ?? nome,
+      platform: platformToSend,
+      condition: condition,
+    });
+    console.log("[searchEbayOnly] fetch /api/ebay?", params.toString());
+    const res = await fetch(`/api/ebay?${params.toString()}`);
+    const data = await res.json();
+    setResultados(data.resultados || []);
+    setLoading(false);
   };
 
   const [ocrTitles, setOcrTitles] = useState<string[]>([]);
   const [selectedOcrTitle, setSelectedOcrTitle] = useState<string>("");
 
   const handleOCRExtraction = (titles: string[] | string, plataforma?: string) => {
+    // construir lista de títulos a partir do argumento
     let arr: string[] = [];
-    if (Array.isArray(titles)) arr = titles.slice(0, 3);
-    else if (typeof titles === "string" && titles.trim()) arr = [titles.trim()];
+    if (Array.isArray(titles)) {
+      arr = titles
+        .slice(0, 3)
+        .map((t) => t.trim())
+        .filter(Boolean);
+    } else if (typeof titles === "string" && titles.trim()) {
+      arr = [titles.trim()];
+    }
 
-    if (plataforma) {
+    // determinar plataforma a usar (prioridade: plataforma passada > state.platform)
+    let platformToUse: Platform = platform;
+    console.log("[handleOCRExtraction] received plataforma from OCR:", plataforma);
+    if (typeof plataforma === "string" && plataforma.trim() && plataforma.toLowerCase() !== "all") {
       const normalized = normalizePlatform(plataforma);
-      if (normalized !== "all") setPlatform(normalized);
+      console.log("[handleOCRExtraction] normalized plataforma:", normalized);
+      setPlatform(normalized);
+      platformToUse = normalized;
     }
 
     setOcrTitles(arr);
     setSelectedOcrTitle(arr[0] || "");
     setNome(arr[0] || "");
-    if (arr[0]) searchEbayOnly(arr[0], plataforma);
+
+    if (arr[0]) {
+      // passar a plataforma normalizada para a pesquisa
+      searchEbayOnly(arr[0], platformToUse);
+    }
   };
 
   return (
