@@ -14,7 +14,7 @@ from fastapi import File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 
 # Carregar variáveis de ambiente do arquivo .env.local
-load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retrosniffer/.env.local")
+load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retro-hunter/.env.local")
 
 # Configure o nível de log
 logging.basicConfig(level=logging.DEBUG)
