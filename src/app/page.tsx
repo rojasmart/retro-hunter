@@ -23,6 +23,11 @@ const PLATFORM_ALIASES: Record<string, Platform> = {
   // Adicionado Dreamcast
   dreamcast: "dreamcast",
   "sega dreamcast": "dreamcast",
+  masterSystem: "master-system",
+  "master system": "master-system",
+  genesis: "genesis",
+  megadrive: "genesis",
+  "mega drive": "genesis",
   // fallback
   all: "all",
 };
@@ -42,72 +47,65 @@ function normalizePlatform(input?: string): Platform {
 
 const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
   // Calcular preços
-  const prices = items.map((item) => item.price);
-  const lowestPrice = Math.min(...prices);
-  const highestPrice = Math.max(...prices);
-  const averagePrice = (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2);
+  const prices = items.map((item) => item.price).filter((price) => price > 0);
+  const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const highestPrice = prices.length > 0 ? Math.max(...prices) : 0;
+  const averagePrice = prices.length > 0 ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2) : "0.00";
 
   return (
-    <div className="overflow-hidden">
+    <div className="max-w-2xl mx-auto">
       {/* Tabela de preços */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse mb-4 table-auto">
+      <div className="mb-6">
+        <table className="w-full border-collapse bg-white rounded-lg shadow-sm overflow-hidden">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border px-4 py-2 text-left">Preço mais baixo</th>
-              <th className="border px-4 py-2 text-left">Preço mais alto</th>
-              <th className="border px-4 py-2 text-left">Preço médio</th>
+              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço mais baixo</th>
+              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço mais alto</th>
+              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço médio</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border px-4 py-2">R$ {lowestPrice}</td>
-              <td className="border px-4 py-2">R$ {highestPrice}</td>
-              <td className="border px-4 py-2">R$ {averagePrice}</td>
+              <td className="border px-4 py-3 text-center text-green-600 font-semibold">R$ {lowestPrice}</td>
+              <td className="border px-4 py-3 text-center text-red-600 font-semibold">R$ {highestPrice}</td>
+              <td className="border px-4 py-3 text-center text-blue-600 font-semibold">R$ {averagePrice}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       {/* Slider horizontal com botões de navegação */}
-      <div className="relative">
-        <div className="flex overflow-x-auto gap-4 py-4 scrollbar-hide">
+      <div className="relative bg-white rounded-lg shadow-sm p-4">
+        <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           {items.map((item, index) => (
             <a
               key={index}
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-[150px] p-4 border rounded-lg bg-white shadow hover:shadow-md hover:bg-gray-50 text-center"
+              className="flex-shrink-0 w-48 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 hover:shadow-md transition-all duration-200"
             >
-              <p className="font-medium text-blue-600 hover:underline">{item.title}</p>
-              <p className="text-sm text-gray-500">R$ {item.price}</p>
+              {item.image && (
+                <div className="mb-2">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    width={180}
+                    height={120}
+                    className="w-full h-24 object-cover rounded"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+              <h3 className="font-medium text-blue-600 hover:underline text-sm line-clamp-2 mb-1">{item.title}</h3>
+              <p className="text-green-600 font-bold text-lg">R$ {item.price}</p>
+              {item.tags && item.tags.length > 0 && <p className="text-xs text-gray-500 mt-1">{item.tags[0]}</p>}
             </a>
           ))}
         </div>
-        {/* Botões de navegação */}
-        <button
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
-          onClick={() => {
-            const slider = document.querySelector(".overflow-x-auto");
-            if (slider) {
-              slider.scrollBy({ left: -200, behavior: "smooth" });
-            }
-          }}
-        >
-          ◀
-        </button>
-        <button
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
-          onClick={() => {
-            const slider = document.querySelector(".overflow-x-auto");
-            if (slider) {
-              slider.scrollBy({ left: 200, behavior: "smooth" });
-            }
-          }}
-        >
-          ▶
-        </button>
       </div>
     </div>
   );

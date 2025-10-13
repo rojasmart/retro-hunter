@@ -155,7 +155,8 @@ export async function GET(request: NextRequest) {
         "ps3": "playstation 3",
         "ps4": "playstation 4",
         "xbox": "xbox",
-        "xbox360": "xbox 360"
+        "xbox360": "xbox 360",
+        "nintendo-switch": "nintendo switch",
       };
       const platformName = platformMap[platform] || platform;
       query = `${query} ${platformName}`.trim();
@@ -167,61 +168,58 @@ export async function GET(request: NextRequest) {
     const token = await getEbayToken();
 
     // Search eBay Browse API
-    const searchParams2 = new URLSearchParams({
-      'q': query,
-      'limit': '30',
-      'category_ids': '139973' // Video Games category
-    });
+    let allItems: any[] = [];
+    let offset = 0;
+    const limit = 100; // Maximum allowed by eBay API
 
-    // Add condition filter if specified
-    if (condition !== "all") {
-      const conditionMap: Record<string, string> = {
-        'new': '1000',
-        'used': '3000', 
-        'refurbished': '2000'
-      };
-      if (conditionMap[condition]) {
-        searchParams2.set('filter', `conditionIds:{${conditionMap[condition]}}`);
+    while (true) {
+      const searchParams2 = new URLSearchParams({
+        'q': query,
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+        'category_ids': '139973' // Video Games category
+      });
+
+      if (condition !== "all") {
+        const conditionMap: Record<string, string> = {
+          'new': '1000',
+          'used': '3000', 
+          'refurbished': '2000'
+        };
+        if (conditionMap[condition]) {
+          searchParams2.set('filter', `conditionIds:{${conditionMap[condition]}}`);
+        }
       }
+
+      const searchUrl = `${EBAY_HOST}/buy/browse/v1/item_summary/search?${searchParams2.toString()}`;
+      console.log("[DEBUG] eBay search URL:", searchUrl);
+
+      const searchResponse = await fetch(searchUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+        }
+      });
+
+      const searchData = await searchResponse.json();
+      const items = searchData.itemSummaries || [];
+
+      allItems = allItems.concat(items);
+
+      if (!searchData.next || items.length < limit) {
+        break; // Stop if there are no more pages
+      }
+
+      offset += limit;
     }
 
-    const searchUrl = `${EBAY_HOST}/buy/browse/v1/item_summary/search?${searchParams2.toString()}`;
-    console.log("[DEBUG] eBay search URL:", searchUrl);
-
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
-      }
-    });
-
-    const searchText = await searchResponse.text();
-    console.log("[DEBUG] Search response status:", searchResponse.status);
-
-    if (!searchResponse.ok) {
-      console.error("[ERROR] Search response:", searchText);
-      return NextResponse.json({
-        resultados: [],
-        error: `eBay search failed: ${searchResponse.status}`,
-        debug: { query, searchUrl, response: searchText.substring(0, 500) }
-      }, { status: 502 });
-    }
-
-    const searchData = JSON.parse(searchText);
-    const items = searchData.itemSummaries || [];
-
-    console.log("[DEBUG] Found items:", items.length);
-
-    // Enhanced filtering for games vs accessories
-    const filteredItems = items.filter((item: any) => {
+    const filteredItems = allItems.filter((item: any) => {
       const title = (item.title || "").toLowerCase();
       const searchTerm = nome.toLowerCase();
-      
-      // Must contain the search term
+
       if (!title.includes(searchTerm)) return false;
-      
-      // Exclude accessories, collectibles, and non-games
+
       const excludeKeywords = [
         'manual', 'box only', 'case only', 'cover', 'artwork', 'poster',
         'sword', 'cosplay', 'figure', 'statue', 'keychain', 'necklace',
@@ -229,26 +227,16 @@ export async function GET(request: NextRequest) {
         'sticker', 'decal', 'pin', 'badge', 'soundtrack', 'cd only',
         'guide', 'book', 'strategy', 'prima'
       ];
-      
+
       if (excludeKeywords.some(kw => title.includes(kw))) return false;
-      
-      // For Devil May Cry specifically, exclude sequels if searching for original
-      if (searchTerm === "devil may cry") {
-        const sequelKeywords = ['devil may cry 2', 'devil may cry 3', 'devil may cry 4', 'devil may cry 5', 'dmc2', 'dmc3', 'dmc4', 'dmc5'];
-        if (sequelKeywords.some(kw => title.includes(kw))) return false;
-      }
-      
-      // Must be a video game
-      const gameKeywords = ['game', 'video game', 'gaming', 'playstation', 'xbox', 'nintendo', 'pc', 'ps2', 'ps3', 'ps4'];
-      const hasGameKeyword = gameKeywords.some(kw => title.includes(kw));
-      
-      return hasGameKeyword;
+
+      return true;
     });
 
     const results = filteredItems.map((item: any) => {
       const originalTitle = item.title || "No title";
       const cleanedTitle = cleanGameTitle(originalTitle, nome);
-      
+
       return {
         title: cleanedTitle,
         priceText: item.price ? `${item.price.value} ${item.price.currency}` : "Price not available",
