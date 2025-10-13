@@ -39,6 +39,80 @@ function normalizePlatform(input?: string): Platform {
   }
   return "all";
 }
+
+const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
+  // Calcular preços
+  const prices = items.map((item) => item.price);
+  const lowestPrice = Math.min(...prices);
+  const highestPrice = Math.max(...prices);
+  const averagePrice = (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2);
+
+  return (
+    <div className="overflow-hidden">
+      {/* Tabela de preços */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse mb-4 table-auto">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border px-4 py-2 text-left">Preço mais baixo</th>
+              <th className="border px-4 py-2 text-left">Preço mais alto</th>
+              <th className="border px-4 py-2 text-left">Preço médio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border px-4 py-2">R$ {lowestPrice}</td>
+              <td className="border px-4 py-2">R$ {highestPrice}</td>
+              <td className="border px-4 py-2">R$ {averagePrice}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Slider horizontal com botões de navegação */}
+      <div className="relative">
+        <div className="flex overflow-x-auto gap-4 py-4 scrollbar-hide">
+          {items.map((item, index) => (
+            <a
+              key={index}
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-w-[150px] p-4 border rounded-lg bg-white shadow hover:shadow-md hover:bg-gray-50 text-center"
+            >
+              <p className="font-medium text-blue-600 hover:underline">{item.title}</p>
+              <p className="text-sm text-gray-500">R$ {item.price}</p>
+            </a>
+          ))}
+        </div>
+        {/* Botões de navegação */}
+        <button
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
+          onClick={() => {
+            const slider = document.querySelector(".overflow-x-auto");
+            if (slider) {
+              slider.scrollBy({ left: -200, behavior: "smooth" });
+            }
+          }}
+        >
+          ◀
+        </button>
+        <button
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
+          onClick={() => {
+            const slider = document.querySelector(".overflow-x-auto");
+            if (slider) {
+              slider.scrollBy({ left: 200, behavior: "smooth" });
+            }
+          }}
+        >
+          ▶
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [nome, setNome] = useState("");
   const [platform, setPlatform] = useState<Platform>("all");
@@ -160,35 +234,8 @@ export default function Home() {
       <div className="mt-8 space-y-4">
         {resultados.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Found results ({resultados.length}):</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {resultados.map((r, i) => (
-                <div key={i} className="result-card bg-white p-4 shadow-sm rounded-lg border">
-                  <div className="flex justify-between items-start mb-2">
-                    <a
-                      href={r.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-700 font-semibold hover:text-blue-900 flex-1 line-clamp-2"
-                    >
-                      {r.title}
-                    </a>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-2 whitespace-nowrap">{r.site}</span>
-                  </div>
-                  <p className="text-green-600 font-bold text-lg mb-2">{r.priceText}</p>
-                  {r.tags && r.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {r.tags.map((tag, tagIndex) => (
-                        <span key={tagIndex} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {r.image && <Image src={r.image} alt={r.title} width={300} height={96} className="w-full h-24 object-cover rounded border" />}
-                </div>
-              ))}
-            </div>
+            {/* Exibir tabela e slider de preços */}
+            <PriceTableAndSlider items={resultados} />
           </div>
         )}
 
