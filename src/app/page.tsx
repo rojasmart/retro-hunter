@@ -54,45 +54,47 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Tabela de preços */}
-      <div className="mb-6">
-        <table className="w-full border-collapse bg-white rounded-lg shadow-sm overflow-hidden">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço mais baixo</th>
-              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço mais alto</th>
-              <th className="border px-4 py-3 text-center font-medium text-gray-700">Preço médio</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border px-4 py-3 text-center text-green-600 font-semibold">R$ {lowestPrice}</td>
-              <td className="border px-4 py-3 text-center text-red-600 font-semibold">R$ {highestPrice}</td>
-              <td className="border px-4 py-3 text-center text-blue-600 font-semibold">R$ {averagePrice}</td>
-            </tr>
-          </tbody>
-        </table>
+      {/* Tabela de preços com visual retro */}
+      <div className="mb-8">
+        <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
+          <h2 className="text-center text-xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">PRICE ANALYSIS</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gradient-to-b from-green-500/20 to-green-600/30 rounded-xl border border-green-400/50">
+              <div className="text-xs text-green-300 font-mono mb-1">LOWEST</div>
+              <div className="text-2xl font-bold text-green-400">R$ {lowestPrice}</div>
+            </div>
+            <div className="text-center p-4 bg-gradient-to-b from-red-500/20 to-red-600/30 rounded-xl border border-red-400/50">
+              <div className="text-xs text-red-300 font-mono mb-1">HIGHEST</div>
+              <div className="text-2xl font-bold text-red-400">R$ {highestPrice}</div>
+            </div>
+            <div className="text-center p-4 bg-gradient-to-b from-blue-500/20 to-blue-600/30 rounded-xl border border-blue-400/50">
+              <div className="text-xs text-blue-300 font-mono mb-1">AVERAGE</div>
+              <div className="text-2xl font-bold text-blue-400">R$ {averagePrice}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Slider horizontal com botões de navegação */}
-      <div className="relative bg-white rounded-lg shadow-sm p-4">
-        <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      {/* Slider horizontal com visual retro */}
+      <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-purple-400/50 shadow-2xl">
+        <h2 className="text-center text-xl font-bold text-purple-300 mb-4 font-mono tracking-wider">AVAILABLE GAMES</h2>
+        <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-900/30">
           {items.map((item, index) => (
             <a
               key={index}
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 w-48 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 hover:shadow-md transition-all duration-200"
+              className="flex-shrink-0 w-52 p-4 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-2 border-cyan-400/30 rounded-xl hover:border-pink-400/60 hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:scale-105"
             >
               {item.image && (
-                <div className="mb-2">
+                <div className="mb-3">
                   <Image
                     src={item.image}
                     alt={item.title}
-                    width={180}
+                    width={200}
                     height={120}
-                    className="w-full h-24 object-cover rounded"
+                    className="w-full h-28 object-cover rounded-lg border border-cyan-400/30"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
@@ -100,9 +102,9 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
                   />
                 </div>
               )}
-              <h3 className="font-medium text-blue-600 hover:underline text-sm line-clamp-2 mb-1">{item.title}</h3>
-              <p className="text-green-600 font-bold text-lg">R$ {item.price}</p>
-              {item.tags && item.tags.length > 0 && <p className="text-xs text-gray-500 mt-1">{item.tags[0]}</p>}
+              <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
+              <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
+              {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
             </a>
           ))}
         </div>
@@ -173,76 +175,110 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-gray-100 p-8 rounded-lg">
-      <h1 className="text-3xl font-bold mb-4 text-gray-500">Retro Hunter</h1>
-      <p className="mb-6 text-gray-500">Compare prices of your games</p>
-
-      <div className="mb-8">
-        <AdvancedOCR onGameExtracted={handleOCRExtraction} isProcessing={loading} />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+      {/* Retro Grid Background */}
+      <div className="absolute inset-0 opacity-20">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+            linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px)
+          `,
+            backgroundSize: "50px 50px",
+          }}
+        ></div>
       </div>
 
-      <div className="max-w-2xl space-y-4">
-        <div>
-          <input
-            id="game-name"
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Enter the game name (e.g., R-Type Final)"
-            className="border border-gray-300 p-3 rounded-lg w-full text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+      {/* Neon Glow Effects */}
+      <div className="absolute top-20 left-20 w-32 h-32 bg-pink-500 rounded-full filter blur-xl opacity-30 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-40 h-40 bg-cyan-500 rounded-full filter blur-xl opacity-20 animate-pulse"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-purple-500 rounded-full filter blur-3xl opacity-10"></div>
+
+      <div className="relative z-10 p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent filter drop-shadow-lg">
+            RETRO HUNTER
+          </h1>
+          <p className="text-xl text-cyan-300 font-mono tracking-wider animate-pulse">&gt; GET THE PRICES OF YOUR RETRO GAMES</p>
+          <div className="mt-4 flex justify-center">
+            <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"></div>
+          </div>
         </div>
 
-        <div>
-          <button
-            onClick={() => searchEbayOnly()}
-            disabled={loading || !nome.trim()}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed w-full font-medium"
-          >
-            {loading ? "🔍 Searching..." : "Search"}
-          </button>
+        <div className="mb-8">
+          <AdvancedOCR onGameExtracted={handleOCRExtraction} isProcessing={loading} />
         </div>
 
-        {(platform !== "all" || condition !== "all") && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-sm text-blue-800">
-              <span className="font-medium">Filtros ativos:</span>{" "}
-              {platform !== "all" &&
-                (() => {
-                  const platformConfig = PLATFORM_CONFIGS[platform as Platform];
-                  if (!platformConfig) return <span className="bg-red-100 px-2 py-1 rounded mr-2">Plataforma desconhecida</span>;
-                  return (
-                    <span className="bg-blue-100 px-2 py-1 rounded mr-2">
-                      {platformConfig.icon} {platformConfig.name}
-                    </span>
-                  );
-                })()}
-              {condition !== "all" && (
-                <span className="bg-blue-100 px-2 py-1 rounded">
-                  {condition === "new" && "🆕 Novo"}
-                  {condition === "used" && "📦 Usado"}
-                  {condition === "refurbished" && "🔧 Recondicionado"}
-                </span>
-              )}
-            </p>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-cyan-500/30 shadow-2xl">
+            <input
+              id="game-name"
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Enter the game name (e.g., Action Fighter)"
+              className="w-full p-4 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+            />
           </div>
-        )}
-      </div>
 
-      <div className="mt-8 space-y-4">
-        {resultados.length > 0 && (
-          <div>
-            {/* Exibir tabela e slider de preços */}
-            <PriceTableAndSlider items={resultados} />
+          <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-purple-500/30">
+            <button
+              onClick={() => searchEbayOnly()}
+              disabled={loading || !nome.trim()}
+              className="w-full py-4 px-8 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold text-lg rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-pink-400/50 hover:border-purple-400/50 disabled:border-gray-500/50"
+            >
+              {loading ? "🔍 SCANNING RETRO UNIVERSE..." : "🚀 HUNT FOR GAMES"}
+            </button>
           </div>
-        )}
 
-        {!loading && resultados.length === 0 && nome.trim() && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">😕 Nenhum resultado encontrado para &ldquo;{nome}&rdquo;</p>
-            <p className="text-sm text-gray-400 mt-1">Tente alterar os filtros ou usar termos diferentes</p>
-          </div>
-        )}
+          {(platform !== "all" || condition !== "all") && (
+            <div className="backdrop-blur-sm bg-black/20 border border-cyan-400/40 rounded-xl p-4">
+              <p className="text-sm text-cyan-300 font-mono">
+                <span className="text-pink-400 font-bold">&gt; ACTIVE FILTERS:</span>{" "}
+                {platform !== "all" &&
+                  (() => {
+                    const platformConfig = PLATFORM_CONFIGS[platform as Platform];
+                    if (!platformConfig)
+                      return <span className="bg-red-500/30 text-red-300 px-2 py-1 rounded mr-2 border border-red-400/50">Unknown Platform</span>;
+                    return (
+                      <span className="bg-purple-500/30 text-purple-200 px-2 py-1 rounded mr-2 border border-purple-400/50">
+                        {platformConfig.icon} {platformConfig.name}
+                      </span>
+                    );
+                  })()}
+                {condition !== "all" && (
+                  <span className="bg-cyan-500/30 text-cyan-200 px-2 py-1 rounded border border-cyan-400/50">
+                    {condition === "new" && "🆕 NEW"}
+                    {condition === "used" && "📦 USED"}
+                    {condition === "refurbished" && "🔧 REFURBISHED"}
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 space-y-4">
+          {resultados.length > 0 && (
+            <div>
+              {/* Exibir tabela e slider de preços */}
+              <PriceTableAndSlider items={resultados} />
+            </div>
+          )}
+
+          {!loading && resultados.length === 0 && nome.trim() && (
+            <div className="text-center py-12">
+              <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
+                <p className="text-2xl text-red-400 font-mono mb-2">😕 NO DATA FOUND</p>
+                <p className="text-cyan-300 font-mono">
+                  &gt; No results for &ldquo;<span className="text-pink-400">{nome}</span>&rdquo;
+                </p>
+                <p className="text-sm text-gray-400 mt-2 font-mono">Try different search terms or filters</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

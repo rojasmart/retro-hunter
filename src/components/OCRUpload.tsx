@@ -203,31 +203,34 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-lg border shadow-sm p-6">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">Game detector</h2>
-        <p className="text-sm text-gray-600 mt-1">Take a photo, upload an image or drag and drop a game to search automatically</p>
+    <div className="w-full max-w-2xl mx-auto backdrop-blur-sm bg-black/40 rounded-2xl border-2 border-cyan-400/50 shadow-2xl p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
+        <p className="text-sm text-cyan-300/80 mt-2 font-mono">&gt; Upload an image or use camera to auto-detect games_</p>
       </div>
 
       {/* Upload/Camera Controls */}
-      <div className="flex gap-2 flex-wrap mb-4">
+      <div className="flex gap-3 flex-wrap mb-6">
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isProcessing || showCamera}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-cyan-400/50 hover:border-blue-400/50 disabled:border-gray-500/50 font-mono"
         >
-          Choose Image
+          UPLOAD IMAGE
         </button>
         <button
           onClick={startCamera}
           disabled={isProcessing || showCamera}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-green-400/50 hover:border-emerald-400/50 disabled:border-gray-500/50 font-mono"
         >
-          Use Camera
+          USE CAMERA
         </button>
         {(selectedImage || extractedText || showCamera) && (
-          <button onClick={clearAll} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2">
-            Clear
+          <button
+            onClick={clearAll}
+            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-red-400/50 hover:border-pink-400/50 font-mono"
+          >
+            CLEAR
           </button>
         )}
       </div>
@@ -236,14 +239,20 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
 
       {/* Camera */}
       {showCamera && (
-        <div className="mb-4">
-          <video ref={videoRef} autoPlay playsInline className="w-full max-h-64 rounded-lg border object-cover" />
-          <div className="flex gap-2 mt-2">
-            <button onClick={capturePhoto} className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-              📸 Capture Photo
+        <div className="mb-6">
+          <video ref={videoRef} autoPlay playsInline className="w-full max-h-64 rounded-xl border-2 border-cyan-400/50 object-cover" />
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={capturePhoto}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-purple-400/50 font-mono"
+            >
+              CAPTURE PHOTO
             </button>
-            <button onClick={stopCamera} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-              Cancel
+            <button
+              onClick={stopCamera}
+              className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-gray-400/50 font-mono"
+            >
+              CANCEL
             </button>
           </div>
           <canvas ref={canvasRef} className="hidden" />
@@ -252,39 +261,42 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
 
       {/* Selected Image */}
       {selectedImage && !showCamera && (
-        <div className="mb-4">
-          <Image src={selectedImage} alt="Selected image" width={400} height={300} className="w-full max-h-64 object-contain rounded-lg border" />
+        <div className="mb-6">
+          <div className="backdrop-blur-sm bg-black/20 rounded-xl p-4 border border-purple-400/30">
+            <Image
+              src={selectedImage}
+              alt="Selected image"
+              width={400}
+              height={300}
+              className="w-full max-h-64 object-contain rounded-lg border-2 border-cyan-400/50"
+            />
+          </div>
         </div>
       )}
 
       {/* Progress Bar */}
       {isProcessing && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span>🔍 Processing image...</span>
-            <span>{progress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+        <div className="mb-6">
+          <div className="backdrop-blur-sm bg-black/20 rounded-xl p-4 border border-cyan-400/30">
+            <div className="flex items-center justify-between text-sm mb-3">
+              <span className="text-cyan-300 font-mono">🔍 SCANNING IMAGE...</span>
+              <span className="text-pink-400 font-mono font-bold">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-800/50 rounded-full h-3 border border-cyan-400/30">
+              <div
+                className="bg-gradient-to-r from-cyan-400 to-pink-500 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         </div>
       )}
 
       {/* Error */}
-      {error && <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">❌ {error}</div>}
-
-      {/* Extracted Text */}
-      {extractedText && (
-        <div className="space-y-3">
-          <h3 className="font-bold text-lg text-blue-900 mb-2">{extractedText}</h3>
-          {platform && (
-            <div className="text-sm text-gray-700 mb-2">
-              <span className="font-semibold">Platform:</span> {platform}
-            </div>
-          )}
-          <div className="p-3 bg-green-50 border border-green-200 rounded">
-            <p className="text-green-800 text-sm">✅ Name extracted successfully!</p>
-            <p className="text-green-600 text-xs mt-1">The text was automatically added to the search field. You can edit it above if needed.</p>
+      {error && (
+        <div className="mb-6">
+          <div className="backdrop-blur-sm bg-red-900/30 border-2 border-red-400/50 text-red-300 rounded-xl p-4">
+            <p className="font-mono">❌ ERROR: {error}</p>
           </div>
         </div>
       )}
