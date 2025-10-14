@@ -161,10 +161,7 @@ export default function Home() {
             <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent filter drop-shadow-lg">
               RETRO HUNTER
             </h1>
-            <p className="text-xl text-cyan-300 font-mono tracking-wider animate-pulse">&gt; GET THE PRICES OF YOUR RETRO GAMES</p>
-            <div className="mt-4 flex justify-center">
-              <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"></div>
-            </div>
+            <p className="text-xl text-cyan-300 font-mono tracking-wider">GET THE PRICES OF YOUR RETRO GAMES</p>
           </div>
 
           <div>
