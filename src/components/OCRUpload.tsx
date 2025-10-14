@@ -203,7 +203,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto backdrop-blur-sm bg-black/40 rounded-2xl border-2 border-cyan-400/50 shadow-2xl p-6">
+    <div className="w-full max-w-4xl mx-auto backdrop-blur-sm bg-black/40 rounded-2xl border-2 border-cyan-400/50 shadow-2xl p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
         <p className="text-sm text-cyan-300/80 mt-2 font-mono">&gt; Upload an image or use camera to auto-detect games_</p>

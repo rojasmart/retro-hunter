@@ -53,7 +53,7 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
   const averagePrice = prices.length > 0 ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2) : "0.00";
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Tabela de preços com visual retro */}
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
@@ -72,41 +72,6 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
               <div className="text-2xl font-bold text-blue-400">R$ {averagePrice}</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Slider horizontal com visual retro */}
-      <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-purple-400/50 shadow-2xl">
-        <h2 className="text-center text-xl font-bold text-purple-300 mb-4 font-mono tracking-wider">AVAILABLE GAMES</h2>
-        <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-900/30">
-          {items.map((item, index) => (
-            <a
-              key={index}
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 w-52 p-4 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-2 border-cyan-400/30 rounded-xl hover:border-pink-400/60 hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:scale-105"
-            >
-              {item.image && (
-                <div className="mb-3">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    width={200}
-                    height={120}
-                    className="w-full h-28 object-cover rounded-lg border border-cyan-400/30"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                    }}
-                  />
-                </div>
-              )}
-              <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
-              <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
-              {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
-            </a>
-          ))}
         </div>
       </div>
     </div>
@@ -176,7 +141,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Retro Grid Background */}
       <div className="absolute inset-0 opacity-20">
         <div
           className="absolute inset-0"
@@ -190,83 +154,44 @@ export default function Home() {
         ></div>
       </div>
 
-      {/* Neon Glow Effects */}
-      <div className="absolute top-20 left-20 w-32 h-32 bg-pink-500 rounded-full filter blur-xl opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-40 h-40 bg-cyan-500 rounded-full filter blur-xl opacity-20 animate-pulse"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-purple-500 rounded-full filter blur-3xl opacity-10"></div>
-
-      <div className="relative z-10 p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent filter drop-shadow-lg">
-            RETRO HUNTER
-          </h1>
-          <p className="text-xl text-cyan-300 font-mono tracking-wider animate-pulse">&gt; GET THE PRICES OF YOUR RETRO GAMES</p>
-          <div className="mt-4 flex justify-center">
-            <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"></div>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <AdvancedOCR onGameExtracted={handleOCRExtraction} isProcessing={loading} />
-        </div>
-
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-cyan-500/30 shadow-2xl">
-            <input
-              id="game-name"
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Enter the game name (e.g., Action Fighter)"
-              className="w-full p-4 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
-            />
-          </div>
-
-          <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-purple-500/30">
-            <button
-              onClick={() => searchEbayOnly()}
-              disabled={loading || !nome.trim()}
-              className="w-full py-4 px-8 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold text-lg rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-pink-400/50 hover:border-purple-400/50 disabled:border-gray-500/50"
-            >
-              {loading ? "🔍 SCANNING RETRO UNIVERSE..." : "🚀 HUNT FOR GAMES"}
-            </button>
-          </div>
-
-          {(platform !== "all" || condition !== "all") && (
-            <div className="backdrop-blur-sm bg-black/20 border border-cyan-400/40 rounded-xl p-4">
-              <p className="text-sm text-cyan-300 font-mono">
-                <span className="text-pink-400 font-bold">&gt; ACTIVE FILTERS:</span>{" "}
-                {platform !== "all" &&
-                  (() => {
-                    const platformConfig = PLATFORM_CONFIGS[platform as Platform];
-                    if (!platformConfig)
-                      return <span className="bg-red-500/30 text-red-300 px-2 py-1 rounded mr-2 border border-red-400/50">Unknown Platform</span>;
-                    return (
-                      <span className="bg-purple-500/30 text-purple-200 px-2 py-1 rounded mr-2 border border-purple-400/50">
-                        {platformConfig.icon} {platformConfig.name}
-                      </span>
-                    );
-                  })()}
-                {condition !== "all" && (
-                  <span className="bg-cyan-500/30 text-cyan-200 px-2 py-1 rounded border border-cyan-400/50">
-                    {condition === "new" && "🆕 NEW"}
-                    {condition === "used" && "📦 USED"}
-                    {condition === "refurbished" && "🔧 REFURBISHED"}
-                  </span>
-                )}
-              </p>
+      <div className="relative z-10 flex h-screen">
+        {/* Left Side - Fixed */}
+        <div className="w-1/2 bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
+          <div>
+            <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent filter drop-shadow-lg">
+              RETRO HUNTER
+            </h1>
+            <p className="text-xl text-cyan-300 font-mono tracking-wider animate-pulse">&gt; GET THE PRICES OF YOUR RETRO GAMES</p>
+            <div className="mt-4 flex justify-center">
+              <div className="w-24 h-1 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"></div>
             </div>
-          )}
+          </div>
+
+          <div>
+            <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
+            <div className="mt-4">
+              <input
+                id="game-name"
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Enter the game name (e.g., Action Fighter)"
+                className="w-full p-4 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+              />
+              <button
+                onClick={() => searchEbayOnly()}
+                disabled={loading || !nome.trim()}
+                className="w-full mt-4 py-4 px-8 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold text-lg rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-pink-400/50 hover:border-purple-400/50 disabled:border-gray-500/50"
+              >
+                {loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-8 space-y-4">
-          {resultados.length > 0 && (
-            <div>
-              {/* Exibir tabela e slider de preços */}
-              <PriceTableAndSlider items={resultados} />
-            </div>
-          )}
-
+        {/* Right Side - Scrollable */}
+        <div className="w-1/2 overflow-y-auto p-8">
+          {resultados.length > 0 && <PriceTableAndSlider items={resultados} />}
           {!loading && resultados.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
@@ -278,6 +203,37 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {resultados.map((item, index) => (
+              <a
+                key={index}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 w-full p-4 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-2 border-cyan-400/30 rounded-xl hover:border-pink-400/60 hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:scale-105"
+              >
+                {item.image && (
+                  <div className="mb-3">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      width={200}
+                      height={120}
+                      className="w-full h-28 object-cover rounded-lg border border-cyan-400/30"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                )}
+                <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
+                <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
+                {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>
