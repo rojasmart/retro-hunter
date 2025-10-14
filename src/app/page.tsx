@@ -154,16 +154,24 @@ export default function Home() {
         ></div>
       </div>
 
+      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-900 to-blue-900 shadow-md">
+        {/* Logo */}
+        <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">RETRO HUNTER</h1>
+
+        {/* Buttons */}
+        <div className="flex space-x-4">
+          <button className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg shadow-md hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+            My Account
+          </button>
+          <button className="py-2 px-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg shadow-md hover:from-cyan-600 hover:to-blue-600 transition-all duration-300">
+            My Games
+          </button>
+        </div>
+      </header>
+
       <div className="relative z-10 flex h-screen">
         {/* Left Side - Fixed */}
         <div className="w-1/2 bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
-          <div>
-            <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent filter drop-shadow-lg">
-              RETRO HUNTER
-            </h1>
-            <p className="text-xl text-cyan-300 font-mono tracking-wider">GET THE PRICES OF YOUR RETRO GAMES</p>
-          </div>
-
           <div>
             <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
             <div className="mt-4">
