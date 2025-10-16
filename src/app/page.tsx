@@ -140,31 +140,15 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-            linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px)
-          `,
-            backgroundSize: "50px 50px",
-          }}
-        ></div>
-      </div>
-
-      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-900 to-blue-900 shadow-md">
+    <div className="min-h-screen bg-black text-white font-mono">
+      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700">
         {/* Logo */}
-        <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">RETRO HUNTER</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">RETRO HUNTER</h1>
 
         {/* Buttons */}
         <div className="flex space-x-4">
-          <button className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg shadow-md hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+          <button className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg shadow-md hover:from-purple-600 hover:to-pink-600 transition-all duration-300 border border-gray-700">
             My Account
-          </button>
-          <button className="py-2 px-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-lg shadow-md hover:from-cyan-600 hover:to-blue-600 transition-all duration-300">
-            My Games
           </button>
         </div>
       </header>
