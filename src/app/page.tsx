@@ -122,58 +122,67 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-cyan-300 font-mono mb-2">Filter by Price Range:</label>
-            <div className="flex space-x-4">
-              <input
-                type="number"
-                value={minPrice}
-                onChange={(e) => setMinPrice(Number(e.target.value))}
-                min={lowestPrice}
-                max={highestPrice}
-                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
-                placeholder="Min Price"
-              />
-              <input
-                type="number"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                min={lowestPrice}
-                max={highestPrice}
-                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
-                placeholder="Max Price"
-              />
-            </div>
-            <div className="mt-4">
-              <label className="block text-cyan-300 font-mono mb-2">Sort Order:</label>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-cyan-300 font-mono">Currency:</label>
-                <button
-                  onClick={fetchExchangeRate}
-                  disabled={isLoadingRate}
-                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-mono text-xs rounded transition-all duration-300"
-                >
-                  {isLoadingRate ? "⟳" : "🔄"}
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Price Range Filter */}
+              <div>
+                <label className="block text-cyan-300 font-mono mb-2 text-sm">Price Range:</label>
+                <div className="flex space-x-2">
+                  <input
+                    type="number"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(Number(e.target.value))}
+                    min={lowestPrice}
+                    max={highestPrice}
+                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                    placeholder="Min"
+                  />
+                  <input
+                    type="number"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                    min={lowestPrice}
+                    max={highestPrice}
+                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                    placeholder="Max"
+                  />
+                </div>
               </div>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value as "USD" | "EUR")}
-                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
-              >
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€) - Rate: {exchangeRate.toFixed(4)}</option>
-              </select>
-              {isLoadingRate && <div className="text-xs text-cyan-300 mt-1 font-mono">Updating exchange rate...</div>}
+
+              {/* Sort Order Filter */}
+              <div>
+                <label className="block text-cyan-300 font-mono mb-2 text-sm">Sort Order:</label>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+
+              {/* Currency Filter */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-cyan-300 font-mono text-sm">Currency:</label>
+                  <button
+                    onClick={fetchExchangeRate}
+                    disabled={isLoadingRate}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-mono text-xs rounded transition-all duration-300"
+                  >
+                    {isLoadingRate ? "⟳" : "Refresh"}
+                  </button>
+                </div>
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as "USD" | "EUR")}
+                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                >
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€) - {exchangeRate.toFixed(4)}</option>
+                </select>
+                {isLoadingRate && <div className="text-xs text-cyan-300 mt-1 font-mono">Updating...</div>}
+              </div>
             </div>
           </div>
         </div>
