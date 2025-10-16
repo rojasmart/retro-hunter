@@ -45,7 +45,7 @@ function normalizePlatform(input?: string): Platform {
   return "all";
 }
 
-const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
+const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searchName: string }) => {
   const prices = items.map((item) => item.price).filter((price) => price > 0);
   const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const highestPrice = prices.length > 0 ? Math.max(...prices) : 0;
@@ -58,12 +58,12 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
   const filteredItems = items
     .filter((item) => item.price >= minPrice && item.price <= maxPrice)
     .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
-
+  console.log("hello searchName", searchName);
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
-          <h2 className="text-center text-xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">PRICE ANALYSIS</h2>
+          <h2 className="text-center text-xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">{searchName}</h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gradient-to-b from-green-500/20 to-green-600/30 rounded-xl border border-green-400/50">
               <div className="text-xs text-green-300 font-mono mb-1">LOWEST</div>
@@ -153,6 +153,7 @@ export default function Home() {
   const [platform, setPlatform] = useState<Platform>("all");
   const [condition, setCondition] = useState<string>("all");
   const [resultados, setResultados] = useState<GameResult[]>([]);
+  const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
@@ -161,6 +162,9 @@ export default function Home() {
     // priority: platformParam (from OCR) > current state platform
     const platformToSend = normalizePlatform(platformParam ?? platform);
     console.log("[searchEbayOnly] searchName:", searchName ?? nome, "platformParam:", platformParam, "normalized:", platformToSend);
+
+    const finalSearchName = searchName ?? nome;
+    setSearchNameState(finalSearchName);
 
     const params = new URLSearchParams({
       nome: searchName ?? nome,
@@ -258,7 +262,7 @@ export default function Home() {
 
         {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
-          {resultados.length > 0 && <PriceTableAndSlider items={resultados} />}
+          {resultados.length > 0 && <PriceTableAndSlider items={resultados} searchName={searchNameState} />}
           {!loading && resultados.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
