@@ -46,15 +46,21 @@ function normalizePlatform(input?: string): Platform {
 }
 
 const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
-  // Calcular preços
   const prices = items.map((item) => item.price).filter((price) => price > 0);
   const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const highestPrice = prices.length > 0 ? Math.max(...prices) : 0;
   const averagePrice = prices.length > 0 ? (prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2) : "0.00";
 
+  const [minPrice, setMinPrice] = useState(lowestPrice);
+  const [maxPrice, setMaxPrice] = useState(highestPrice);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const filteredItems = items
+    .filter((item) => item.price >= minPrice && item.price <= maxPrice)
+    .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
+
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Tabela de preços com visual retro */}
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
           <h2 className="text-center text-xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">PRICE ANALYSIS</h2>
@@ -72,7 +78,71 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
               <div className="text-2xl font-bold text-blue-400">R$ {averagePrice}</div>
             </div>
           </div>
+          <div className="mt-4">
+            <label className="block text-cyan-300 font-mono mb-2">Filter by Price Range:</label>
+            <div className="flex space-x-4">
+              <input
+                type="number"
+                value={minPrice}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                min={lowestPrice}
+                max={highestPrice}
+                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+                placeholder="Min Price"
+              />
+              <input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                min={lowestPrice}
+                max={highestPrice}
+                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+                placeholder="Max Price"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-cyan-300 font-mono mb-2">Sort Order:</label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {filteredItems.map((item, index) => (
+          <a
+            key={index}
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 w-full p-4 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-2 border-cyan-400/30 rounded-xl hover:border-pink-400/60 hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:scale-105"
+          >
+            {item.image && (
+              <div className="mb-3">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={200}
+                  height={120}
+                  className="w-full h-28 object-cover rounded-lg border border-cyan-400/30"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+            <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
+            <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
+            {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
+          </a>
+        ))}
       </div>
     </div>
   );
@@ -200,37 +270,6 @@ export default function Home() {
               </div>
             </div>
           )}
-
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {resultados.map((item, index) => (
-              <a
-                key={index}
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 w-full p-4 bg-gradient-to-b from-gray-800/80 to-gray-900/80 border-2 border-cyan-400/30 rounded-xl hover:border-pink-400/60 hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300 transform hover:scale-105"
-              >
-                {item.image && (
-                  <div className="mb-3">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      width={200}
-                      height={120}
-                      className="w-full h-28 object-cover rounded-lg border border-cyan-400/30"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = "none";
-                      }}
-                    />
-                  </div>
-                )}
-                <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
-                <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
-                {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
-              </a>
-            ))}
-          </div>
         </div>
       </div>
     </div>
