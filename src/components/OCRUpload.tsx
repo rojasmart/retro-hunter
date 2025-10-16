@@ -214,7 +214,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isProcessing || showCamera}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700 text-sm"
         >
           UPLOAD IMAGE
         </button>
@@ -222,15 +222,16 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         {(selectedImage || extractedText) && (
           <button
             onClick={() => alert("Added to collection!")}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700 text-sm"
           >
             + ADD TO COLLECTION
           </button>
         )}
+
         {(selectedImage || extractedText || showCamera) && (
           <button
             onClick={clearAll}
-            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700 text-sm"
           >
             CLEAR
           </button>

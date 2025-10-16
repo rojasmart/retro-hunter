@@ -163,7 +163,7 @@ export default function Home() {
 
       <div className="relative z-10 flex h-screen pt-16">
         {/* Lateral Esquerda - Fixa */}
-        <div className="w-1/2 w-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
+        <div className="w-1/2 h-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
             <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
             <div className="mt-4">
