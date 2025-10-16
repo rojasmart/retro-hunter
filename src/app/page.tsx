@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GameResult, Platform } from "@/lib/types";
 import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import { AdvancedOCR } from "@/components/AdvancedOCR";
@@ -54,6 +54,43 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
   const [minPrice, setMinPrice] = useState(lowestPrice);
   const [maxPrice, setMaxPrice] = useState(highestPrice);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [currency, setCurrency] = useState<"USD" | "EUR">("USD");
+  const [exchangeRate, setExchangeRate] = useState(0.86); // USD to EUR rate (fallback rate)
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
+
+  // Fetch current exchange rate from free API
+  const fetchExchangeRate = async () => {
+    try {
+      setIsLoadingRate(true);
+      const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      const data = await response.json();
+
+      if (data.rates && data.rates.EUR) {
+        setExchangeRate(data.rates.EUR);
+        console.log("Exchange rate updated:", data.rates.EUR);
+      }
+    } catch (error) {
+      console.error("Failed to fetch exchange rate, using fallback 0.86:", error);
+      setExchangeRate(0.86); // Fallback rate
+    } finally {
+      setIsLoadingRate(false);
+    }
+  };
+
+  // Fetch exchange rate on component mount
+  useEffect(() => {
+    fetchExchangeRate();
+  }, []);
+
+  // Function to convert price based on selected currency
+  const convertPrice = (price: number) => {
+    return currency === "EUR" ? (price * exchangeRate).toFixed(2) : price.toFixed(2);
+  };
+
+  // Function to get currency symbol
+  const getCurrencySymbol = () => {
+    return currency === "EUR" ? "€" : "$";
+  };
 
   const filteredItems = items
     .filter((item) => item.price >= minPrice && item.price <= maxPrice)
@@ -67,15 +104,21 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-green-500 rounded-xl border border-green-400">
               <div className="text-xs text-white font-mono mb-1">LOWEST</div>
-              <div className="text-2xl font-bold text-white">$ {lowestPrice}</div>
+              <div className="text-2xl font-bold text-white">
+                {getCurrencySymbol()} {convertPrice(lowestPrice)}
+              </div>
             </div>
             <div className="text-center p-4 bg-red-500 rounded-xl border border-red-400">
               <div className="text-xs text-white font-mono mb-1">HIGHEST</div>
-              <div className="text-2xl font-bold text-white">$ {highestPrice}</div>
+              <div className="text-2xl font-bold text-white">
+                {getCurrencySymbol()} {convertPrice(highestPrice)}
+              </div>
             </div>
             <div className="text-center p-4 bg-blue-500 rounded-xl border border-blue-400">
               <div className="text-xs text-white font-mono mb-1">AVERAGE</div>
-              <div className="text-2xl font-bold text-white">$ {averagePrice}</div>
+              <div className="text-2xl font-bold text-white">
+                {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
+              </div>
             </div>
           </div>
           <div className="mt-4">
@@ -111,6 +154,27 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
                 <option value="desc">Descending</option>
               </select>
             </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-cyan-300 font-mono">Currency:</label>
+                <button
+                  onClick={fetchExchangeRate}
+                  disabled={isLoadingRate}
+                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-mono text-xs rounded transition-all duration-300"
+                >
+                  {isLoadingRate ? "⟳" : "🔄"}
+                </button>
+              </div>
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as "USD" | "EUR")}
+                className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+              >
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€) - Rate: {exchangeRate.toFixed(4)}</option>
+              </select>
+              {isLoadingRate && <div className="text-xs text-cyan-300 mt-1 font-mono">Updating exchange rate...</div>}
+            </div>
           </div>
         </div>
       </div>
@@ -139,7 +203,9 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
               </div>
             )}
             <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
-            <p className="text-green-400 font-bold text-xl mb-1">R$ {item.price}</p>
+            <p className="text-green-400 font-bold text-xl mb-1">
+              {getCurrencySymbol()} {convertPrice(item.price)}
+            </p>
             {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
           </a>
         ))}
