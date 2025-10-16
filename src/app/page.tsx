@@ -140,10 +140,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-mono">
+    <div className="w-screen bg-black text-white font-mono">
       <header className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700">
         {/* Logo */}
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">RETRO HUNTER</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">RETRO HUNTER</h1>
 
         {/* Buttons */}
         <div className="flex space-x-4">
@@ -155,7 +155,7 @@ export default function Home() {
 
       <div className="relative z-10 flex h-screen">
         {/* Left Side - Fixed */}
-        <div className="w-1/2 bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
+        <div className="w-1/2 w-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
             <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
             <div className="mt-4">
@@ -179,7 +179,7 @@ export default function Home() {
         </div>
 
         {/* Right Side - Scrollable */}
-        <div className="w-1/2 overflow-y-auto p-8">
+        <div className="w-1/2 w-full overflow-y-auto p-8">
           {resultados.length > 0 && <PriceTableAndSlider items={resultados} />}
           {!loading && resultados.length === 0 && nome.trim() && (
             <div className="text-center py-12">
