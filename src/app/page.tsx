@@ -67,15 +67,15 @@ const PriceTableAndSlider = ({ items }: { items: GameResult[] }) => {
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gradient-to-b from-green-500/20 to-green-600/30 rounded-xl border border-green-400/50">
               <div className="text-xs text-green-300 font-mono mb-1">LOWEST</div>
-              <div className="text-2xl font-bold text-green-400">R$ {lowestPrice}</div>
+              <div className="text-2xl font-bold text-green-400">$ {lowestPrice}</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-b from-red-500/20 to-red-600/30 rounded-xl border border-red-400/50">
               <div className="text-xs text-red-300 font-mono mb-1">HIGHEST</div>
-              <div className="text-2xl font-bold text-red-400">R$ {highestPrice}</div>
+              <div className="text-2xl font-bold text-red-400">$ {highestPrice}</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-b from-blue-500/20 to-blue-600/30 rounded-xl border border-blue-400/50">
               <div className="text-xs text-blue-300 font-mono mb-1">AVERAGE</div>
-              <div className="text-2xl font-bold text-blue-400">R$ {averagePrice}</div>
+              <div className="text-2xl font-bold text-blue-400">$ {averagePrice}</div>
             </div>
           </div>
           <div className="mt-4">
