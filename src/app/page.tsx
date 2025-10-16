@@ -63,19 +63,19 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
-          <h2 className="text-center text-xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">{searchName}</h2>
+          <h2 className="text-center text-3xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">{searchName}</h2>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gradient-to-b from-green-500/20 to-green-600/30 rounded-xl border border-green-400/50">
-              <div className="text-xs text-green-300 font-mono mb-1">LOWEST</div>
-              <div className="text-2xl font-bold text-green-400">$ {lowestPrice}</div>
+            <div className="text-center p-4 bg-green-500 rounded-xl border border-green-400">
+              <div className="text-xs text-white font-mono mb-1">LOWEST</div>
+              <div className="text-2xl font-bold text-white">$ {lowestPrice}</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-b from-red-500/20 to-red-600/30 rounded-xl border border-red-400/50">
-              <div className="text-xs text-red-300 font-mono mb-1">HIGHEST</div>
-              <div className="text-2xl font-bold text-red-400">$ {highestPrice}</div>
+            <div className="text-center p-4 bg-red-500 rounded-xl border border-red-400">
+              <div className="text-xs text-white font-mono mb-1">HIGHEST</div>
+              <div className="text-2xl font-bold text-white">$ {highestPrice}</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-b from-blue-500/20 to-blue-600/30 rounded-xl border border-blue-400/50">
-              <div className="text-xs text-blue-300 font-mono mb-1">AVERAGE</div>
-              <div className="text-2xl font-bold text-blue-400">$ {averagePrice}</div>
+            <div className="text-center p-4 bg-blue-500 rounded-xl border border-blue-400">
+              <div className="text-xs text-white font-mono mb-1">AVERAGE</div>
+              <div className="text-2xl font-bold text-white">$ {averagePrice}</div>
             </div>
           </div>
           <div className="mt-4">
@@ -214,7 +214,7 @@ export default function Home() {
   };
 
   return (
-    <div className="w-screen bg-black text-white font-mono">
+    <div className="w-screen bg-gray-900 text-white font-mono">
       <header className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700 z-50">
         {/* Logo e Mensagem */}
         <div className="flex items-center space-x-4">
