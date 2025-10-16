@@ -141,8 +141,8 @@ export default function Home() {
 
   return (
     <div className="w-screen bg-black text-white font-mono">
-      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700">
-        {/* Logo */}
+      <header className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700 z-50">
+        {/* Logo e Mensagem */}
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             RETRO HUNTER
@@ -150,16 +150,19 @@ export default function Home() {
           <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
         </div>
 
-        {/* Buttons */}
+        {/* Botões */}
         <div className="flex space-x-4">
-          <button className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg shadow-md hover:from-purple-600 hover:to-pink-600 transition-all duration-300 border border-gray-700">
-            My Games
+          <button className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700">
+            My Collection
+          </button>
+          <button className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700">
+            My Account
           </button>
         </div>
       </header>
 
-      <div className="relative z-10 flex h-screen">
-        {/* Left Side - Fixed */}
+      <div className="relative z-10 flex h-screen pt-16">
+        {/* Lateral Esquerda - Fixa */}
         <div className="w-1/2 w-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
             <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
@@ -183,7 +186,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right Side - Scrollable */}
+        {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
           {resultados.length > 0 && <PriceTableAndSlider items={resultados} />}
           {!loading && resultados.length === 0 && nome.trim() && (

@@ -206,7 +206,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
     <div className="w-full max-w-4xl mx-auto backdrop-blur-sm bg-black/40 rounded-2xl border-2 border-cyan-400/50 shadow-2xl p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
-        <p className="text-sm text-cyan-300/80 mt-2 font-mono">&gt; Upload an image or use camera to auto-detect games_</p>
+        <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or use camera to auto-detect games</p>
       </div>
 
       {/* Upload/Camera Controls */}
@@ -214,21 +214,21 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isProcessing || showCamera}
-          className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-cyan-400/50 hover:border-blue-400/50 disabled:border-gray-500/50 font-mono"
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
         >
           UPLOAD IMAGE
         </button>
+
         <button
-          onClick={startCamera}
-          disabled={isProcessing || showCamera}
-          className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-300 border-2 border-green-400/50 hover:border-emerald-400/50 disabled:border-gray-500/50 font-mono"
+          onClick={() => alert("Added to collection!")}
+          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
         >
-          USE CAMERA
+          + ADD TO COLLECTION
         </button>
         {(selectedImage || extractedText || showCamera) && (
           <button
             onClick={clearAll}
-            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-red-400/50 hover:border-pink-400/50 font-mono"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
           >
             CLEAR
           </button>
