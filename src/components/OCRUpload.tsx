@@ -219,12 +219,14 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
           UPLOAD IMAGE
         </button>
 
-        <button
-          onClick={() => alert("Added to collection!")}
-          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
-        >
-          + ADD TO COLLECTION
-        </button>
+        {(selectedImage || extractedText) && (
+          <button
+            onClick={() => alert("Added to collection!")}
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-all duration-300 border border-gray-700"
+          >
+            + ADD TO COLLECTION
+          </button>
+        )}
         {(selectedImage || extractedText || showCamera) && (
           <button
             onClick={clearAll}
