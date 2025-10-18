@@ -4,9 +4,20 @@ import React, { useState, useRef } from "react";
 import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
 
+interface GameResult {
+  title: string;
+  priceText: string;
+  price: number;
+  link: string;
+  site: string;
+  image: string;
+  condition: string;
+  tags: string[];
+}
+
 interface OCRUploadProps {
-  // changed to accept optional plataforma
-  onTextExtracted: (text: string, plataforma?: string) => void;
+  // changed to accept optional plataforma and ebay results
+  onTextExtracted: (text: string, plataforma?: string, ebayResults?: GameResult[]) => void;
   onSearch: (gameName: string) => void;
   isSearching?: boolean;
 }
@@ -63,10 +74,12 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       const processedBlob = await new Promise<Blob>((resolve) => {
         processedCanvas.toBlob((blob) => resolve(blob!), fileType, 0.9);
       });
-      // Send to /api/ocr (Next.js proxy)
+      setProgress(20);
+
+      // Usar o novo endpoint combinado OCR + eBay
       const apiForm = new FormData();
       apiForm.append("file", imageFile, fileName);
-      const resp = await fetch("http://127.0.0.1:8000/ask-agent-image", {
+      const resp = await fetch("http://127.0.0.1:8000/ask-agent-image-with-ebay", {
         method: "POST",
         body: apiForm,
       });
@@ -74,30 +87,26 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         const txt = await resp.text();
         throw new Error(`OCR API failed: ${resp.status} ${txt}`);
       }
-      const data = await resp.json();
-      setExtractedText(data.text?.text || "");
-      setPlatform(data.platform || "");
-      // matched_title from backend
-      const text = (data.text || "").toString();
-      let bestName = "";
-      if (typeof data.titulo === "string" && data.titulo.trim().length > 0) {
-        bestName = data.titulo.trim();
-      } else if (typeof data.text === "string" && data.text.trim().length > 0) {
-        bestName = cleanOCRText(data.text);
-      } else if (typeof data.matched_title === "string" && data.matched_title.trim().length > 0) {
-        // fallback if present
-        bestName = data.matched_title.trim();
-      }
 
-      const plataforma = (data.plataforma || data.platform || "").toString();
-      if (bestName.trim()) {
-        setExtractedText(bestName);
-        // pass platform as second arg
-        onTextExtracted(bestName, plataforma || undefined);
-        onSearch(bestName);
+      setProgress(80);
+
+      const data = await resp.json();
+      const titulo = data.titulo || "";
+      const plataforma = data.plataforma || "";
+      const ebayResults = data.ebay_results || [];
+
+      setExtractedText(titulo);
+      setPlatform(plataforma);
+
+      if (titulo.trim()) {
+        // Passar título, plataforma e resultados do eBay
+        onTextExtracted(titulo, plataforma || undefined, ebayResults);
+        // Não chamar onSearch separadamente pois já temos os resultados
       } else {
         throw new Error("Could not extract readable text from the image");
       }
+
+      setProgress(100);
     } catch (err) {
       console.error("❌ OCR error:", err);
       setError("Error processing the image. Try a clearer image or take another photo.");

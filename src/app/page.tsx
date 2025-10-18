@@ -241,22 +241,30 @@ export default function Home() {
     const finalSearchName = searchName ?? nome;
     setSearchNameState(finalSearchName);
 
-    const params = new URLSearchParams({
-      nome: searchName ?? nome,
-      platform: platformToSend,
-      condition: condition,
-    });
-    console.log("[searchEbayOnly] fetch /api/ebay?", params.toString());
-    const res = await fetch(`/api/ebay?${params.toString()}`);
-    const data = await res.json();
-    setResultados(data.resultados || []);
+    try {
+      // Chamar diretamente o FastAPI
+      const params = new URLSearchParams({
+        game_name: finalSearchName,
+        platform: platformToSend,
+        condition: condition,
+      });
+
+      console.log("[searchEbayOnly] fetch http://127.0.0.1:8000/ebay-search?", params.toString());
+      const res = await fetch(`http://127.0.0.1:8000/ebay-search?${params.toString()}`);
+      const data = await res.json();
+      setResultados(data.resultados || []);
+    } catch (error) {
+      console.error("Erro na busca:", error);
+      setResultados([]);
+    }
+
     setLoading(false);
   };
 
   const [ocrTitles, setOcrTitles] = useState<string[]>([]);
   const [selectedOcrTitle, setSelectedOcrTitle] = useState<string>("");
 
-  const handleOCRExtraction = (titles: string[] | string, plataforma?: string) => {
+  const handleOCRExtraction = (titles: string[] | string, plataforma?: string, ebayResults?: GameResult[]) => {
     // construir lista de títulos a partir do argumento
     let arr: string[] = [];
     if (Array.isArray(titles)) {
@@ -281,9 +289,14 @@ export default function Home() {
     setOcrTitles(arr);
     setSelectedOcrTitle(arr[0] || "");
     setNome(arr[0] || "");
+    setSearchNameState(arr[0] || "");
 
-    if (arr[0]) {
-      // passar a plataforma normalizada para a pesquisa
+    // Se já temos resultados do eBay, usar diretamente
+    if (ebayResults && ebayResults.length > 0) {
+      setResultados(ebayResults);
+      setLoading(false);
+    } else if (arr[0]) {
+      // Caso contrário, fazer busca normal
       searchEbayOnly(arr[0], platformToUse);
     }
   };

@@ -15,3 +15,6 @@ google-auth
 
 # Environment variables
 python-dotenv
+
+# HTTP requests
+requests

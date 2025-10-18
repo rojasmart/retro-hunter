@@ -4,9 +4,20 @@ import { useState } from "react";
 import { OCRUpload } from "@/components/OCRUpload";
 import { generateGameNameVariations } from "@/lib/utils/ocr";
 
+interface GameResult {
+  title: string;
+  priceText: string;
+  price: number;
+  link: string;
+  site: string;
+  image: string;
+  condition: string;
+  tags: string[];
+}
+
 interface AdvancedOCRProps {
-  // changed to accept optional plataforma
-  onGameExtracted: (gameName: string, plataforma?: string) => void;
+  // changed to accept optional plataforma and ebay results
+  onGameExtracted: (gameName: string, plataforma?: string, ebayResults?: GameResult[]) => void;
   isProcessing?: boolean;
 }
 
@@ -15,16 +26,16 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
 
-  // now accepts plataforma from OCRUpload
-  const handleTextExtracted = (text: string, plataforma?: string) => {
+  // now accepts plataforma and ebay results from OCRUpload
+  const handleTextExtracted = (text: string, plataforma?: string, ebayResults?: GameResult[]) => {
     setExtractedText(text);
     const variations = [text, ...generateGameNameVariations(text).filter((v) => v !== text)];
     setGameVariations(variations);
 
     if (variations.length > 0) {
       setSelectedGame(variations[0]);
-      // forward platform when available
-      onGameExtracted(variations[0], plataforma);
+      // forward platform and ebay results when available
+      onGameExtracted(variations[0], plataforma, ebayResults);
     }
   };
 
