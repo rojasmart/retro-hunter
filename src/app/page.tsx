@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { GameResult, Platform } from "@/lib/types";
 import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import { AdvancedOCR } from "@/components/AdvancedOCR";
+import AuthButton from "@/components/auth/AuthButton";
 import Image from "next/image";
 
 // Normalização simples de nomes de plataformas para as keys do projeto
@@ -312,14 +313,25 @@ export default function Home() {
           <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
         </div>
 
-        {/* Botões */}
-        <div className="flex space-x-4">
-          <button className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700">
-            My Collection
-          </button>
-          <button className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700">
-            My Account
-          </button>
+        {/* Navigation e Auth */}
+        <div className="flex items-center space-x-4">
+          <nav className="flex space-x-4">
+            <a
+              href="/my-collection"
+              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
+            >
+              My Collection
+            </a>
+            <a
+              href="/my-account"
+              className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
+            >
+              My Account
+            </a>
+          </nav>
+          <div className="border-l border-gray-600 pl-4">
+            <AuthButton />
+          </div>
         </div>
       </header>
 

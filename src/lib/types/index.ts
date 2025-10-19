@@ -66,7 +66,7 @@ export interface EbaySearchResponse {
   }>;
 }
 
-export type Platform = "all" | "ps2" | "ps3" | "ps4" | "xbox" | "xbox360" | "nintendo-switch" | "nintendo-wii" | "nintendo-ds" | "retro";
+export type Platform = "all" | "ps2" | "ps3" | "ps4" | "xbox" | "xbox360" | "nintendo-switch" | "nintendo-wii" | "nintendo-ds" | "retro" | "dreamcast" | "master-system" | "genesis";
 
 export interface PlatformConfig {
   id: string;

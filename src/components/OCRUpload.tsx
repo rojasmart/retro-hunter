@@ -35,6 +35,11 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
   const [showCamera, setShowCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
 
+  // States for adding to collection
+  const [addLoading, setAddLoading] = useState(false);
+  const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [addErrorMsg, setAddErrorMsg] = useState<string | null>(null);
+
   // Process image with OCR
   const processImage = async (imageFile: File | Blob) => {
     setIsProcessing(true);
@@ -113,6 +118,52 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
     } finally {
       setIsProcessing(false);
       setProgress(0);
+    }
+  };
+
+  // Add detected game to user's collection via API
+  const addToCollection = async () => {
+    setAddLoading(true);
+    setAddErrorMsg(null);
+    setAddSuccess(null);
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("You must be logged in to add to collection");
+
+      const payload = {
+        gameTitle: extractedText || "Unknown title",
+        platform: platform || "all",
+        condition: "used",
+        purchasePrice: undefined,
+        notes: "",
+        images: selectedImage ? [selectedImage] : [],
+      } as any;
+
+      const res = await fetch("/api/collection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Failed to add to collection");
+      }
+
+      setAddSuccess("Added to your collection");
+      // Optionally clear selection or keep it
+    } catch (err: any) {
+      console.error("Add to collection error:", err);
+      setAddErrorMsg(err?.message || "Error adding to collection");
+    } finally {
+      setAddLoading(false);
+      // Clear success after a brief moment
+      setTimeout(() => setAddSuccess(null), 3000);
     }
   };
 
@@ -230,12 +281,21 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
 
         {(selectedImage || extractedText) && (
           <button
-            onClick={() => alert("Added to collection!")}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700 text-sm"
+            onClick={addToCollection}
+            disabled={addLoading}
+            className={`px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700 text-sm ${
+              addLoading ? "opacity-70 cursor-wait" : ""
+            }`}
           >
-            + ADD TO COLLECTION
+            {addLoading ? "ADDING..." : "+ ADD TO COLLECTION"}
           </button>
         )}
+
+        {/* feedback messages for add action */}
+        {addSuccess && (
+          <div className="text-green-400 bg-green-900/20 px-3 py-2 rounded-md border border-green-700 flex items-center">{addSuccess}</div>
+        )}
+        {addErrorMsg && <div className="text-red-300 bg-red-900/20 px-3 py-2 rounded-md border border-red-700 flex items-center">{addErrorMsg}</div>}
 
         {(selectedImage || extractedText || showCamera) && (
           <button
