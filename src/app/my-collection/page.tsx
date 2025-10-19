@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CollectionGame } from "@/lib/types/auth";
@@ -8,6 +8,8 @@ import { CollectionGame } from "@/lib/types/auth";
 export default function MyCollectionPage() {
   const { user, logout } = useAuth();
   const [games, setGames] = useState<CollectionGame[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isAddingGame, setIsAddingGame] = useState(false);
   const [newGame, setNewGame] = useState({
     title: "",
@@ -16,6 +18,51 @@ export default function MyCollectionPage() {
     purchasePrice: "",
     notes: "",
   });
+
+  // Fetch user's collection
+  const fetchCollection = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(`/api/collection`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to fetch collection');
+
+      // map backend documents to CollectionGame
+      const mapped: CollectionGame[] = (data.games || []).map((g: any) => ({
+        id: g._id,
+        title: g.gameTitle,
+        platform: g.platform,
+        condition: g.condition,
+        purchasePrice: g.purchasePrice,
+        notes: g.notes,
+        addedAt: g.createdAt,
+      }));
+
+      setGames(mapped);
+    } catch (err: any) {
+      console.error('Error fetching collection:', err);
+      setError(err?.message || 'Error fetching collection');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCollection();
+
+    // Listen for collection updates
+    const handler = () => fetchCollection();
+    window.addEventListener('collection:added', handler);
+    return () => window.removeEventListener('collection:added', handler);
+  }, []);
 
   const handleAddGame = () => {
     if (!newGame.title || !newGame.platform) return;
@@ -42,6 +89,7 @@ export default function MyCollectionPage() {
   };
 
   const handleRemoveGame = (gameId: string) => {
+    // TODO: call DELETE API
     setGames((prev) => prev.filter((game) => game.id !== gameId));
   };
 

@@ -156,6 +156,10 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       }
 
       setAddSuccess("Added to your collection");
+      // Notify other parts of the app to refresh collection
+      try {
+        window.dispatchEvent(new CustomEvent("collection:added"));
+      } catch (e) {}
       // Optionally clear selection or keep it
     } catch (err: any) {
       console.error("Add to collection error:", err);
