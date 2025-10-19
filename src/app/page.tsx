@@ -46,7 +46,17 @@ function normalizePlatform(input?: string): Platform {
   return "all";
 }
 
-const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searchName: string }) => {
+const PriceTableAndSlider = ({ 
+  items, 
+  searchName, 
+  myPrice, 
+  setMyPrice 
+}: { 
+  items: GameResult[]; 
+  searchName: string; 
+  myPrice: number; 
+  setMyPrice: (price: number) => void; 
+}) => {
   const prices = items.map((item) => item.price).filter((price) => price > 0);
   const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const highestPrice = prices.length > 0 ? Math.max(...prices) : 0;
@@ -93,6 +103,14 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
     return currency === "EUR" ? "€" : "$";
   };
 
+  // Function to pass myPrice to components
+  const getPriceData = () => ({
+    lowestPrice,
+    highestPrice,
+    averagePrice: Number(averagePrice),
+    myPrice
+  });
+
   const filteredItems = items
     .filter((item) => item.price >= minPrice && item.price <= maxPrice)
     .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
@@ -102,7 +120,7 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
           <h2 className="text-center text-3xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">{searchName}</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-500 rounded-xl border border-green-400">
               <div className="text-xs text-white font-mono mb-1">LOWEST</div>
               <div className="text-2xl font-bold text-white">
@@ -120,6 +138,17 @@ const PriceTableAndSlider = ({ items, searchName }: { items: GameResult[]; searc
               <div className="text-2xl font-bold text-white">
                 {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
               </div>
+            </div>
+            <div className="text-center p-4 bg-purple-500 rounded-xl border border-purple-400">
+              <div className="text-xs text-white font-mono mb-1">MY PRICE</div>
+              <input
+                type="number"
+                step="0.01"
+                value={myPrice || ''}
+                onChange={(e) => setMyPrice(Number(e.target.value) || 0)}
+                placeholder="0.00"
+                className="w-full text-center text-xl font-bold bg-transparent text-white placeholder-purple-200 border-0 outline-0 focus:ring-0"
+              />
             </div>
           </div>
           <div className="mt-4">
@@ -231,6 +260,7 @@ export default function Home() {
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [myPrice, setMyPrice] = useState<number>(0);
 
   const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
     setLoading(true);
@@ -339,7 +369,12 @@ export default function Home() {
         {/* Lateral Esquerda - Fixa */}
         <div className="w-1/2 h-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
-            <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} currentGameResults={resultados} />
+            <AdvancedOCR 
+              onGameExtracted={handleOCRExtraction} 
+              isProcessing={loading}
+              currentGameResults={resultados}
+              userPrice={myPrice}
+            />
             <div className="mt-4">
               <input
                 id="game-name"
@@ -362,7 +397,14 @@ export default function Home() {
 
         {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
-          {resultados.length > 0 && <PriceTableAndSlider items={resultados} searchName={searchNameState} />}
+          {resultados.length > 0 && (
+            <PriceTableAndSlider 
+              items={resultados} 
+              searchName={searchNameState} 
+              myPrice={myPrice} 
+              setMyPrice={setMyPrice} 
+            />
+          )}
           {!loading && resultados.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">

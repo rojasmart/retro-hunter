@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
 
     const gameData = await request.json();
+    console.log('Collection POST incoming gameData:', JSON.stringify(gameData, null, 2));
     
     // Validações básicas
     if (!gameData.gameTitle || !gameData.platform) {
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
     });
 
     await game.save();
+    console.log('Collection POST saved game:', JSON.stringify(game.toObject(), null, 2));
 
     return NextResponse.json({ 
       message: 'Jogo adicionado à coleção',

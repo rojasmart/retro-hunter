@@ -3,17 +3,7 @@
 import React, { useState, useRef } from "react";
 import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/ocr";
 import Image from "next/image";
-
-interface GameResult {
-  title: string;
-  priceText: string;
-  price: number;
-  link: string;
-  site: string;
-  image: string;
-  condition: string;
-  tags: string[];
-}
+import { GameResult } from "@/lib/types";
 
 interface OCRUploadProps {
   // changed to accept optional plataforma and ebay results
@@ -21,9 +11,10 @@ interface OCRUploadProps {
   onSearch: (gameName: string) => void;
   isSearching?: boolean;
   currentGameResults?: GameResult[];
+  userPrice?: number;
 }
 
-export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, currentGameResults = [] }: OCRUploadProps) {
+export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, currentGameResults = [], userPrice = 0 }: OCRUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>("");
   const [platform, setPlatform] = useState<string>("");
@@ -156,7 +147,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
         gameTitle: extractedText || "Unknown title",
         platform: platform || "all",
         condition: "used",
-        purchasePrice: undefined,
+        purchasePrice: userPrice > 0 ? userPrice : undefined,
         notes: "",
         images: selectedImage ? [selectedImage] : [],
         lowestPrice,
