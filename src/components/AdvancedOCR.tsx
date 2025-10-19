@@ -19,9 +19,10 @@ interface AdvancedOCRProps {
   // changed to accept optional plataforma and ebay results
   onGameExtracted: (gameName: string, plataforma?: string, ebayResults?: GameResult[]) => void;
   isProcessing?: boolean;
+  currentGameResults?: GameResult[];
 }
 
-export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedOCRProps) {
+export function AdvancedOCR({ onGameExtracted, isProcessing = false, currentGameResults = [] }: AdvancedOCRProps) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
@@ -53,7 +54,12 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false }: AdvancedO
 
   return (
     <div className="space-y-4">
-      <OCRUpload onTextExtracted={handleTextExtracted} onSearch={handleDirectSearch} isSearching={isProcessing} />
+      <OCRUpload 
+        onTextExtracted={handleTextExtracted} 
+        onSearch={handleDirectSearch} 
+        isSearching={isProcessing}
+        currentGameResults={currentGameResults}
+      />
     </div>
   );
 }

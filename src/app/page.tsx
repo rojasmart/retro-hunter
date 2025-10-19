@@ -339,7 +339,7 @@ export default function Home() {
         {/* Lateral Esquerda - Fixa */}
         <div className="w-1/2 h-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
-            <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} />
+            <AdvancedOCR onGameExtracted={searchEbayOnly} isProcessing={loading} currentGameResults={resultados} />
             <div className="mt-4">
               <input
                 id="game-name"

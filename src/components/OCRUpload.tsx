@@ -20,9 +20,10 @@ interface OCRUploadProps {
   onTextExtracted: (text: string, plataforma?: string, ebayResults?: GameResult[]) => void;
   onSearch: (gameName: string) => void;
   isSearching?: boolean;
+  currentGameResults?: GameResult[];
 }
 
-export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OCRUploadProps) {
+export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, currentGameResults = [] }: OCRUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>("");
   const [platform, setPlatform] = useState<string>("");
@@ -131,6 +132,26 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
       const token = localStorage.getItem("auth_token");
       if (!token) throw new Error("You must be logged in to add to collection");
 
+      // Calculate price statistics from current game results
+      const prices = currentGameResults.map((result) => result.price).filter((price) => typeof price === "number" && price > 0);
+
+      let lowestPrice: number | undefined;
+      let highestPrice: number | undefined;
+      let averagePrice: number | undefined;
+
+      if (prices.length > 0) {
+        lowestPrice = Math.min(...prices);
+        highestPrice = Math.max(...prices);
+        averagePrice = Number((prices.reduce((sum, price) => sum + price, 0) / prices.length).toFixed(2));
+
+        console.log("Calculated prices from search results:", {
+          lowestPrice,
+          highestPrice,
+          averagePrice,
+          totalResults: prices.length,
+        });
+      }
+
       const payload = {
         gameTitle: extractedText || "Unknown title",
         platform: platform || "all",
@@ -138,6 +159,9 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false }: OC
         purchasePrice: undefined,
         notes: "",
         images: selectedImage ? [selectedImage] : [],
+        lowestPrice,
+        highestPrice,
+        averagePrice,
       } as any;
 
       const res = await fetch("/api/collection", {

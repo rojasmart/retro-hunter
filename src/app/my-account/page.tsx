@@ -144,7 +144,7 @@ export default function MyAccountPage() {
                   <div className="text-sm text-green-800">Pesquisas Realizadas</div>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">R$ 0,00</div>
+                  <div className="text-2xl font-bold text-purple-600">0,00</div>
                   <div className="text-sm text-purple-800">Valor Total Estimado</div>
                 </div>
               </div>

@@ -25,15 +25,15 @@ export default function MyCollectionPage() {
     setError(null);
 
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) throw new Error('Not authenticated');
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
 
       const res = await fetch(`/api/collection`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Failed to fetch collection');
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch collection");
 
       // map backend documents to CollectionGame
       const mapped: CollectionGame[] = (data.games || []).map((g: any) => ({
@@ -44,12 +44,16 @@ export default function MyCollectionPage() {
         purchasePrice: g.purchasePrice,
         notes: g.notes,
         addedAt: g.createdAt,
+        // Add price analysis fields
+        lowestPrice: g.lowestPrice,
+        highestPrice: g.highestPrice,
+        averagePrice: g.averagePrice,
       }));
 
       setGames(mapped);
     } catch (err: any) {
-      console.error('Error fetching collection:', err);
-      setError(err?.message || 'Error fetching collection');
+      console.error("Error fetching collection:", err);
+      setError(err?.message || "Error fetching collection");
     } finally {
       setLoading(false);
     }
@@ -60,8 +64,8 @@ export default function MyCollectionPage() {
 
     // Listen for collection updates
     const handler = () => fetchCollection();
-    window.addEventListener('collection:added', handler);
-    return () => window.removeEventListener('collection:added', handler);
+    window.addEventListener("collection:added", handler);
+    return () => window.removeEventListener("collection:added", handler);
   }, []);
 
   const handleAddGame = () => {
@@ -131,7 +135,7 @@ export default function MyCollectionPage() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Minha Coleção</h1>
-              <p className="text-gray-600">Gerencie sua coleção de jogos retrô</p>
+              <p className="text-gray-600">Gerir a sua coleção de jogos retro</p>
             </div>
             <button
               onClick={() => setIsAddingGame(true)}
@@ -151,7 +155,7 @@ export default function MyCollectionPage() {
               <div className="text-gray-600">Jogos na Coleção</div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <div className="text-2xl font-bold text-green-600">R$ {totalValue.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-green-600">{totalValue.toFixed(2)}</div>
               <div className="text-gray-600">Valor Total Investido</div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
@@ -211,7 +215,7 @@ export default function MyCollectionPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Preço de Compra (R$)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Preço de Compra ($)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -257,7 +261,7 @@ export default function MyCollectionPage() {
           {/* Games List */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Seus Jogos</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Jogos</h2>
             </div>
 
             {games.length === 0 ? (
@@ -287,8 +291,33 @@ export default function MyCollectionPage() {
                       <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                         <span className="bg-gray-100 px-2 py-1 rounded">{game.platform}</span>
                         <span className="capitalize">{game.condition}</span>
-                        {game.purchasePrice && <span className="text-green-600 font-medium">R$ {game.purchasePrice.toFixed(2)}</span>}
+                        {game.purchasePrice && <span className="text-green-600 font-medium">Pago: ${game.purchasePrice.toFixed(2)}</span>}
                       </div>
+
+                      {/* Price Analysis Section */}
+                      {(game.lowestPrice || game.highestPrice || game.averagePrice) && (
+                        <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                          <p className="text-xs font-medium text-blue-700 mb-1">Análise de Preços de Mercado:</p>
+                          <div className="flex items-center space-x-4 text-xs text-blue-600">
+                            {game.lowestPrice && (
+                              <span className="flex items-center">
+                                <span className="text-green-600 font-medium">↓ Menor: ${game.lowestPrice.toFixed(2)}</span>
+                              </span>
+                            )}
+                            {game.highestPrice && (
+                              <span className="flex items-center">
+                                <span className="text-red-600 font-medium">↑ Maior: ${game.highestPrice.toFixed(2)}</span>
+                              </span>
+                            )}
+                            {game.averagePrice && (
+                              <span className="flex items-center">
+                                <span className="text-blue-600 font-medium">≈ Médio: ${game.averagePrice.toFixed(2)}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {game.notes && <p className="mt-2 text-sm text-gray-600">{game.notes}</p>}
                       <p className="text-xs text-gray-400 mt-1">Adicionado em {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
                     </div>

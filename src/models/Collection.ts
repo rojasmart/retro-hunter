@@ -8,6 +8,9 @@ export interface IGameInCollection extends Document {
   condition: 'new' | 'used' | 'refurbished' | 'poor';
   purchasePrice?: number;
   currentValue?: number;
+  lowestPrice?: number;
+  highestPrice?: number;
+  averagePrice?: number;
   purchaseDate?: Date;
   location?: string; // Onde está fisicamente
   notes?: string;
@@ -44,6 +47,18 @@ const GameInCollectionSchema = new Schema<IGameInCollection>({
     min: 0
   },
   currentValue: {
+    type: Number,
+    min: 0
+  },
+  lowestPrice: {
+    type: Number,
+    min: 0
+  },
+  highestPrice: {
+    type: Number,
+    min: 0
+  },
+  averagePrice: {
     type: Number,
     min: 0
   },

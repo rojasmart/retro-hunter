@@ -62,4 +62,8 @@ export interface CollectionGame {
   notes?: string;
   image?: string;
   addedAt: Date;
+  // Price analysis fields
+  lowestPrice?: number;
+  highestPrice?: number;
+  averagePrice?: number;
 }
