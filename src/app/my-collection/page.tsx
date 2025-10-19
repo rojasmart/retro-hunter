@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CollectionGame } from "@/lib/types/auth";
+import AuthButton from "@/components/auth/AuthButton";
 
 export default function MyCollectionPage() {
   const { user, logout } = useAuth();
@@ -116,34 +117,9 @@ export default function MyCollectionPage() {
             <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
           </div>
 
-          {/* Navigation e Auth */}
-          <div className="flex items-center space-x-4">
-            <nav className="flex space-x-4">
-              <a
-                href="/"
-                className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
-              >
-                Home
-              </a>
-              <a
-                href="/my-collection"
-                className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
-              >
-                My Collection
-              </a>
-              <a
-                href="/my-account"
-                className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
-              >
-                My Account
-              </a>
-            </nav>
-            <div className="border-l border-gray-600 pl-4 flex items-center space-x-4">
-              <span className="text-sm text-cyan-300">Olá, {user?.name}</span>
-              <button onClick={logout} className="text-sm text-red-400 hover:text-red-300 transition-colors">
-                Sair
-              </button>
-            </div>
+          {/* Auth */}
+          <div className="flex items-center">
+            <AuthButton />
           </div>
         </header>
 

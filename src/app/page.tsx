@@ -46,16 +46,16 @@ function normalizePlatform(input?: string): Platform {
   return "all";
 }
 
-const PriceTableAndSlider = ({ 
-  items, 
-  searchName, 
-  myPrice, 
-  setMyPrice 
-}: { 
-  items: GameResult[]; 
-  searchName: string; 
-  myPrice: number; 
-  setMyPrice: (price: number) => void; 
+const PriceTableAndSlider = ({
+  items,
+  searchName,
+  myPrice,
+  setMyPrice,
+}: {
+  items: GameResult[];
+  searchName: string;
+  myPrice: number;
+  setMyPrice: (price: number) => void;
 }) => {
   const prices = items.map((item) => item.price).filter((price) => price > 0);
   const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -108,7 +108,7 @@ const PriceTableAndSlider = ({
     lowestPrice,
     highestPrice,
     averagePrice: Number(averagePrice),
-    myPrice
+    myPrice,
   });
 
   const filteredItems = items
@@ -144,7 +144,7 @@ const PriceTableAndSlider = ({
               <input
                 type="number"
                 step="0.01"
-                value={myPrice || ''}
+                value={myPrice || ""}
                 onChange={(e) => setMyPrice(Number(e.target.value) || 0)}
                 placeholder="0.00"
                 className="w-full text-center text-xl font-bold bg-transparent text-white placeholder-purple-200 border-0 outline-0 focus:ring-0"
@@ -343,25 +343,9 @@ export default function Home() {
           <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
         </div>
 
-        {/* Navigation e Auth */}
-        <div className="flex items-center space-x-4">
-          <nav className="flex space-x-4">
-            <a
-              href="/my-collection"
-              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
-            >
-              My Collection
-            </a>
-            <a
-              href="/my-account"
-              className="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-300 border border-gray-700"
-            >
-              My Account
-            </a>
-          </nav>
-          <div className="border-l border-gray-600 pl-4">
-            <AuthButton />
-          </div>
+        {/* Auth */}
+        <div className="flex items-center">
+          <AuthButton />
         </div>
       </header>
 
@@ -369,12 +353,7 @@ export default function Home() {
         {/* Lateral Esquerda - Fixa */}
         <div className="w-1/2 h-full bg-black/30 p-8 border-r border-cyan-500/30 flex flex-col justify-between">
           <div>
-            <AdvancedOCR 
-              onGameExtracted={handleOCRExtraction} 
-              isProcessing={loading}
-              currentGameResults={resultados}
-              userPrice={myPrice}
-            />
+            <AdvancedOCR onGameExtracted={handleOCRExtraction} isProcessing={loading} currentGameResults={resultados} userPrice={myPrice} />
             <div className="mt-4">
               <input
                 id="game-name"
@@ -397,14 +376,7 @@ export default function Home() {
 
         {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
-          {resultados.length > 0 && (
-            <PriceTableAndSlider 
-              items={resultados} 
-              searchName={searchNameState} 
-              myPrice={myPrice} 
-              setMyPrice={setMyPrice} 
-            />
-          )}
+          {resultados.length > 0 && <PriceTableAndSlider items={resultados} searchName={searchNameState} myPrice={myPrice} setMyPrice={setMyPrice} />}
           {!loading && resultados.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
