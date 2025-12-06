@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     // Validação básica
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: 'Email e senha são obrigatórios' } as ApiAuthResponse,
+        { success: false, message: 'Email and password are required' } as ApiAuthResponse,
         { status: 400 }
       );
     }
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const user = await AuthService.findUserByEmail(email);
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Credenciais inválidas' } as ApiAuthResponse,
+        { success: false, message: 'Invalid credentials' } as ApiAuthResponse,
         { status: 401 }
       );
     }
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await AuthService.validatePassword(user, password);
     if (!isValidPassword) {
       return NextResponse.json(
-        { success: false, message: 'Credenciais inválidas' } as ApiAuthResponse,
+        { success: false, message: 'Invalid credentials' } as ApiAuthResponse,
         { status: 401 }
       );
     }
@@ -42,13 +42,13 @@ export async function POST(request: NextRequest) {
       success: true,
       user: publicUser,
       token,
-      message: 'Login realizado com sucesso',
+      message: 'Login successful',
     } as ApiAuthResponse);
 
   } catch (error) {
-    console.error('Erro no login:', error);
+    console.error('Login error:', error);
     return NextResponse.json(
-      { success: false, message: 'Erro interno do servidor' } as ApiAuthResponse,
+      { success: false, message: 'Internal server error' } as ApiAuthResponse,
       { status: 500 }
     );
   }
