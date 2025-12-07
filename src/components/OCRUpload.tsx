@@ -98,7 +98,20 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       if (titulo.trim()) {
         // Passar título, plataforma e resultados do eBay
         onTextExtracted(titulo, plataforma || undefined, ebayResults);
-        // Não chamar onSearch separadamente pois já temos os resultados
+      } else if (data.raw) {
+        // Processar o campo raw para separar os itens
+        const games = data.raw.split("\n").map((line: string) => {
+          const [title, platform] = line.split(",").map((part: string) => part.trim());
+          return { title, platform };
+        });
+
+        console.log("Extracted games from raw:", games);
+        // Renderizar vários cartões com títulos e preços
+        games.forEach((game: { title: string; platform: string }) => {
+          const prices = ebayResults.filter((result: { title: string }) => result.title.includes(game.title));
+          console.log(`Game: ${game.title}, Prices:`, prices);
+          // Render logic for cards can be added here
+        });
       } else {
         throw new Error("Could not extract readable text from the image");
       }

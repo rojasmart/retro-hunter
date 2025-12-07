@@ -259,32 +259,45 @@ async def ask_agent_image_with_ebay(
     try:
         # Fazer OCR primeiro (reutilizar código existente)
         ocr_result = await ask_agent_image(prompt, file)
-        
+
         # Extrair dados do OCR
-        titulo = ocr_result.get("titulo", "")
+        raw = ocr_result.get("raw", "")
         plataforma = ocr_result.get("plataforma", "all")
-        
-        # Se temos um título, buscar no eBay
-        search_term = titulo.strip() if titulo else ""
+
+        # Parse o `raw` em um array de jogos
+        games = []
+        for line in raw.split("\n"):
+            parts = line.split(",")
+            if len(parts) == 2:
+                title, platform = parts[0].strip(), parts[1].strip()
+                if title and platform:
+                    games.append({"title": title, "platform": platform})
+
+        # Filtrar jogos duplicados ou irrelevantes
+        filtered_games = []
+        seen_titles = set()
+        for game in games:
+            if game["title"] not in seen_titles:
+                seen_titles.add(game["title"])
+                filtered_games.append(game)
+
+        # Buscar resultados no eBay para cada jogo filtrado
         ebay_results = []
-        
-        if search_term:
-            logger.info(f"Searching eBay for: {search_term} (platform: {plataforma})")
-            ebay_results = await search_ebay(search_term, plataforma)
-        
+        for game in filtered_games:
+            results = await search_ebay(game["title"], game["platform"])
+            ebay_results.extend(results)
+
         return {
-            **ocr_result,  # Incluir todos os dados do OCR
+            "games": filtered_games,
             "ebay_results": ebay_results,
             "total_ebay": len(ebay_results)
         }
-        
+
     except Exception as e:
         logger.error(f"Error in combined OCR+eBay endpoint: {e}")
         return {
             "error": str(e),
-            "titulo": "",
-            "plataforma": "",
-            "raw": "",
+            "games": [],
             "ebay_results": [],
             "total_ebay": 0
         }
