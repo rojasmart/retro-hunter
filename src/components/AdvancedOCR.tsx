@@ -5,9 +5,28 @@ import { OCRUpload } from "@/components/OCRUpload";
 import { generateGameNameVariations } from "@/lib/utils/ocr";
 import { GameResult } from "@/lib/types";
 
+interface PriceData {
+  id: string;
+  product_name: string;
+  console_name: string;
+  genre: string;
+  release_date: string;
+  upc: string;
+  asin: string;
+  prices: {
+    loose: number | null;
+    cib: number | null;
+    new: number | null;
+    graded: number | null;
+    box_only: number | null;
+  };
+  currency: string;
+  detected_title?: string;
+  detected_platform?: string;
+}
+
 interface AdvancedOCRProps {
-  // changed to accept optional plataforma and ebay results
-  onGameExtracted: (gameName: string, plataforma?: string, ebayResults?: GameResult[]) => void;
+  onGameExtracted: (gameName: string, plataforma?: string, priceData?: PriceData[]) => void;
   isProcessing?: boolean;
   currentGameResults?: GameResult[];
   userPrice?: number;
@@ -18,16 +37,16 @@ export function AdvancedOCR({ onGameExtracted, isProcessing = false, currentGame
   const [gameVariations, setGameVariations] = useState<string[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
 
-  // now accepts plataforma and ebay results from OCRUpload
-  const handleTextExtracted = (text: string, plataforma?: string, ebayResults?: GameResult[]) => {
+  // now accepts plataforma and price data from OCRUpload
+  const handleTextExtracted = (text: string, plataforma?: string, priceData?: PriceData[]) => {
     setExtractedText(text);
     const variations = [text, ...generateGameNameVariations(text).filter((v) => v !== text)];
     setGameVariations(variations);
 
     if (variations.length > 0) {
       setSelectedGame(variations[0]);
-      // forward platform and ebay results when available
-      onGameExtracted(variations[0], plataforma, ebayResults);
+      // forward platform and price data when available
+      onGameExtracted(variations[0], plataforma, priceData);
     }
   };
 

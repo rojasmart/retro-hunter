@@ -261,6 +261,7 @@ export default function Home() {
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [myPrice, setMyPrice] = useState<number>(0);
+  const [priceData, setPriceData] = useState<PriceData[]>([]);
 
   const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
     setLoading(true);
@@ -295,7 +296,27 @@ export default function Home() {
   const [ocrTitles, setOcrTitles] = useState<string[]>([]);
   const [selectedOcrTitle, setSelectedOcrTitle] = useState<string>("");
 
-  const handleOCRExtraction = (titles: string[] | string, plataforma?: string, ebayResults?: GameResult[]) => {
+  interface PriceData {
+    id: string;
+    product_name: string;
+    console_name: string;
+    genre: string;
+    release_date: string;
+    upc: string;
+    asin: string;
+    prices: {
+      loose: number | null;
+      cib: number | null;
+      new: number | null;
+      graded: number | null;
+      box_only: number | null;
+    };
+    currency: string;
+    detected_title?: string;
+    detected_platform?: string;
+  }
+
+  const handleOCRExtraction = (titles: string[] | string, plataforma?: string, priceData?: PriceData[]) => {
     // construir lista de títulos a partir do argumento
     let arr: string[] = [];
     if (Array.isArray(titles)) {
@@ -322,12 +343,13 @@ export default function Home() {
     setNome(arr[0] || "");
     setSearchNameState(arr[0] || "");
 
-    // Se já temos resultados do eBay, usar diretamente
-    if (ebayResults && ebayResults.length > 0) {
-      setResultados(ebayResults);
+    // Se recebemos dados de preço do Price Charting, processar e exibir
+    if (priceData && priceData.length > 0) {
+      console.log("[handleOCRExtraction] Price Charting data received:", priceData);
+      setPriceData(priceData);
       setLoading(false);
     } else if (arr[0]) {
-      // Caso contrário, fazer busca normal
+      // Caso contrário, fazer busca normal (se ainda estiver usando busca externa)
       searchEbayOnly(arr[0], platformToUse);
     }
   };
@@ -376,8 +398,101 @@ export default function Home() {
 
         {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
+          {/* Price Data Display */}
+          {priceData.length > 0 && (
+            <div className="mb-8 space-y-4">
+              <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider text-center mb-6">💰 PRICE INFORMATION</h3>
+              {priceData.map((item, index) => (
+                <div key={index} className="backdrop-blur-sm bg-black/40 rounded-xl p-6 border-2 border-purple-400/50 shadow-2xl">
+                  {/* Game Info */}
+                  <div className="mb-4 pb-4 border-b border-cyan-400/30">
+                    <h4 className="text-2xl font-bold text-pink-400 font-mono mb-3">{item.product_name}</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-cyan-300/70 font-mono">Console:</span>
+                        <span className="text-white font-mono ml-2 font-bold">{item.console_name}</span>
+                      </div>
+                      <div>
+                        <span className="text-cyan-300/70 font-mono">Release:</span>
+                        <span className="text-white font-mono ml-2 font-bold">{item.release_date || "N/A"}</span>
+                      </div>
+                      {item.genre && (
+                        <div>
+                          <span className="text-cyan-300/70 font-mono">Genre:</span>
+                          <span className="text-white font-mono ml-2 font-bold">{item.genre}</span>
+                        </div>
+                      )}
+                      {item.detected_title && (
+                        <div>
+                          <span className="text-cyan-300/70 font-mono">Detected as:</span>
+                          <span className="text-yellow-300 font-mono ml-2 font-bold">{item.detected_title}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Prices Grid */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {item.prices.loose !== null && (
+                      <div className="bg-blue-900/40 rounded-lg p-4 border-2 border-blue-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-xs text-blue-300 font-mono mb-2">💿 LOOSE</div>
+                        <div className="text-2xl font-bold text-white font-mono">${item.prices.loose.toFixed(2)}</div>
+                      </div>
+                    )}
+
+                    {item.prices.cib !== null && (
+                      <div className="bg-green-900/40 rounded-lg p-4 border-2 border-green-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-xs text-green-300 font-mono mb-2">📦 COMPLETE (CIB)</div>
+                        <div className="text-2xl font-bold text-white font-mono">${item.prices.cib.toFixed(2)}</div>
+                      </div>
+                    )}
+
+                    {item.prices.new !== null && (
+                      <div className="bg-purple-900/40 rounded-lg p-4 border-2 border-purple-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-xs text-purple-300 font-mono mb-2">✨ NEW</div>
+                        <div className="text-2xl font-bold text-white font-mono">${item.prices.new.toFixed(2)}</div>
+                      </div>
+                    )}
+
+                    {item.prices.graded !== null && (
+                      <div className="bg-yellow-900/40 rounded-lg p-4 border-2 border-yellow-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-xs text-yellow-300 font-mono mb-2">🏆 GRADED</div>
+                        <div className="text-2xl font-bold text-white font-mono">${item.prices.graded.toFixed(2)}</div>
+                      </div>
+                    )}
+
+                    {item.prices.box_only !== null && (
+                      <div className="bg-gray-900/40 rounded-lg p-4 border-2 border-gray-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-xs text-gray-300 font-mono mb-2">📦 BOX ONLY</div>
+                        <div className="text-2xl font-bold text-white font-mono">${item.prices.box_only.toFixed(2)}</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional Info */}
+                  {(item.upc || item.asin) && (
+                    <div className="pt-4 border-t border-cyan-400/30 text-sm space-y-2">
+                      {item.upc && (
+                        <div>
+                          <span className="text-cyan-300/70 font-mono">UPC:</span>
+                          <span className="text-white font-mono ml-2">{item.upc}</span>
+                        </div>
+                      )}
+                      {item.asin && (
+                        <div>
+                          <span className="text-cyan-300/70 font-mono">ASIN:</span>
+                          <span className="text-white font-mono ml-2">{item.asin}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {resultados.length > 0 && <PriceTableAndSlider items={resultados} searchName={searchNameState} myPrice={myPrice} setMyPrice={setMyPrice} />}
-          {!loading && resultados.length === 0 && nome.trim() && (
+          {!loading && resultados.length === 0 && priceData.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
                 <p className="text-2xl text-red-400 font-mono mb-2">😕 NO DATA FOUND</p>

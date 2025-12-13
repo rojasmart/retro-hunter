@@ -13,8 +13,6 @@ from fastapi import File, UploadFile, Form
 
 from fastapi.middleware.cors import CORSMiddleware
 import requests
-from urllib.parse import urlencode
-import base64
 
 # Carregar variáveis de ambiente do arquivo .env.local
 load_dotenv(dotenv_path="/media/rogerio/PROMETHEUS/Personal/retro-hunter/.env.local")
@@ -53,163 +51,68 @@ MODEL_NAME = "gemini-2.5-flash-preview-09-2025"  # Substitua pelo modelo configu
 class PromptRequest(BaseModel):
     prompt: str
 
-# Função para buscar no eBay
-async def search_ebay(game_name: str, platform: str = "all", condition: str = "all"):
-    """Busca jogos no eBay usando a API oficial"""
+# Função para buscar preços no Price Charting
+async def search_price_charting(game_name: str):
+    """Busca preços de jogos no Price Charting API"""
     try:
-        # Credenciais do eBay
-        client_id = os.getenv("EBAY_CLIENT_ID")
-        client_secret = os.getenv("EBAY_CLIENT_SECRET")
-        is_sandbox = os.getenv("EBAY_SANDBOX") == "true"
+        # Token do Price Charting
+        api_token = "96630e69825ff33893df7004397367a75f6aa91a"
         
-        if not client_id or not client_secret:
-            logger.warning("eBay credentials not configured")
-            return []
+        # Limpar o nome do jogo para a query (remover espaços extras)
+        query = game_name.strip().replace(" ", "")
         
-        # URLs base
-        base_url = "https://api.sandbox.ebay.com" if is_sandbox else "https://api.ebay.com"
+        # Construir URL da API
+        api_url = f"https://www.pricecharting.com/api/product?t={api_token}&q={query}"
         
-        # Obter token
-        credentials = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+        logger.info(f"Searching Price Charting for: {game_name} (query: {query})")
         
-        token_response = requests.post(
-            f"{base_url}/identity/v1/oauth2/token",
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': f'Basic {credentials}'
+        # Fazer requisição à API
+        response = requests.get(api_url)
+        
+        if not response.ok:
+            logger.error(f"Price Charting API error: {response.status_code} - {response.text}")
+            return None
+        
+        data = response.json()
+        
+        # Verificar se a busca foi bem-sucedida
+        if data.get("status") != "success":
+            logger.warning(f"Price Charting returned non-success status for '{game_name}'")
+            return None
+        
+        # Converter preços de pennies para dólares
+        def pennies_to_dollars(pennies):
+            if pennies is None or pennies == "":
+                return None
+            try:
+                return float(pennies) / 100
+            except:
+                return None
+        
+        result = {
+            "id": data.get("id"),
+            "product_name": data.get("product-name"),
+            "console_name": data.get("console-name"),
+            "genre": data.get("genre"),
+            "release_date": data.get("release-date"),
+            "upc": data.get("upc"),
+            "asin": data.get("asin"),
+            "prices": {
+                "loose": pennies_to_dollars(data.get("loose-price")),
+                "cib": pennies_to_dollars(data.get("cib-price")),
+                "new": pennies_to_dollars(data.get("new-price")),
+                "graded": pennies_to_dollars(data.get("graded-price")),
+                "box_only": pennies_to_dollars(data.get("box-only-price"))
             },
-            data={
-                'grant_type': 'client_credentials',
-                'scope': 'https://api.ebay.com/oauth/api_scope'
-            }
-        )
-        
-        if not token_response.ok:
-            logger.error(f"Failed to get eBay token: {token_response.text}")
-            return []
-        
-        token_data = token_response.json()
-        access_token = token_data['access_token']
-        
-        # Construir query de busca
-        query = game_name.strip()
-        
-        # Mapear plataforma
-        if platform and platform != "all":
-            platform_map = {
-                "retro": "dreamcast",
-                "dreamcast": "dreamcast", 
-                "ps2": "playstation 2",
-                "ps3": "playstation 3",
-                "ps4": "playstation 4",
-                "xbox": "xbox",
-                "xbox360": "xbox 360",
-                "nintendo-switch": "nintendo switch",
-                "nintendo-wii": "wii",
-                "nintendo-ds": "nintendo ds",
-                "master-system": "master system",
-                "genesis": "genesis",
-            }
-            platform_name = platform_map.get(platform, platform)
-            query = f"{query} {platform_name}".strip()
-        
-        # Parâmetros de busca
-        search_params = {
-            'q': query,
-            'limit': '100',
-            'category_ids': '139973'  # Video Games category
+            "currency": "USD"
         }
         
-        # Adicionar filtro de condição
-        if condition != "all":
-            condition_map = {
-                'new': '1000',
-                'used': '3000', 
-                'refurbished': '2000'
-            }
-            if condition in condition_map:
-                search_params['filter'] = f'conditionIds:{{{condition_map[condition]}}}'
-        
-        # Fazer busca no eBay
-        search_url = f"{base_url}/buy/browse/v1/item_summary/search?" + urlencode(search_params)
-        
-        search_response = requests.get(
-            search_url,
-            headers={
-                'Authorization': f'Bearer {access_token}',
-                'Content-Type': 'application/json',
-                'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
-            }
-        )
-        
-        if not search_response.ok:
-            logger.error(f"eBay search failed: {search_response.text}")
-            return []
-        
-        search_data = search_response.json()
-        items = search_data.get('itemSummaries', [])
-        
-        # Processar resultados
-        results = []
-        for item in items:
-            try:
-                title = item.get('title', '').lower()
-                search_term = game_name.lower()
-                
-                # Filtrar itens irrelevantes
-                if not title or search_term not in title:
-                    continue
-                
-                # Excluir itens que não são jogos
-                exclude_keywords = [
-                    'manual', 'box only', 'case only', 'cover', 'artwork', 'poster',
-                    'sword', 'cosplay', 'figure', 'statue', 'keychain', 'necklace',
-                    't-shirt', 'shirt', 'clothing', 'apparel', 'mug', 'cup',
-                    'sticker', 'decal', 'pin', 'badge', 'soundtrack', 'cd only',
-                    'guide', 'book', 'strategy', 'prima'
-                ]
-                
-                if any(keyword in title for keyword in exclude_keywords):
-                    continue
-                
-                price_info = item.get('price', {})
-                price = float(price_info.get('value', 0))
-                
-                if price <= 0:
-                    continue
-                
-                # Limpar título
-                clean_title = item.get('title', '')
-                
-                result = {
-                    'title': clean_title,
-                    'priceText': f"{price} {price_info.get('currency', 'USD')}",
-                    'price': price,
-                    'link': item.get('itemWebUrl', '#'),
-                    'site': 'eBay',
-                    'image': item.get('thumbnailImages', [{}])[0].get('imageUrl', '') or item.get('image', {}).get('imageUrl', ''),
-                    'condition': item.get('condition', 'Unknown'),
-                    'tags': [
-                        f"🏷️ {item.get('condition', 'Unknown')}",
-                        platform if platform and platform != "all" else None
-                    ]
-                }
-                
-                # Remove tags None
-                result['tags'] = [tag for tag in result['tags'] if tag]
-                
-                results.append(result)
-                
-            except Exception as e:
-                logger.error(f"Error processing eBay item: {e}")
-                continue
-        
-        logger.info(f"Found {len(results)} eBay results for '{game_name}'")
-        return results
+        logger.info(f"Found Price Charting data for '{game_name}': {result['product_name']} ({result['console_name']})")
+        return result
         
     except Exception as e:
-        logger.error(f"eBay search error: {e}")
-        return []
+        logger.error(f"Price Charting search error for '{game_name}': {e}")
+        return None
 
 @app.post("/ask-agent-image")
 async def ask_agent_image(
@@ -228,97 +131,93 @@ async def ask_agent_image(
         response = model.generate_content(contents)
         result = response.text if hasattr(response, "text") else str(response)
 
-       # Tentar extrair título e plataforma da resposta do modelo
-        match = re.search(r"(?:Title|Nome)[:\-]?\s*(.+?)[\n\r]+(?:Platform|Plataforma)[:\-]?\s*(.+)", result, re.IGNORECASE)
-        if match:
-            titulo = match.group(1).strip()
-            plataforma = match.group(2).strip()
-        else:
-            # Novo: tentar extrair por vírgula
-            parts = [p.strip() for p in result.split(",")]
-            if len(parts) == 2:
-                titulo, plataforma = parts
-            else:
-                titulo = ""
-                plataforma = ""
+        # Parse o `raw` em um array de jogos
+        games = []
+        for line in result.split("\n"):
+            parts = line.split(",")
+            if len(parts) >= 2:
+                title = parts[0].strip()
+                platform = parts[1].strip()
+                if title and platform:
+                    games.append({"title": title, "platform": platform})
+
         return {
-            "titulo": titulo,
-            "plataforma": plataforma,
+            "games": games,
             "raw": result
         }
     except Exception as e:
         logger.error("Erro ao processar a solicitação: %s", e, exc_info=True)
         return {"error": f"Erro ao processar a solicitação: {str(e)}"}
 
-# Endpoint combinado OCR + eBay
-@app.post("/ask-agent-image-with-ebay")
-async def ask_agent_image_with_ebay(
+# Endpoint combinado OCR + Price Charting
+@app.post("/ask-agent-image-with-prices")
+async def ask_agent_image_with_prices(
     prompt: str = Form("return the name and platform of this game with comma separated"),
     file: UploadFile = File(...)
 ):
     try:
-        # Fazer OCR primeiro (reutilizar código existente)
+        # Fazer OCR primeiro
         ocr_result = await ask_agent_image(prompt, file)
+        
+        if "error" in ocr_result:
+            return ocr_result
 
-        # Extrair dados do OCR
-        raw = ocr_result.get("raw", "")
-        plataforma = ocr_result.get("plataforma", "all")
+        # Extrair jogos detectados
+        games = ocr_result.get("games", [])
 
-        # Parse o `raw` em um array de jogos
-        games = []
-        for line in raw.split("\n"):
-            parts = line.split(",")
-            if len(parts) == 2:
-                title, platform = parts[0].strip(), parts[1].strip()
-                if title and platform:
-                    games.append({"title": title, "platform": platform})
-
-        # Filtrar jogos duplicados ou irrelevantes
+        # Filtrar jogos duplicados
         filtered_games = []
         seen_titles = set()
         for game in games:
-            if game["title"] not in seen_titles:
-                seen_titles.add(game["title"])
+            title_lower = game["title"].lower()
+            if title_lower not in seen_titles:
+                seen_titles.add(title_lower)
                 filtered_games.append(game)
 
-        # Buscar resultados no eBay para cada jogo filtrado
-        ebay_results = []
+        # Buscar preços no Price Charting para cada jogo
+        price_results = []
         for game in filtered_games:
-            results = await search_ebay(game["title"], game["platform"])
-            ebay_results.extend(results)
+            price_data = await search_price_charting(game["title"])
+            if price_data:
+                price_results.append({
+                    "detected_title": game["title"],
+                    "detected_platform": game["platform"],
+                    **price_data
+                })
 
         return {
             "games": filtered_games,
-            "ebay_results": ebay_results,
-            "total_ebay": len(ebay_results)
+            "price_data": price_results,
+            "total_found": len(price_results)
         }
 
     except Exception as e:
-        logger.error(f"Error in combined OCR+eBay endpoint: {e}")
+        logger.error(f"Error in combined OCR+Price Charting endpoint: {e}")
         return {
             "error": str(e),
             "games": [],
-            "ebay_results": [],
-            "total_ebay": 0
+            "price_data": [],
+            "total_found": 0
         }
 
-# Endpoint separado só para eBay
-@app.get("/ebay-search")
-async def ebay_search_endpoint(
-    game_name: str,
-    platform: str = "all",
-    condition: str = "all"
-):
+# Endpoint separado só para Price Charting
+@app.get("/price-search")
+async def price_search_endpoint(game_name: str):
     try:
-        results = await search_ebay(game_name, platform, condition)
-        return {
-            "resultados": results,
-            "total": len(results)
-        }
+        result = await search_price_charting(game_name)
+        if result:
+            return {
+                "success": True,
+                "data": result
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Game not found or API error"
+            }
     except Exception as e:
-        logger.error(f"eBay search endpoint error: {e}")
+        logger.error(f"Price search endpoint error: {e}")
         return {
-            "error": str(e),
-            "resultados": [],
-            "total": 0
+            "success": False,
+            "error": str(e)
         }

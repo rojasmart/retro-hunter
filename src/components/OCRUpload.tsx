@@ -5,9 +5,28 @@ import { cleanOCRText, preprocessImage, resizeImageForOCR } from "@/lib/utils/oc
 import Image from "next/image";
 import { GameResult } from "@/lib/types";
 
+interface PriceData {
+  id: string;
+  product_name: string;
+  console_name: string;
+  genre: string;
+  release_date: string;
+  upc: string;
+  asin: string;
+  prices: {
+    loose: number | null;
+    cib: number | null;
+    new: number | null;
+    graded: number | null;
+    box_only: number | null;
+  };
+  currency: string;
+  detected_title?: string;
+  detected_platform?: string;
+}
+
 interface OCRUploadProps {
-  // changed to accept optional plataforma and ebay results
-  onTextExtracted: (text: string, plataforma?: string, ebayResults?: GameResult[]) => void;
+  onTextExtracted: (text: string, plataforma?: string, priceData?: PriceData[]) => void;
   onSearch: (gameName: string) => void;
   isSearching?: boolean;
   currentGameResults?: GameResult[];
@@ -73,10 +92,10 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       });
       setProgress(20);
 
-      // Usar o novo endpoint combinado OCR + eBay
+      // Usar o novo endpoint combinado OCR + Price Charting
       const apiForm = new FormData();
       apiForm.append("file", imageFile, fileName);
-      const resp = await fetch("http://127.0.0.1:8000/ask-agent-image-with-ebay", {
+      const resp = await fetch("http://127.0.0.1:8000/ask-agent-image-with-prices", {
         method: "POST",
         body: apiForm,
       });
@@ -88,32 +107,19 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       setProgress(80);
 
       const data = await resp.json();
-      const titulo = data.titulo || "";
-      const plataforma = data.plataforma || "";
-      const ebayResults = data.ebay_results || [];
+      const games = data.games || [];
+      const prices = data.price_data || [];
 
-      setExtractedText(titulo);
-      setPlatform(plataforma);
+      console.log("OCR + Price Charting response:", data);
 
-      if (titulo.trim()) {
-        // Passar título, plataforma e resultados do eBay
-        onTextExtracted(titulo, plataforma || undefined, ebayResults);
-      } else if (data.raw) {
-        // Processar o campo raw para separar os itens
-        const games = data.raw.split("\n").map((line: string) => {
-          const [title, platform] = line.split(",").map((part: string) => part.trim());
-          return { title, platform };
-        });
-
-        console.log("Extracted games from raw:", games);
-        // Renderizar vários cartões com títulos e preços
-        games.forEach((game: { title: string; platform: string }) => {
-          const prices = ebayResults.filter((result: { title: string }) => result.title.includes(game.title));
-          console.log(`Game: ${game.title}, Prices:`, prices);
-          // Render logic for cards can be added here
-        });
+      // Extrair o primeiro jogo detectado para exibição principal
+      const firstGame = games[0];
+      if (firstGame) {
+        setExtractedText(firstGame.title);
+        setPlatform(firstGame.platform);
+        onTextExtracted(firstGame.title, firstGame.platform, prices);
       } else {
-        throw new Error("Could not extract readable text from the image");
+        throw new Error("No games detected in the image");
       }
 
       setProgress(100);
@@ -286,6 +292,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
   const clearAll = () => {
     setSelectedImage(null);
     setExtractedText("");
+    setPlatform("");
     setError(null);
     setProgress(0);
     stopCamera();
