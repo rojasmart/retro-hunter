@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthButton from "@/components/auth/AuthButton";
+import { CollectionGame } from "@/lib/types/auth";
 
 export default function MyAccountPage() {
   const { user, logout } = useAuth();
@@ -12,6 +13,46 @@ export default function MyAccountPage() {
     name: user?.name || "",
     email: user?.email || "",
   });
+  const [games, setGames] = useState<CollectionGame[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
+  const [platformCount, setPlatformCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCollection = async () => {
+      const token = localStorage.getItem("auth_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`/api/collection`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch collection");
+
+        const mappedGames: CollectionGame[] = (data.games || []).map((g: any) => ({
+          id: g._id,
+          title: g.gameTitle,
+          platform: g.platform,
+          condition: g.condition,
+          purchasePrice: g.purchasePrice,
+          notes: g.notes,
+          addedAt: g.createdAt,
+          lowestPrice: g.lowestPrice,
+          highestPrice: g.highestPrice,
+          averagePrice: g.averagePrice,
+        }));
+
+        setGames(mappedGames);
+        setTotalValue(mappedGames.reduce((sum, game) => sum + (game.purchasePrice || 0), 0));
+        setPlatformCount(new Set(mappedGames.map((g) => g.platform)).size);
+      } catch (error) {
+        console.error("Failed to fetch collection data:", error);
+      }
+    };
+
+    fetchCollection();
+  }, []);
 
   const handleSave = async () => {
     // Aqui você implementaria a atualização do perfil
@@ -136,16 +177,16 @@ export default function MyAccountPage() {
                 <h3 className="text-lg font-medium text-cyan-300 mb-4">Statistic</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400/30">
-                    <div className="text-2xl font-bold text-blue-400">0</div>
+                    <div className="text-2xl font-bold text-blue-400">{games.length}</div>
                     <div className="text-sm text-blue-300">Games in your Collection</div>
                   </div>
                   <div className="bg-green-900/20 p-4 rounded-lg border border-green-400/30">
-                    <div className="text-2xl font-bold text-green-400">0</div>
-                    <div className="text-sm text-green-300">Searches Made</div>
+                    <div className="text-2xl font-bold text-green-400">$ {totalValue.toFixed(2)}</div>
+                    <div className="text-sm text-green-300">Total Invested Value</div>
                   </div>
                   <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-400/30">
-                    <div className="text-2xl font-bold text-purple-400">$ 0,00</div>
-                    <div className="text-sm text-purple-300">Total Estimated Value</div>
+                    <div className="text-2xl font-bold text-purple-400">{platformCount}</div>
+                    <div className="text-sm text-purple-300">Different Platforms</div>
                   </div>
                 </div>
               </div>
