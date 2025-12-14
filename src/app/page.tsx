@@ -263,6 +263,67 @@ export default function Home() {
   const [myPrice, setMyPrice] = useState<number>(0);
   const [priceData, setPriceData] = useState<PriceData[]>([]);
 
+  // States para adicionar à coleção
+  const [addingGameId, setAddingGameId] = useState<string | null>(null);
+  const [gamesPurchasePrice, setGamesPurchasePrice] = useState<Record<string, number>>({});
+  const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  // Função para adicionar jogo à coleção
+  const addToCollection = async (game: PriceData) => {
+    setAddingGameId(game.id);
+    setAddError(null);
+    setAddSuccess(null);
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("You must be logged in to add to collection");
+
+      const purchasePrice = gamesPurchasePrice[game.id] || 0;
+
+      const payload = {
+        gameTitle: game.product_name,
+        platform: game.console_name || "Unknown",
+        condition: "used",
+        purchasePrice: purchasePrice > 0 ? purchasePrice : undefined,
+        notes: `Genre: ${game.genre || "N/A"}`,
+        images: [],
+        lowestPrice: game.prices.loose,
+        highestPrice: game.prices.graded,
+        averagePrice: game.prices.cib,
+      };
+
+      const res = await fetch("/api/collection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Failed to add to collection");
+      }
+
+      setAddSuccess(`${game.product_name} added to your collection!`);
+      
+      // Notify other parts of the app to refresh collection
+      window.dispatchEvent(new CustomEvent("collection:added"));
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setAddSuccess(null), 3000);
+    } catch (err: any) {
+      console.error("Add to collection error:", err);
+      setAddError(err?.message || "Error adding to collection");
+      setTimeout(() => setAddError(null), 3000);
+    } finally {
+      setAddingGameId(null);
+    }
+  };
+
   const searchEbayOnly = async (searchName?: string, platformParam?: string) => {
     setLoading(true);
 
@@ -419,6 +480,19 @@ export default function Home() {
                   Found {priceData.length} game{priceData.length > 1 ? "s" : ""}
                 </p>
               </div>
+
+              {/* Success/Error Messages */}
+              {addSuccess && (
+                <div className="backdrop-blur-sm bg-green-900/30 border-2 border-green-400/50 text-green-300 rounded-xl p-4 text-center">
+                  <p className="font-mono">✓ {addSuccess}</p>
+                </div>
+              )}
+              {addError && (
+                <div className="backdrop-blur-sm bg-red-900/30 border-2 border-red-400/50 text-red-300 rounded-xl p-4 text-center">
+                  <p className="font-mono">✗ {addError}</p>
+                </div>
+              )}
+
               {priceData.map((item, index) => (
                 <div key={index} className="backdrop-blur-sm bg-black/40 rounded-xl p-6 border-2 border-purple-400/50 shadow-2xl">
                   {/* Game Info */}
@@ -506,6 +580,32 @@ export default function Home() {
                       )}
                     </div>
                   )}
+
+                  {/* Add to Collection Section */}
+                  <div className="mt-4 pt-4 border-t border-cyan-400/30">
+                    <div className="flex gap-2 items-end">
+                      <div className="flex-1">
+                        <label className="text-xs text-cyan-300/70 font-mono mb-1 block">MY PURCHASE PRICE</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={gamesPurchasePrice[item.id] || ""}
+                          onChange={(e) => setGamesPurchasePrice({ ...gamesPurchasePrice, [item.id]: Number(e.target.value) || 0 })}
+                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                        />
+                      </div>
+                      <button
+                        onClick={() => addToCollection(item)}
+                        disabled={addingGameId === item.id}
+                        className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-lg shadow-lg transition-all duration-300 border-2 border-purple-400/50 hover:border-pink-400/50 font-mono text-sm ${
+                          addingGameId === item.id ? "opacity-70 cursor-wait" : ""
+                        }`}
+                      >
+                        {addingGameId === item.id ? "..." : "+ ADD"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

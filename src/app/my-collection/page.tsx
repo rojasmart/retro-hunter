@@ -97,9 +97,30 @@ export default function MyCollectionPage() {
     setIsAddingGame(false);
   };
 
-  const handleRemoveGame = (gameId: string) => {
-    // TODO: call DELETE API
-    setGames((prev) => prev.filter((game) => game.id !== gameId));
+  const handleRemoveGame = async (gameId: string) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(`/api/collection?id=${gameId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.error || "Failed to delete game");
+      }
+
+      // Remove from local state
+      setGames((prev) => prev.filter((game) => game.id !== gameId));
+
+      console.log(`Game ${gameId} deleted successfully`);
+    } catch (err: any) {
+      console.error("Error deleting game:", err);
+      setError(err?.message || "Error deleting game");
+      setTimeout(() => setError(null), 3000);
+    }
   };
 
   const totalValue = games.reduce((sum, game) => sum + (game.purchasePrice || 0), 0);
@@ -304,21 +325,21 @@ export default function MyCollectionPage() {
                           {/* Price Analysis Section */}
                           {(game.lowestPrice || game.highestPrice || game.averagePrice) && (
                             <div className="mt-2 p-2 bg-blue-900/20 rounded-lg border border-blue-400/30">
-                              <p className="text-xs font-medium text-blue-300 mb-1">Análise de Preços de Mercado:</p>
+                              <p className="text-xs font-medium text-blue-300 mb-1">Price Analysis market:</p>
                               <div className="flex items-center space-x-4 text-xs">
                                 {game.lowestPrice && (
                                   <span className="flex items-center">
-                                    <span className="text-green-400 font-medium">↓ Menor:$ {game.lowestPrice.toFixed(2)}</span>
+                                    <span className="text-green-400 font-medium">↓ Lowest:$ {game.lowestPrice.toFixed(2)}</span>
                                   </span>
                                 )}
                                 {game.highestPrice && (
                                   <span className="flex items-center">
-                                    <span className="text-red-400 font-medium">↑ Maior:$ {game.highestPrice.toFixed(2)}</span>
+                                    <span className="text-red-400 font-medium">↑ Highest:$ {game.highestPrice.toFixed(2)}</span>
                                   </span>
                                 )}
                                 {game.averagePrice && (
                                   <span className="flex items-center">
-                                    <span className="text-blue-400 font-medium">≈ Médio:$ {game.averagePrice.toFixed(2)}</span>
+                                    <span className="text-blue-400 font-medium">≈ Average:$ {game.averagePrice.toFixed(2)}</span>
                                   </span>
                                 )}
                               </div>
