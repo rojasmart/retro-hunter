@@ -314,11 +314,6 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
             <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
             <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or use camera to auto-detect games</p>
           </div>
-          {extractedText && extractedText.includes("game(s)") && (
-            <div className="bg-green-600 px-4 py-2 rounded-full border-2 border-green-400">
-              <span className="text-white font-mono font-bold">✓ {extractedText.split(" ")[0]} DETECTED</span>
-            </div>
-          )}
         </div>
       </div>
 

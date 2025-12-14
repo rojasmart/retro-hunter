@@ -414,9 +414,9 @@ export default function Home() {
           {!loading && priceData.length > 0 && (
             <div className="mb-8 space-y-4">
               <div className="text-center mb-6">
-                <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider">💰 PRICE INFORMATION</h3>
+                <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider">PRICE INFORMATION</h3>
                 <p className="text-sm text-cyan-300/70 font-mono mt-2">
-                  Found {priceData.length} game{priceData.length > 1 ? 's' : ''}
+                  Found {priceData.length} game{priceData.length > 1 ? "s" : ""}
                 </p>
               </div>
               {priceData.map((item, index) => (
@@ -452,39 +452,39 @@ export default function Home() {
                   </div>
 
                   {/* Prices Grid */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-5 gap-2 mb-4">
                     {item.prices.loose !== null && (
-                      <div className="bg-blue-900/40 rounded-lg p-4 border-2 border-blue-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-xs text-blue-300 font-mono mb-2">💿 LOOSE</div>
-                        <div className="text-2xl font-bold text-white font-mono">${item.prices.loose.toFixed(2)}</div>
+                      <div className="bg-blue-900/40 rounded-lg p-3 border-2 border-blue-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-[10px] text-blue-300 font-mono mb-1">LOOSE</div>
+                        <div className="text-lg font-bold text-white font-mono">${item.prices.loose.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.cib !== null && (
-                      <div className="bg-green-900/40 rounded-lg p-4 border-2 border-green-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-xs text-green-300 font-mono mb-2">📦 COMPLETE (CIB)</div>
-                        <div className="text-2xl font-bold text-white font-mono">${item.prices.cib.toFixed(2)}</div>
+                      <div className="bg-green-900/40 rounded-lg p-3 border-2 border-green-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-[10px] text-green-300 font-mono mb-1">CIB</div>
+                        <div className="text-lg font-bold text-white font-mono">${item.prices.cib.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.new !== null && (
-                      <div className="bg-purple-900/40 rounded-lg p-4 border-2 border-purple-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-xs text-purple-300 font-mono mb-2">✨ NEW</div>
-                        <div className="text-2xl font-bold text-white font-mono">${item.prices.new.toFixed(2)}</div>
+                      <div className="bg-purple-900/40 rounded-lg p-3 border-2 border-purple-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-[10px] text-purple-300 font-mono mb-1">NEW</div>
+                        <div className="text-lg font-bold text-white font-mono">${item.prices.new.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.graded !== null && (
-                      <div className="bg-yellow-900/40 rounded-lg p-4 border-2 border-yellow-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-xs text-yellow-300 font-mono mb-2">🏆 GRADED</div>
-                        <div className="text-2xl font-bold text-white font-mono">${item.prices.graded.toFixed(2)}</div>
+                      <div className="bg-yellow-900/40 rounded-lg p-3 border-2 border-yellow-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-[10px] text-yellow-300 font-mono mb-1">GRADED</div>
+                        <div className="text-lg font-bold text-white font-mono">${item.prices.graded.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.box_only !== null && (
-                      <div className="bg-gray-900/40 rounded-lg p-4 border-2 border-gray-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-xs text-gray-300 font-mono mb-2">📦 BOX ONLY</div>
-                        <div className="text-2xl font-bold text-white font-mono">${item.prices.box_only.toFixed(2)}</div>
+                      <div className="bg-gray-900/40 rounded-lg p-3 border-2 border-gray-400/50 transform hover:scale-105 transition-all">
+                        <div className="text-[10px] text-gray-300 font-mono mb-1">BOX</div>
+                        <div className="text-lg font-bold text-white font-mono">${item.prices.box_only.toFixed(2)}</div>
                       </div>
                     )}
                   </div>
