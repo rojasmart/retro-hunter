@@ -111,12 +111,17 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       const prices = data.price_data || [];
 
       console.log("OCR + Price Charting response:", data);
+      console.log(`✅ Detected ${games.length} games, found ${prices.length} prices`);
 
-      // Extrair o primeiro jogo detectado para exibição principal
-      const firstGame = games[0];
-      if (firstGame) {
-        setExtractedText(firstGame.title);
+      // Se temos jogos detectados, processar todos
+      if (games.length > 0) {
+        // Extrair o primeiro jogo para exibição principal (compatibilidade)
+        const firstGame = games[0];
+        const gamesList = games.map((g: any) => g.title).join(", ");
+        setExtractedText(`${games.length} game(s): ${gamesList}`);
         setPlatform(firstGame.platform);
+
+        // Passar todos os jogos e preços para o parent
         onTextExtracted(firstGame.title, firstGame.platform, prices);
       } else {
         throw new Error("No games detected in the image");
@@ -304,8 +309,17 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
   return (
     <div className="w-full max-w-4xl mx-auto backdrop-blur-sm bg-black/40 rounded-2xl border-2 border-cyan-400/50 shadow-2xl p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
-        <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or use camera to auto-detect games</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
+            <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or use camera to auto-detect games</p>
+          </div>
+          {extractedText && extractedText.includes("game(s)") && (
+            <div className="bg-green-600 px-4 py-2 rounded-full border-2 border-green-400">
+              <span className="text-white font-mono font-bold">✓ {extractedText.split(" ")[0]} DETECTED</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Upload/Camera Controls */}

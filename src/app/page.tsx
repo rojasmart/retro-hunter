@@ -398,15 +398,35 @@ export default function Home() {
 
         {/* Lateral Direita - Rolável */}
         <div className="w-1/2 w-full overflow-y-auto p-8">
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-cyan-400/40">
+                <div className="animate-pulse">
+                  <p className="text-2xl text-cyan-400 font-mono mb-2">🔍 SEARCHING PRICES...</p>
+                  <p className="text-cyan-300 font-mono">Please wait while we fetch the best prices</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Price Data Display */}
-          {priceData.length > 0 && (
+          {!loading && priceData.length > 0 && (
             <div className="mb-8 space-y-4">
-              <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider text-center mb-6">💰 PRICE INFORMATION</h3>
+              <div className="text-center mb-6">
+                <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider">💰 PRICE INFORMATION</h3>
+                <p className="text-sm text-cyan-300/70 font-mono mt-2">
+                  Found {priceData.length} game{priceData.length > 1 ? 's' : ''}
+                </p>
+              </div>
               {priceData.map((item, index) => (
                 <div key={index} className="backdrop-blur-sm bg-black/40 rounded-xl p-6 border-2 border-purple-400/50 shadow-2xl">
                   {/* Game Info */}
                   <div className="mb-4 pb-4 border-b border-cyan-400/30">
-                    <h4 className="text-2xl font-bold text-pink-400 font-mono mb-3">{item.product_name}</h4>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-2xl font-bold text-pink-400 font-mono">{item.product_name}</h4>
+                      <span className="text-xs bg-purple-600 px-3 py-1 rounded-full font-mono">#{index + 1}</span>
+                    </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-cyan-300/70 font-mono">Console:</span>

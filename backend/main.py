@@ -133,13 +133,28 @@ async def ask_agent_image(
 
         # Parse o `raw` em um array de jogos
         games = []
-        for line in result.split("\n"):
-            parts = line.split(",")
+        
+        # Tentar primeiro parsing por linha (formato: Title, Platform por linha)
+        lines = result.split("\n")
+        for line in lines:
+            parts = [p.strip() for p in line.split(",")]
             if len(parts) >= 2:
-                title = parts[0].strip()
-                platform = parts[1].strip()
+                title = parts[0]
+                platform = parts[1]
                 if title and platform:
                     games.append({"title": title, "platform": platform})
+        
+        # Se não encontrou jogos por linha, tentar parsing inline (formato: Title, Platform, Title, Platform, ...)
+        if len(games) == 0:
+            all_parts = [p.strip() for p in result.split(",")]
+            # Processar em pares: [0,1], [2,3], [4,5]...
+            for i in range(0, len(all_parts) - 1, 2):
+                title = all_parts[i]
+                platform = all_parts[i + 1] if i + 1 < len(all_parts) else ""
+                if title and platform:
+                    games.append({"title": title, "platform": platform})
+        
+        logger.info(f"Parsed {len(games)} games from OCR: {[g['title'] for g in games]}")
 
         return {
             "games": games,
@@ -174,9 +189,12 @@ async def ask_agent_image_with_prices(
                 seen_titles.add(title_lower)
                 filtered_games.append(game)
 
+        logger.info(f"Detected {len(games)} games, filtered to {len(filtered_games)} unique games")
+
         # Buscar preços no Price Charting para cada jogo
         price_results = []
         for game in filtered_games:
+            logger.info(f"Searching Price Charting for: {game['title']} ({game['platform']})")
             price_data = await search_price_charting(game["title"])
             if price_data:
                 price_results.append({
@@ -184,6 +202,11 @@ async def ask_agent_image_with_prices(
                     "detected_platform": game["platform"],
                     **price_data
                 })
+                logger.info(f"✓ Found price data for: {price_data.get('product_name')}")
+            else:
+                logger.warning(f"✗ No price data found for: {game['title']}")
+
+        logger.info(f"Total price results: {len(price_results)}")
 
         return {
             "games": filtered_games,
