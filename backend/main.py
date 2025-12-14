@@ -52,19 +52,26 @@ class PromptRequest(BaseModel):
     prompt: str
 
 # Função para buscar preços no Price Charting
-async def search_price_charting(game_name: str):
+async def search_price_charting(game_name: str, platform: str = ""):
     """Busca preços de jogos no Price Charting API"""
     try:
         # Token do Price Charting
         api_token = "96630e69825ff33893df7004397367a75f6aa91a"
         
-        # Limpar o nome do jogo para a query (remover espaços extras)
-        query = game_name.strip().replace(" ", "")
+        # Construir a query com plataforma na frente se disponível
+        if platform and platform.strip():
+            # Incluir plataforma na query: "soulcalibur sega dreamcast"
+            full_query = f"{game_name} {platform}".strip()
+        else:
+            full_query = game_name.strip()
+        
+        # Manter espaços para melhor matching (não remover)
+        query = full_query
         
         # Construir URL da API
         api_url = f"https://www.pricecharting.com/api/product?t={api_token}&q={query}"
         
-        logger.info(f"Searching Price Charting for: {game_name} (query: {query})")
+        logger.info(f"Searching Price Charting for: '{game_name}' on '{platform}' (query: '{query}')")
         
         # Fazer requisição à API
         response = requests.get(api_url)
@@ -77,7 +84,7 @@ async def search_price_charting(game_name: str):
         
         # Verificar se a busca foi bem-sucedida
         if data.get("status") != "success":
-            logger.warning(f"Price Charting returned non-success status for '{game_name}'")
+            logger.warning(f"Price Charting returned non-success status for '{full_query}'")
             return None
         
         # Converter preços de pennies para dólares
@@ -107,7 +114,7 @@ async def search_price_charting(game_name: str):
             "currency": "USD"
         }
         
-        logger.info(f"Found Price Charting data for '{game_name}': {result['product_name']} ({result['console_name']})")
+        logger.info(f"Found Price Charting data: {result['product_name']} ({result['console_name']})")
         return result
         
     except Exception as e:
@@ -195,7 +202,8 @@ async def ask_agent_image_with_prices(
         price_results = []
         for game in filtered_games:
             logger.info(f"Searching Price Charting for: {game['title']} ({game['platform']})")
-            price_data = await search_price_charting(game["title"])
+            # Passar o título e a plataforma para melhor matching
+            price_data = await search_price_charting(game["title"], game["platform"])
             if price_data:
                 price_results.append({
                     "detected_title": game["title"],
@@ -225,9 +233,9 @@ async def ask_agent_image_with_prices(
 
 # Endpoint separado só para Price Charting
 @app.get("/price-search")
-async def price_search_endpoint(game_name: str):
+async def price_search_endpoint(game_name: str, platform: str = ""):
     try:
-        result = await search_price_charting(game_name)
+        result = await search_price_charting(game_name, platform)
         if result:
             return {
                 "success": True,
