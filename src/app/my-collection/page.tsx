@@ -51,6 +51,10 @@ export default function MyCollectionPage() {
         lowestPrice: g.lowestPrice,
         highestPrice: g.highestPrice,
         averagePrice: g.averagePrice,
+        newPrice: g.newPrice,
+        loosePrice: g.loosePrice,
+        gradedPrice: g.gradedPrice,
+        completePrice: g.completePrice,
       }));
 
       console.log("Mapped games:", mapped);
@@ -325,23 +329,28 @@ export default function MyCollectionPage() {
                             )}
 
                             {/* Price Analysis Section */}
-                            {(game.lowestPrice || game.highestPrice || game.averagePrice) && (
+                            {(game.newPrice || game.loosePrice || game.gradedPrice || game.completePrice) && (
                               <div className="flex-1 p-2 bg-blue-900/20 rounded-lg border border-blue-400/30">
                                 <p className="text-xs font-medium text-blue-300 mb-1">Price Analysis Market:</p>
                                 <div className="flex items-center space-x-4 text-xs">
-                                  {game.lowestPrice && (
+                                  {game.newPrice && (
                                     <span className="flex items-center">
-                                      <span className="text-green-400 font-medium">↓ Lowest: $ {game.lowestPrice.toFixed(2)}</span>
+                                      <span className="text-green-400 font-medium">New: $ {game.newPrice.toFixed(2)}</span>
                                     </span>
                                   )}
-                                  {game.highestPrice && (
+                                  {game.loosePrice && (
                                     <span className="flex items-center">
-                                      <span className="text-red-400 font-medium">↑ Highest: $ {game.highestPrice.toFixed(2)}</span>
+                                      <span className="text-red-400 font-medium">Loose: $ {game.loosePrice.toFixed(2)}</span>
                                     </span>
                                   )}
-                                  {game.averagePrice && (
+                                  {game.gradedPrice && (
                                     <span className="flex items-center">
-                                      <span className="text-blue-400 font-medium">≈ Average: $ {game.averagePrice.toFixed(2)}</span>
+                                      <span className="text-blue-400 font-medium">Graded: $ {game.gradedPrice.toFixed(2)}</span>
+                                    </span>
+                                  )}
+                                  {game.completePrice && (
+                                    <span className="flex items-center">
+                                      <span className="text-yellow-400 font-medium">Complete: $ {game.completePrice.toFixed(2)}</span>
                                     </span>
                                   )}
                                 </div>

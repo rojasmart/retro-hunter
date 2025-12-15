@@ -66,4 +66,8 @@ export interface CollectionGame {
   lowestPrice?: number;
   highestPrice?: number;
   averagePrice?: number;
+  newPrice?: number;
+  loosePrice?: number;
+  gradedPrice?: number;
+  completePrice?: number;
 }

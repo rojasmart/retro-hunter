@@ -288,10 +288,13 @@ export default function Home() {
         purchasePrice: purchasePrice > 0 ? purchasePrice : undefined,
         notes: `Genre: ${game.genre || "N/A"}`,
         images: [],
-        lowestPrice: game.prices.loose,
-        highestPrice: game.prices.graded,
-        averagePrice: game.prices.cib,
+        loosePrice: game.prices.loose,
+        gradedPrice: game.prices.graded,
+        completePrice: game.prices.cib,
+        newPrice: game.prices.new,
       };
+
+      console.log("payload to add:", payload);
 
       const res = await fetch("/api/collection", {
         method: "POST",
@@ -309,10 +312,10 @@ export default function Home() {
       }
 
       setAddSuccess(`${game.product_name} added to your collection!`);
-      
+
       // Notify other parts of the app to refresh collection
       window.dispatchEvent(new CustomEvent("collection:added"));
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setAddSuccess(null), 3000);
     } catch (err: any) {

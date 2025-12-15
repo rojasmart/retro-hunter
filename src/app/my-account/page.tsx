@@ -41,6 +41,10 @@ export default function MyAccountPage() {
           lowestPrice: g.lowestPrice,
           highestPrice: g.highestPrice,
           averagePrice: g.averagePrice,
+          newPrice: g.newPrice,
+          loosePrice: g.loosePrice,
+          gradedPrice: g.gradedPrice,
+          completePrice: g.completePrice,
         }));
 
         setGames(mappedGames);
