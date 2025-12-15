@@ -15,6 +15,13 @@ export interface IGameInCollection extends Document {
   loosePrice?: number;
   gradedPrice?: number;
   completePrice?: number;
+  priceHistory?: Array<{
+    date: Date;
+    newPrice?: number;
+    loosePrice?: number;
+    gradedPrice?: number;
+    completePrice?: number;
+  }>;
   purchaseDate?: Date;
   location?: string; // Onde está fisicamente
   notes?: string;
@@ -82,6 +89,28 @@ const GameInCollectionSchema = new Schema<IGameInCollection>({
     type: Number,
     min: 0
   },
+  priceHistory: [{
+    date: {
+      type: Date,
+      required: true
+    },
+    newPrice: {
+      type: Number,
+      min: 0
+    },
+    loosePrice: {
+      type: Number,
+      min: 0
+    },
+    gradedPrice: {
+      type: Number,
+      min: 0
+    },
+    completePrice: {
+      type: Number,
+      min: 0
+    }
+  }],
   purchaseDate: {
     type: Date
   },

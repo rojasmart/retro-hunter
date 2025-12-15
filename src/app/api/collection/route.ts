@@ -79,9 +79,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Initialize price history with current prices if any exist
+    const priceHistory = [];
+    if (gameData.newPrice || gameData.loosePrice || gameData.gradedPrice || gameData.completePrice) {
+      priceHistory.push({
+        date: new Date(),
+        newPrice: gameData.newPrice,
+        loosePrice: gameData.loosePrice,
+        gradedPrice: gameData.gradedPrice,
+        completePrice: gameData.completePrice,
+      });
+    }
+
     const game = new GameInCollection({
       ...gameData,
-      userId: decoded.userId
+      userId: decoded.userId,
+      priceHistory,
     });
 
     await game.save();

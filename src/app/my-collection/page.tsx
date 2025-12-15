@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { CollectionGame } from "@/lib/types/auth";
 import AuthButton from "@/components/auth/AuthButton";
+import PriceHistoryChart from "@/components/PriceHistoryChart";
 
 export default function MyCollectionPage() {
   const { user, logout } = useAuth();
@@ -55,6 +56,7 @@ export default function MyCollectionPage() {
         loosePrice: g.loosePrice,
         gradedPrice: g.gradedPrice,
         completePrice: g.completePrice,
+        priceHistory: g.priceHistory,
       }));
 
       console.log("Mapped games:", mapped);
@@ -330,9 +332,9 @@ export default function MyCollectionPage() {
 
                             {/* Price Analysis Section */}
                             {(game.newPrice || game.loosePrice || game.gradedPrice || game.completePrice) && (
-                              <div className="flex-1 p-2 bg-blue-900/20 rounded-lg border border-blue-400/30">
-                                <p className="text-xs font-medium text-blue-300 mb-1">Price Analysis Market:</p>
-                                <div className="flex items-center space-x-4 text-xs">
+                              <div className="flex-1 p-3 bg-blue-900/20 rounded-lg border border-blue-400/30">
+                                <p className="text-xs font-medium text-blue-300 mb-2">Price Analysis Market:</p>
+                                <div className="flex items-center space-x-4 text-xs mb-3">
                                   {game.newPrice && (
                                     <span className="flex items-center">
                                       <span className="text-green-400 font-medium">New: $ {game.newPrice.toFixed(2)}</span>
@@ -353,6 +355,19 @@ export default function MyCollectionPage() {
                                       <span className="text-yellow-400 font-medium">Complete: $ {game.completePrice.toFixed(2)}</span>
                                     </span>
                                   )}
+                                </div>
+                                {/* Price History Chart */}
+                                <div className="mt-3 pt-3 border-t border-blue-400/20">
+                                  <PriceHistoryChart
+                                    priceHistory={game.priceHistory}
+                                    currentPrices={{
+                                      newPrice: game.newPrice,
+                                      loosePrice: game.loosePrice,
+                                      gradedPrice: game.gradedPrice,
+                                      completePrice: game.completePrice,
+                                    }}
+                                    addedAt={game.addedAt}
+                                  />
                                 </div>
                               </div>
                             )}

@@ -70,4 +70,11 @@ export interface CollectionGame {
   loosePrice?: number;
   gradedPrice?: number;
   completePrice?: number;
+  priceHistory?: Array<{
+    date: Date;
+    newPrice?: number;
+    loosePrice?: number;
+    gradedPrice?: number;
+    completePrice?: number;
+  }>;
 }
