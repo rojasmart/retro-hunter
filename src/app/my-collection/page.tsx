@@ -314,37 +314,40 @@ export default function MyCollectionPage() {
                             <span className="capitalize">{game.condition}</span>
                           </div>
 
-                          {/* MY PRICE Section - More prominent */}
-                          {game.purchasePrice && (
-                            <div className="mt-2 p-2 bg-purple-900/20 rounded-lg border border-purple-400/30">
-                              <p className="text-xs font-medium text-purple-300 mb-1">My Price:</p>
-                              <span className="text-purple-400 font-bold text-sm">$ {game.purchasePrice.toFixed(2)}</span>
-                            </div>
-                          )}
-
-                          {/* Price Analysis Section */}
-                          {(game.lowestPrice || game.highestPrice || game.averagePrice) && (
-                            <div className="mt-2 p-2 bg-blue-900/20 rounded-lg border border-blue-400/30">
-                              <p className="text-xs font-medium text-blue-300 mb-1">Price Analysis market:</p>
-                              <div className="flex items-center space-x-4 text-xs">
-                                {game.lowestPrice && (
-                                  <span className="flex items-center">
-                                    <span className="text-green-400 font-medium">↓ Lowest:$ {game.lowestPrice.toFixed(2)}</span>
-                                  </span>
-                                )}
-                                {game.highestPrice && (
-                                  <span className="flex items-center">
-                                    <span className="text-red-400 font-medium">↑ Highest:$ {game.highestPrice.toFixed(2)}</span>
-                                  </span>
-                                )}
-                                {game.averagePrice && (
-                                  <span className="flex items-center">
-                                    <span className="text-blue-400 font-medium">≈ Average:$ {game.averagePrice.toFixed(2)}</span>
-                                  </span>
-                                )}
+                          {/* Horizontal Layout for My Price and Price Analysis */}
+                          <div className="mt-2 flex space-x-4">
+                            {/* MY PRICE Section */}
+                            {game.purchasePrice && (
+                              <div className="flex-1 p-2 bg-purple-900/20 rounded-lg border border-purple-400/30">
+                                <p className="text-xs font-medium text-purple-300 mb-1">My Price:</p>
+                                <span className="text-purple-400 font-bold text-sm">$ {game.purchasePrice.toFixed(2)}</span>
                               </div>
-                            </div>
-                          )}
+                            )}
+
+                            {/* Price Analysis Section */}
+                            {(game.lowestPrice || game.highestPrice || game.averagePrice) && (
+                              <div className="flex-1 p-2 bg-blue-900/20 rounded-lg border border-blue-400/30">
+                                <p className="text-xs font-medium text-blue-300 mb-1">Price Analysis Market:</p>
+                                <div className="flex items-center space-x-4 text-xs">
+                                  {game.lowestPrice && (
+                                    <span className="flex items-center">
+                                      <span className="text-green-400 font-medium">↓ Lowest: $ {game.lowestPrice.toFixed(2)}</span>
+                                    </span>
+                                  )}
+                                  {game.highestPrice && (
+                                    <span className="flex items-center">
+                                      <span className="text-red-400 font-medium">↑ Highest: $ {game.highestPrice.toFixed(2)}</span>
+                                    </span>
+                                  )}
+                                  {game.averagePrice && (
+                                    <span className="flex items-center">
+                                      <span className="text-blue-400 font-medium">≈ Average: $ {game.averagePrice.toFixed(2)}</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
 
                           {game.notes && <p className="mt-2 text-sm text-cyan-100/60">{game.notes}</p>}
                           <p className="text-xs text-cyan-400/60 mt-1">Adicionado em {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
