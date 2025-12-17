@@ -51,7 +51,20 @@ export async function POST(request: NextRequest) {
     if (gradedPrice !== undefined) game.gradedPrice = gradedPrice;
     if (completePrice !== undefined) game.completePrice = completePrice;
 
-    // Add to price history
+    if (!game.priceHistory) {
+      game.priceHistory = [];
+    }
+
+    // Check if there's already an entry for today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    const todayEntryIndex = game.priceHistory.findIndex((entry: any) => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() === today.getTime();
+    });
+
     const priceHistoryEntry = {
       date: new Date(),
       newPrice: newPrice !== undefined ? newPrice : game.newPrice,
@@ -60,10 +73,13 @@ export async function POST(request: NextRequest) {
       completePrice: completePrice !== undefined ? completePrice : game.completePrice,
     };
 
-    if (!game.priceHistory) {
-      game.priceHistory = [];
+    if (todayEntryIndex >= 0) {
+      // Update existing entry for today
+      game.priceHistory[todayEntryIndex] = priceHistoryEntry;
+    } else {
+      // Add new entry
+      game.priceHistory.push(priceHistoryEntry);
     }
-    game.priceHistory.push(priceHistoryEntry);
 
     await game.save();
 

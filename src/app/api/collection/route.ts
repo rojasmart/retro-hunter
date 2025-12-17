@@ -79,25 +79,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize price history with current prices if any exist
-    const priceHistory = [];
+    const game = new GameInCollection({
+      ...gameData,
+      userId: decoded.userId,
+      priceHistory: [], // Initialize empty, will add after save
+    });
+
+    await game.save();
+
+    // Initialize price history with the game's creation date if prices exist
     if (gameData.newPrice || gameData.loosePrice || gameData.gradedPrice || gameData.completePrice) {
-      priceHistory.push({
-        date: new Date(),
+      game.priceHistory = [{
+        date: game.createdAt, // Use the actual creation date
         newPrice: gameData.newPrice,
         loosePrice: gameData.loosePrice,
         gradedPrice: gameData.gradedPrice,
         completePrice: gameData.completePrice,
-      });
+      }];
+      await game.save();
     }
-
-    const game = new GameInCollection({
-      ...gameData,
-      userId: decoded.userId,
-      priceHistory,
-    });
-
-    await game.save();
     console.log('Collection POST saved game:', JSON.stringify(game.toObject(), null, 2));
 
     return NextResponse.json({ 

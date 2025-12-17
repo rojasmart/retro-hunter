@@ -13,6 +13,8 @@ export default function MyCollectionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAddingGame, setIsAddingGame] = useState(false);
+  const [updatingPrices, setUpdatingPrices] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0 });
   const [newGame, setNewGame] = useState({
     title: "",
     platform: "",
@@ -70,14 +72,109 @@ export default function MyCollectionPage() {
     }
   };
 
+  // Update prices for a single game
+  const updateGamePrices = async (gameId: string, gameTitle: string, platform: string): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      // Fetch new prices from backend price API
+      const priceResponse = await fetch(
+        `http://127.0.0.1:8000/price-search?game_name=${encodeURIComponent(gameTitle)}&platform=${encodeURIComponent(platform)}`
+      );
+
+      if (!priceResponse.ok) {
+        console.warn(`Failed to fetch prices for ${gameTitle}`);
+        return false;
+      }
+
+      const priceData = await priceResponse.json();
+
+      if (priceData.success && priceData.data && priceData.data.prices) {
+        // Update the game with new prices and add to history
+        const updateResponse = await fetch("/api/collection/update-prices", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            gameId,
+            newPrice: priceData.data.prices.new,
+            loosePrice: priceData.data.prices.loose,
+            gradedPrice: priceData.data.prices.graded,
+            completePrice: priceData.data.prices.cib,
+          }),
+        });
+
+        if (updateResponse.ok) {
+          console.log(`✓ Updated prices for ${gameTitle}`);
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error(`Error updating prices for ${gameTitle}:`, error);
+      return false;
+    }
+  };
+
+  // Update all games prices
+  const updateAllGamesPrices = async () => {
+    if (games.length === 0) return;
+
+    setUpdatingPrices(true);
+    setUpdateProgress({ current: 0, total: games.length });
+
+    let successCount = 0;
+
+    for (let i = 0; i < games.length; i++) {
+      const game = games[i];
+      setUpdateProgress({ current: i + 1, total: games.length });
+
+      const success = await updateGamePrices(game.id, game.title, game.platform);
+      if (success) successCount++;
+
+      // Add a small delay to avoid overwhelming the API
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    console.log(`Updated ${successCount}/${games.length} games successfully`);
+
+    // Refresh collection to show updated data
+    await fetchCollection();
+    setUpdatingPrices(false);
+    setUpdateProgress({ current: 0, total: 0 });
+  };
+
   useEffect(() => {
-    fetchCollection();
+    const initializeCollection = async () => {
+      await fetchCollection();
+    };
+
+    initializeCollection();
 
     // Listen for collection updates
     const handler = () => fetchCollection();
     window.addEventListener("collection:added", handler);
     return () => window.removeEventListener("collection:added", handler);
   }, []);
+
+  // Auto-update prices when games are loaded (once per day)
+  useEffect(() => {
+    if (games.length === 0) return;
+
+    const lastUpdate = localStorage.getItem("last_price_update");
+    const now = new Date().getTime();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    // Check if we should update (once per day)
+    if (!lastUpdate || now - parseInt(lastUpdate) > oneDayMs) {
+      console.log("Triggering automatic price update...");
+      updateAllGamesPrices();
+      localStorage.setItem("last_price_update", now.toString());
+    }
+  }, [games.length]);
 
   const handleAddGame = () => {
     if (!newGame.title || !newGame.platform) return;
@@ -158,16 +255,48 @@ export default function MyCollectionPage() {
               <div>
                 <h1 className="text-3xl font-bold text-cyan-300">My Collection</h1>
                 <p className="text-cyan-100/80">Manage your game collection</p>
+                {updatingPrices && (
+                  <div className="mt-2 flex items-center space-x-2 text-sm text-yellow-400">
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>
+                      Updating prices... ({updateProgress.current}/{updateProgress.total})
+                    </span>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={() => setIsAddingGame(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-bold transition-all duration-300 border border-purple-400/50 flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span>Adicionar Jogo</span>
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={updateAllGamesPrices}
+                  disabled={updatingPrices || games.length === 0}
+                  className="bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md font-bold transition-all duration-300 border border-cyan-400/50 flex items-center space-x-2"
+                >
+                  <svg className={`w-5 h-5 ${updatingPrices ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  <span>Update All Prices</span>
+                </button>
+                <button
+                  onClick={() => setIsAddingGame(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-bold transition-all duration-300 border border-purple-400/50 flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span>Adicionar Jogo</span>
+                </button>
+              </div>
             </div>
 
             {/* Statistics */}
