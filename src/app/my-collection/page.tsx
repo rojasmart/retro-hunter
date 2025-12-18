@@ -95,16 +95,18 @@ export default function MyCollectionPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setFolders(data.folders.map((f: any) => ({
-          id: f._id,
-          name: f.name,
-          description: f.description,
-          color: f.color,
-          icon: f.icon,
-          gameCount: f.gameCount,
-          createdAt: f.createdAt,
-          updatedAt: f.updatedAt,
-        })));
+        setFolders(
+          data.folders.map((f: any) => ({
+            id: f._id,
+            name: f.name,
+            description: f.description,
+            color: f.color,
+            icon: f.icon,
+            gameCount: f.gameCount,
+            createdAt: f.createdAt,
+            updatedAt: f.updatedAt,
+          }))
+        );
         setUncategorizedCount(data.uncategorizedCount);
       }
     } catch (err: any) {
@@ -120,17 +122,17 @@ export default function MyCollectionPage() {
       const token = localStorage.getItem("auth_token");
       if (!token) throw new Error("Not authenticated");
 
-      const res = await fetch('/api/folders', {
-        method: 'POST',
+      const res = await fetch("/api/folders", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newFolder)
+        body: JSON.stringify(newFolder),
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         setError(data.error || "Failed to create folder");
         setTimeout(() => setError(null), 3000);
@@ -156,8 +158,8 @@ export default function MyCollectionPage() {
       if (!token) throw new Error("Not authenticated");
 
       const res = await fetch(`/api/folders?id=${folderId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (res.ok) {
@@ -179,12 +181,12 @@ export default function MyCollectionPage() {
       if (!token) throw new Error("Not authenticated");
 
       const res = await fetch(`/api/collection?id=${gameId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ folderId })
+        body: JSON.stringify({ folderId }),
       });
 
       if (res.ok) {
@@ -466,9 +468,7 @@ export default function MyCollectionPage() {
                     <button
                       onClick={() => setSelectedFolder(null)}
                       className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between ${
-                        selectedFolder === null
-                          ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50"
-                          : "text-cyan-100/80 hover:bg-gray-800/50"
+                        selectedFolder === null ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50" : "text-cyan-100/80 hover:bg-gray-800/50"
                       }`}
                     >
                       <span>📁 Todos os Jogos</span>
@@ -519,9 +519,7 @@ export default function MyCollectionPage() {
               </div>
 
               {/* Games List */}
-              <div className="lg:col-span-3">
-                {/* Games content will go here */}
-              </div>
+              <div className="lg:col-span-3">{/* Games content will go here */}</div>
             </div>
 
             {/* Add Folder Modal */}
@@ -706,19 +704,18 @@ export default function MyCollectionPage() {
                 <h2 className="text-lg font-semibold text-cyan-300">
                   {selectedFolder === null && "Todos os Jogos"}
                   {selectedFolder === "uncategorized" && "Jogos Sem Pasta"}
-                  {selectedFolder && selectedFolder !== "uncategorized" && 
-                    folders.find((f) => f.id === selectedFolder)?.name
-                  }
+                  {selectedFolder && selectedFolder !== "uncategorized" && folders.find((f) => f.id === selectedFolder)?.name}
                 </h2>
               </div>
 
               {(() => {
                 // Filter games based on selected folder
-                const filteredGames = selectedFolder === null
-                  ? games
-                  : selectedFolder === "uncategorized"
-                  ? games.filter((g) => !g.folderId)
-                  : games.filter((g) => g.folderId === selectedFolder);
+                const filteredGames =
+                  selectedFolder === null
+                    ? games
+                    : selectedFolder === "uncategorized"
+                    ? games.filter((g) => !g.folderId)
+                    : games.filter((g) => g.folderId === selectedFolder);
 
                 return filteredGames.length === 0 ? (
                   <div className="p-12 text-center">
