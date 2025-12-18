@@ -441,80 +441,90 @@ export default function MyCollectionPage() {
                   {games.map((game) => {
                     console.log("Rendering game:", game);
                     return (
-                      <div key={game.id} className="p-6 flex items-center justify-between hover:bg-gray-800/30 transition-colors">
-                        <div className="flex-1">
+                      <div key={game.id} className="p-6 hover:bg-gray-800/30 transition-colors">
+                        {/* Title and Purchase Price on same line */}
+                        <div className="flex items-center justify-between mb-2">
                           <h3 className="text-lg font-medium text-cyan-300">{game.title}</h3>
-                          <div className="mt-1 flex items-center space-x-4 text-sm text-cyan-100/80">
-                            <span className="bg-gray-800/50 px-2 py-1 rounded border border-cyan-400/30">{game.platform}</span>
-                            <span className="capitalize">{game.condition}</span>
-                          </div>
-
-                          {/* Horizontal Layout for My Price and Price Analysis */}
-                          <div className="mt-2 flex space-x-4">
-                            {/* MY PRICE Section */}
-                            {game.purchasePrice && (
-                              <div className="flex-1 p-2 bg-purple-900/20 rounded-lg border border-purple-400/30">
-                                <p className="text-xs font-medium text-purple-300 mb-1">My Price:</p>
-                                <span className="text-purple-400 font-bold text-sm">$ {game.purchasePrice.toFixed(2)}</span>
-                              </div>
-                            )}
-
-                            {/* Price Analysis Section */}
-                            {(game.newPrice || game.loosePrice || game.gradedPrice || game.completePrice) && (
-                              <div className="flex-1 p-3 bg-blue-900/20 rounded-lg border border-blue-400/30">
-                                <p className="text-xs font-medium text-blue-300 mb-2">Price Analysis Market:</p>
-                                <div className="flex items-center space-x-4 text-xs mb-3">
-                                  {game.newPrice && (
-                                    <span className="flex items-center">
-                                      <span className="text-green-400 font-medium">New: $ {game.newPrice.toFixed(2)}</span>
-                                    </span>
-                                  )}
-                                  {game.loosePrice && (
-                                    <span className="flex items-center">
-                                      <span className="text-red-400 font-medium">Loose: $ {game.loosePrice.toFixed(2)}</span>
-                                    </span>
-                                  )}
-                                  {game.gradedPrice && (
-                                    <span className="flex items-center">
-                                      <span className="text-blue-400 font-medium">Graded: $ {game.gradedPrice.toFixed(2)}</span>
-                                    </span>
-                                  )}
-                                  {game.completePrice && (
-                                    <span className="flex items-center">
-                                      <span className="text-yellow-400 font-medium">Complete: $ {game.completePrice.toFixed(2)}</span>
-                                    </span>
-                                  )}
-                                </div>
-                                {/* Price History Chart */}
-                                <div className="mt-3 pt-3 border-t border-blue-400/20">
-                                  <PriceHistoryChart
-                                    priceHistory={game.priceHistory}
-                                    currentPrices={{
-                                      newPrice: game.newPrice,
-                                      loosePrice: game.loosePrice,
-                                      gradedPrice: game.gradedPrice,
-                                      completePrice: game.completePrice,
-                                    }}
-                                    addedAt={game.addedAt}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {game.notes && <p className="mt-2 text-sm text-cyan-100/60">{game.notes}</p>}
-                          <p className="text-xs text-cyan-400/60 mt-1">Adicionado em {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
+                          {game.purchasePrice && (
+                            <div className="flex items-center space-x-2 bg-gray-800/50 px-2 py-1 rounded border border-cyan-400/30">
+                              <span className="text-md text-purple-300">My Price:</span>
+                              <span className="text-purple-400 font-bold text-lg">$ {game.purchasePrice.toFixed(2)}</span>
+                            </div>
+                          )}
                         </div>
-                        <button onClick={() => handleRemoveGame(game.id)} className="ml-4 text-red-400 hover:text-red-300 transition-colors">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
+
+                        {/* Platform and Condition */}
+                        <div className="flex items-center space-x-4 text-sm text-cyan-100/80 mb-4">
+                          <span className="bg-gray-800/50 px-2 py-1 rounded border border-cyan-400/30">{game.platform}</span>
+                          <span className="capitalize">{game.condition}</span>
+                        </div>
+
+                        {/* Price Analysis Section - Full Width */}
+                        {(game.newPrice || game.loosePrice || game.gradedPrice || game.completePrice) && (
+                          <div className="p-4 bg-blue-900/20 rounded-lg border border-blue-400/30">
+                            <p className="text-xs font-medium text-blue-300 mb-3">Price Analysis Market:</p>
+
+                            {/* Price Labels */}
+                            <div className="flex items-center justify-around text-xs mb-4">
+                              {game.newPrice && (
+                                <div className="text-center">
+                                  <div className="text-green-400/60 text-[10px] mb-1">New</div>
+                                  <div className="text-green-400 font-bold">$ {game.newPrice.toFixed(2)}</div>
+                                </div>
+                              )}
+                              {game.loosePrice && (
+                                <div className="text-center">
+                                  <div className="text-red-400/60 text-[10px] mb-1">Loose</div>
+                                  <div className="text-red-400 font-bold">$ {game.loosePrice.toFixed(2)}</div>
+                                </div>
+                              )}
+                              {game.gradedPrice && (
+                                <div className="text-center">
+                                  <div className="text-blue-400/60 text-[10px] mb-1">Graded</div>
+                                  <div className="text-blue-400 font-bold">$ {game.gradedPrice.toFixed(2)}</div>
+                                </div>
+                              )}
+                              {game.completePrice && (
+                                <div className="text-center">
+                                  <div className="text-yellow-400/60 text-[10px] mb-1">Complete</div>
+                                  <div className="text-yellow-400 font-bold">$ {game.completePrice.toFixed(2)}</div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Price History Chart - Full Width */}
+                            <div className="pt-3 border-t border-blue-400/20">
+                              <PriceHistoryChart
+                                priceHistory={game.priceHistory}
+                                currentPrices={{
+                                  newPrice: game.newPrice,
+                                  loosePrice: game.loosePrice,
+                                  gradedPrice: game.gradedPrice,
+                                  completePrice: game.completePrice,
+                                }}
+                                addedAt={game.addedAt}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Notes */}
+                        {game.notes && <p className="mt-3 text-sm text-cyan-100/60 italic">{game.notes}</p>}
+
+                        {/* Added Date and Delete Button */}
+                        <div className="mt-3 flex items-center justify-between">
+                          <p className="text-xs text-cyan-400/60">Adicionado em {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
+                          <button onClick={() => handleRemoveGame(game.id)} className="text-red-400 hover:text-red-300 transition-colors">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
