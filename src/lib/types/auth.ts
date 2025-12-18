@@ -57,6 +57,7 @@ export interface CollectionGame {
   title: string;
   platform: string;
   condition: string;
+  folderId?: string;
   purchasePrice?: number;
   purchaseDate?: Date;
   notes?: string;
@@ -77,4 +78,15 @@ export interface CollectionGame {
     gradedPrice?: number;
     completePrice?: number;
   }>;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  gameCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }

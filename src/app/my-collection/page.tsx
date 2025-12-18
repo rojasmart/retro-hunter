@@ -3,16 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { CollectionGame } from "@/lib/types/auth";
+import { CollectionGame, Folder } from "@/lib/types/auth";
 import AuthButton from "@/components/auth/AuthButton";
 import PriceHistoryChart from "@/components/PriceHistoryChart";
 
 export default function MyCollectionPage() {
   const { user, logout } = useAuth();
   const [games, setGames] = useState<CollectionGame[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [uncategorizedCount, setUncategorizedCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAddingGame, setIsAddingGame] = useState(false);
+  const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [updatingPrices, setUpdatingPrices] = useState(false);
   const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0 });
   const [newGame, setNewGame] = useState({
@@ -21,6 +25,12 @@ export default function MyCollectionPage() {
     condition: "used",
     purchasePrice: "",
     notes: "",
+    folderId: "",
+  });
+  const [newFolder, setNewFolder] = useState({
+    name: "",
+    description: "",
+    color: "#22d3ee",
   });
 
   // Fetch user's collection
@@ -47,6 +57,7 @@ export default function MyCollectionPage() {
         title: g.gameTitle,
         platform: g.platform,
         condition: g.condition,
+        folderId: g.folderId,
         purchasePrice: g.purchasePrice,
         notes: g.notes,
         addedAt: g.createdAt,
@@ -69,6 +80,119 @@ export default function MyCollectionPage() {
       setError(err?.message || "Error fetching collection");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch folders
+  const fetchFolders = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) return;
+
+      const res = await fetch(`/api/folders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setFolders(data.folders.map((f: any) => ({
+          id: f._id,
+          name: f.name,
+          description: f.description,
+          color: f.color,
+          icon: f.icon,
+          gameCount: f.gameCount,
+          createdAt: f.createdAt,
+          updatedAt: f.updatedAt,
+        })));
+        setUncategorizedCount(data.uncategorizedCount);
+      }
+    } catch (err: any) {
+      console.error("Error fetching folders:", err);
+    }
+  };
+
+  // Create new folder
+  const handleAddFolder = async () => {
+    if (!newFolder.name.trim()) return;
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newFolder)
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setError(data.error || "Failed to create folder");
+        setTimeout(() => setError(null), 3000);
+        return;
+      }
+
+      await fetchFolders();
+      setNewFolder({ name: "", description: "", color: "#22d3ee" });
+      setIsAddingFolder(false);
+    } catch (err: any) {
+      console.error("Error creating folder:", err);
+      setError(err.message);
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  // Delete folder
+  const handleDeleteFolder = async (folderId: string) => {
+    if (!confirm("Tem certeza que deseja deletar esta pasta? Os jogos não serão deletados.")) return;
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(`/api/folders?id=${folderId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        await fetchFolders();
+        await fetchCollection();
+        if (selectedFolder === folderId) {
+          setSelectedFolder(null);
+        }
+      }
+    } catch (err: any) {
+      console.error("Error deleting folder:", err);
+    }
+  };
+
+  // Move game to folder
+  const moveGameToFolder = async (gameId: string, folderId: string | null) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(`/api/collection?id=${gameId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ folderId })
+      });
+
+      if (res.ok) {
+        await fetchCollection();
+        await fetchFolders();
+      }
+    } catch (err: any) {
+      console.error("Error moving game:", err);
     }
   };
 
@@ -149,13 +273,17 @@ export default function MyCollectionPage() {
 
   useEffect(() => {
     const initializeCollection = async () => {
+      await fetchFolders();
       await fetchCollection();
     };
 
     initializeCollection();
 
     // Listen for collection updates
-    const handler = () => fetchCollection();
+    const handler = () => {
+      fetchCollection();
+      fetchFolders();
+    };
     window.addEventListener("collection:added", handler);
     return () => window.removeEventListener("collection:added", handler);
   }, []);
@@ -196,6 +324,7 @@ export default function MyCollectionPage() {
       condition: "used",
       purchasePrice: "",
       notes: "",
+      folderId: "",
     });
     setIsAddingGame(false);
   };
@@ -315,6 +444,152 @@ export default function MyCollectionPage() {
               </div>
             </div>
 
+            {/* Folders and Games Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+              {/* Folders Sidebar */}
+              <div className="lg:col-span-1">
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl">
+                  <div className="px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-cyan-300">Pastas</h3>
+                    <button
+                      onClick={() => setIsAddingFolder(true)}
+                      className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                      title="Criar Nova Pasta"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="p-2">
+                    {/* All Games */}
+                    <button
+                      onClick={() => setSelectedFolder(null)}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between ${
+                        selectedFolder === null
+                          ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50"
+                          : "text-cyan-100/80 hover:bg-gray-800/50"
+                      }`}
+                    >
+                      <span>📁 Todos os Jogos</span>
+                      <span className="text-xs bg-gray-700/50 px-2 py-0.5 rounded">{games.length}</span>
+                    </button>
+
+                    {/* Uncategorized */}
+                    <button
+                      onClick={() => setSelectedFolder("uncategorized")}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between mt-1 ${
+                        selectedFolder === "uncategorized"
+                          ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50"
+                          : "text-cyan-100/80 hover:bg-gray-800/50"
+                      }`}
+                    >
+                      <span>📂 Sem Pasta</span>
+                      <span className="text-xs bg-gray-700/50 px-2 py-0.5 rounded">{uncategorizedCount}</span>
+                    </button>
+
+                    <div className="border-t border-cyan-500/20 my-2"></div>
+
+                    {/* User Folders */}
+                    {folders.map((folder) => (
+                      <div
+                        key={folder.id}
+                        className={`group w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center justify-between mt-1 ${
+                          selectedFolder === folder.id
+                            ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50"
+                            : "text-cyan-100/80 hover:bg-gray-800/50"
+                        }`}
+                      >
+                        <button onClick={() => setSelectedFolder(folder.id)} className="flex-1 flex items-center justify-between">
+                          <span style={{ color: folder.color }}>📁 {folder.name}</span>
+                          <span className="text-xs bg-gray-700/50 px-2 py-0.5 rounded">{folder.gameCount}</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFolder(folder.id)}
+                          className="ml-2 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-all"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Games List */}
+              <div className="lg:col-span-3">
+                {/* Games content will go here */}
+              </div>
+            </div>
+
+            {/* Add Folder Modal */}
+            {isAddingFolder && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-md border border-cyan-400/50">
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold mb-4 text-cyan-300">Nova Pasta</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Nome da Pasta *</label>
+                        <input
+                          type="text"
+                          value={newFolder.name}
+                          onChange={(e) => setNewFolder((prev) => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 bg-gray-900/80 border border-cyan-400/50 rounded-md text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none"
+                          placeholder="Ex: Jogos SNES"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Descrição</label>
+                        <input
+                          type="text"
+                          value={newFolder.description}
+                          onChange={(e) => setNewFolder((prev) => ({ ...prev, description: e.target.value }))}
+                          className="w-full px-3 py-2 bg-gray-900/80 border border-cyan-400/50 rounded-md text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none"
+                          placeholder="Ex: Minha coleção de SNES"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Cor</label>
+                        <div className="flex space-x-2">
+                          {["#22d3ee", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"].map((color) => (
+                            <button
+                              key={color}
+                              onClick={() => setNewFolder((prev) => ({ ...prev, color }))}
+                              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                newFolder.color === color ? "border-white scale-110" : "border-gray-600"
+                              }`}
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-4 mt-6">
+                      <button
+                        onClick={() => {
+                          setIsAddingFolder(false);
+                          setNewFolder({ name: "", description: "", color: "#22d3ee" });
+                        }}
+                        className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleAddFolder}
+                        disabled={!newFolder.name.trim()}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                      >
+                        Criar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Add Game Modal */}
             {isAddingGame && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -366,6 +641,22 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Pasta</label>
+                        <select
+                          value={newGame.folderId}
+                          onChange={(e) => setNewGame((prev) => ({ ...prev, folderId: e.target.value }))}
+                          className="w-full px-3 py-2 bg-gray-900/80 border border-cyan-400/50 rounded-md text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none"
+                        >
+                          <option value="">Sem Pasta</option>
+                          {folders.map((folder) => (
+                            <option key={folder.id} value={folder.id}>
+                              {folder.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
                         <label className="block text-sm font-medium text-cyan-100 mb-1">Preço de Compra ($)</label>
                         <input
                           type="number"
@@ -412,39 +703,60 @@ export default function MyCollectionPage() {
             {/* Games List */}
             <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl">
               <div className="px-6 py-4 border-b border-cyan-500/30">
-                <h2 className="text-lg font-semibold text-cyan-300">Jogos</h2>
+                <h2 className="text-lg font-semibold text-cyan-300">
+                  {selectedFolder === null && "Todos os Jogos"}
+                  {selectedFolder === "uncategorized" && "Jogos Sem Pasta"}
+                  {selectedFolder && selectedFolder !== "uncategorized" && 
+                    folders.find((f) => f.id === selectedFolder)?.name
+                  }
+                </h2>
               </div>
 
-              {games.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-400/30">
-                    <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                      />
-                    </svg>
+              {(() => {
+                // Filter games based on selected folder
+                const filteredGames = selectedFolder === null
+                  ? games
+                  : selectedFolder === "uncategorized"
+                  ? games.filter((g) => !g.folderId)
+                  : games.filter((g) => g.folderId === selectedFolder);
+
+                return filteredGames.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-400/30">
+                      <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-cyan-300 mb-2">Nenhum jogo nesta pasta</h3>
+                    <p className="text-cyan-100/60 mb-6">Adicione jogos ou mova jogos existentes para esta pasta.</p>
                   </div>
-                  <h3 className="text-lg font-medium text-cyan-300 mb-2">Nenhum jogo na coleção</h3>
-                  <p className="text-cyan-100/60 mb-6">Comece adicionando seus primeiros jogos à sua coleção!</p>
-                  <button
-                    onClick={() => setIsAddingGame(true)}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 font-bold transition-colors border border-purple-400/50"
-                  >
-                    Adicionar Primeiro Jogo
-                  </button>
-                </div>
-              ) : (
-                <div className="divide-y divide-cyan-500/20">
-                  {games.map((game) => {
-                    console.log("Rendering game:", game);
-                    return (
+                ) : (
+                  <div className="divide-y divide-cyan-500/20">
+                    {filteredGames.map((game) => (
                       <div key={game.id} className="p-6 hover:bg-gray-800/30 transition-colors">
-                        {/* Title and Purchase Price on same line */}
+                        {/* Title, Folder Dropdown and Purchase Price */}
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-lg font-medium text-cyan-300">{game.title}</h3>
+                          <div className="flex items-center space-x-3 flex-1">
+                            <h3 className="text-lg font-medium text-cyan-300">{game.title}</h3>
+                            <select
+                              value={game.folderId || ""}
+                              onChange={(e) => moveGameToFolder(game.id, e.target.value || null)}
+                              className="text-xs px-2 py-1 bg-gray-900/80 border border-cyan-400/30 rounded text-cyan-100 focus:border-pink-400 focus:ring-1 focus:ring-pink-400/50 focus:outline-none"
+                              title="Mover para pasta"
+                            >
+                              <option value="">📂 Sem Pasta</option>
+                              {folders.map((folder) => (
+                                <option key={folder.id} value={folder.id}>
+                                  📁 {folder.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                           {game.purchasePrice && (
                             <div className="flex items-center space-x-2 bg-gray-800/50 px-2 py-1 rounded border border-cyan-400/30">
                               <span className="text-md text-purple-300">My Price:</span>
@@ -526,10 +838,10 @@ export default function MyCollectionPage() {
                           </button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

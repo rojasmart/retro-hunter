@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IGameInCollection extends Document {
   _id: string;
   userId: string;
+  folderId?: string; // Reference to Folder
   gameTitle: string;
   platform: string;
   condition: 'new' | 'used' | 'refurbished' | 'poor';
@@ -37,6 +38,10 @@ const GameInCollectionSchema = new Schema<IGameInCollection>({
   userId: {
     type: String,
     required: true,
+    index: true
+  },
+  folderId: {
+    type: String,
     index: true
   },
   gameTitle: {
