@@ -430,27 +430,27 @@ export default function MyCollectionPage() {
               </div>
             </div>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-cyan-400/50 shadow-xl">
-                <div className="text-2xl font-bold text-cyan-400">{games.length}</div>
-                <div className="text-cyan-100/80">Games in your Collection</div>
-              </div>
-              <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-green-400/50 shadow-xl">
-                <div className="text-2xl font-bold text-green-400">$ {totalValue.toFixed(2)}</div>
-                <div className="text-cyan-100/80">Total Invested Value</div>
-              </div>
-              <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-purple-400/50 shadow-xl">
-                <div className="text-2xl font-bold text-purple-400">{new Set(games.map((g) => g.platform)).size}</div>
-                <div className="text-cyan-100/80">Different Platforms</div>
-              </div>
-            </div>
-
-            {/* Folders and Games Layout */}
+            {/* Statistics and Folders - Same Line */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-              {/* Folders Sidebar */}
+              {/* Statistics - 3 columns */}
+              <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-cyan-400/50 shadow-xl">
+                  <div className="text-2xl font-bold text-cyan-400">{games.length}</div>
+                  <div className="text-cyan-100/80">Games in your Collection</div>
+                </div>
+                <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-green-400/50 shadow-xl">
+                  <div className="text-2xl font-bold text-green-400">$ {totalValue.toFixed(2)}</div>
+                  <div className="text-cyan-100/80">Total Invested Value</div>
+                </div>
+                <div className="bg-black/40 backdrop-blur-sm p-6 rounded-lg border border-purple-400/50 shadow-xl">
+                  <div className="text-2xl font-bold text-purple-400">{new Set(games.map((g) => g.platform)).size}</div>
+                  <div className="text-cyan-100/80">Different Platforms</div>
+                </div>
+              </div>
+
+              {/* Folders Sidebar - 1 column */}
               <div className="lg:col-span-1">
-                <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl">
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl h-full">
                   <div className="px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-cyan-300">Pastas</h3>
                     <button
@@ -463,7 +463,7 @@ export default function MyCollectionPage() {
                       </svg>
                     </button>
                   </div>
-                  <div className="p-2">
+                  <div className="p-2 max-h-[200px] overflow-y-auto">
                     {/* All Games */}
                     <button
                       onClick={() => setSelectedFolder(null)}
@@ -517,9 +517,6 @@ export default function MyCollectionPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Games List */}
-              <div className="lg:col-span-3">{/* Games content will go here */}</div>
             </div>
 
             {/* Add Folder Modal */}
