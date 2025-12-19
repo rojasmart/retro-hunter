@@ -232,8 +232,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">GAME DETECTOR</h2>
-            <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or use camera to auto-detect games</p>
+            <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">PRICE SEARCH</h2>
+            <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or type a name to search for price games</p>
           </div>
         </div>
       </div>
@@ -302,7 +302,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
         <div className="mb-6">
           <div className="backdrop-blur-sm bg-black/20 rounded-xl p-4 border border-cyan-400/30">
             <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-cyan-300 font-mono">🔍 SCANNING IMAGE...</span>
+              <span className="text-cyan-300 font-mono">SCANNING IMAGE...</span>
               <span className="text-pink-400 font-mono font-bold">{progress}%</span>
             </div>
             <div className="w-full bg-gray-800/50 rounded-full h-3 border border-cyan-400/30">
