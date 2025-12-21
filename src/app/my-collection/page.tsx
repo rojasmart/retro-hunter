@@ -452,7 +452,7 @@ export default function MyCollectionPage() {
               <div className="lg:col-span-1">
                 <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl h-full">
                   <div className="px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-cyan-300">Pastas</h3>
+                    <h3 className="text-sm font-semibold text-cyan-300">Folders</h3>
                     <button
                       onClick={() => setIsAddingFolder(true)}
                       className="text-cyan-400 hover:text-cyan-300 transition-colors"
@@ -471,7 +471,7 @@ export default function MyCollectionPage() {
                         selectedFolder === null ? "bg-cyan-600/30 text-cyan-300 border border-cyan-400/50" : "text-cyan-100/80 hover:bg-gray-800/50"
                       }`}
                     >
-                      <span>📁 Todos os Jogos</span>
+                      <span>All Games</span>
                       <span className="text-xs bg-gray-700/50 px-2 py-0.5 rounded">{games.length}</span>
                     </button>
 
@@ -484,7 +484,7 @@ export default function MyCollectionPage() {
                           : "text-cyan-100/80 hover:bg-gray-800/50"
                       }`}
                     >
-                      <span>📂 Sem Pasta</span>
+                      <span>No Folder</span>
                       <span className="text-xs bg-gray-700/50 px-2 py-0.5 rounded">{uncategorizedCount}</span>
                     </button>
 
@@ -594,7 +594,7 @@ export default function MyCollectionPage() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Título do Jogo *</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Game Title *</label>
                         <input
                           type="text"
                           value={newGame.title}
@@ -605,7 +605,7 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Plataforma *</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Platform *</label>
                         <select
                           value={newGame.platform}
                           onChange={(e) => setNewGame((prev) => ({ ...prev, platform: e.target.value }))}
@@ -623,7 +623,7 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Condição</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Condition</label>
                         <select
                           value={newGame.condition}
                           onChange={(e) => setNewGame((prev) => ({ ...prev, condition: e.target.value }))}
@@ -636,13 +636,13 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Pasta</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Folder</label>
                         <select
                           value={newGame.folderId}
                           onChange={(e) => setNewGame((prev) => ({ ...prev, folderId: e.target.value }))}
                           className="w-full px-3 py-2 bg-gray-900/80 border border-cyan-400/50 rounded-md text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none"
                         >
-                          <option value="">Sem Pasta</option>
+                          <option value="">Uncategorised</option>
                           {folders.map((folder) => (
                             <option key={folder.id} value={folder.id}>
                               {folder.name}
@@ -652,7 +652,7 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Preço de Compra ($)</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Purchase Price ($)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -664,7 +664,7 @@ export default function MyCollectionPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-cyan-100 mb-1">Notas</label>
+                        <label className="block text-sm font-medium text-cyan-100 mb-1">Notes</label>
                         <textarea
                           value={newGame.notes}
                           onChange={(e) => setNewGame((prev) => ({ ...prev, notes: e.target.value }))}
@@ -680,14 +680,14 @@ export default function MyCollectionPage() {
                         onClick={() => setIsAddingGame(false)}
                         className="px-4 py-2 border border-gray-600 rounded-md text-gray-300 hover:bg-gray-700 transition-colors"
                       >
-                        Cancelar
+                        Cancel
                       </button>
                       <button
                         onClick={handleAddGame}
                         disabled={!newGame.title || !newGame.platform}
                         className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 transition-colors"
                       >
-                        Adicionar
+                        Add Game
                       </button>
                     </div>
                   </div>
@@ -699,8 +699,8 @@ export default function MyCollectionPage() {
             <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-cyan-400/50 shadow-xl">
               <div className="px-6 py-4 border-b border-cyan-500/30">
                 <h2 className="text-lg font-semibold text-cyan-300">
-                  {selectedFolder === null && "Todos os Jogos"}
-                  {selectedFolder === "uncategorized" && "Jogos Sem Pasta"}
+                  {selectedFolder === null && "All Games"}
+                  {selectedFolder === "uncategorized" && "Uncategorised"}
                   {selectedFolder && selectedFolder !== "uncategorized" && folders.find((f) => f.id === selectedFolder)?.name}
                 </h2>
               </div>
@@ -743,10 +743,10 @@ export default function MyCollectionPage() {
                               className="text-xs px-2 py-1 bg-gray-900/80 border border-cyan-400/30 rounded text-cyan-100 focus:border-pink-400 focus:ring-1 focus:ring-pink-400/50 focus:outline-none"
                               title="Mover para pasta"
                             >
-                              <option value="">📂 Sem Pasta</option>
+                              <option value="">No folder</option>
                               {folders.map((folder) => (
                                 <option key={folder.id} value={folder.id}>
-                                  📁 {folder.name}
+                                  {folder.name}
                                 </option>
                               ))}
                             </select>
