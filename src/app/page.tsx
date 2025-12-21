@@ -266,6 +266,7 @@ export default function Home() {
   // States para adicionar à coleção
   const [addingGameId, setAddingGameId] = useState<string | null>(null);
   const [gamesPurchasePrice, setGamesPurchasePrice] = useState<Record<string, number>>({});
+  const [gamesCondition, setGamesCondition] = useState<Record<string, string>>({});
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
 
@@ -280,11 +281,12 @@ export default function Home() {
       if (!token) throw new Error("You must be logged in to add to collection");
 
       const purchasePrice = gamesPurchasePrice[game.id] || 0;
+      const selectedCondition = gamesCondition[game.id] || "used";
 
       const payload = {
         gameTitle: game.product_name,
         platform: game.console_name || "Unknown",
-        condition: "used",
+        condition: selectedCondition,
         purchasePrice: purchasePrice > 0 ? purchasePrice : undefined,
         notes: `Genre: ${game.genre || "N/A"}`,
         images: [],
@@ -587,6 +589,18 @@ export default function Home() {
                   {/* Add to Collection Section */}
                   <div className="mt-4 pt-4 border-t border-cyan-400/30">
                     <div className="flex gap-2 items-end">
+                      <div className="flex-1">
+                        <label className="text-xs text-cyan-300/70 font-mono mb-1 block">CONDITION</label>
+                        <select
+                          value={gamesCondition[item.id] || "used"}
+                          onChange={(e) => setGamesCondition({ ...gamesCondition, [item.id]: e.target.value })}
+                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                        >
+                          <option value="new">New</option>
+                          <option value="used">Used</option>
+                          <option value="refurbished">Refurbished</option>
+                        </select>
+                      </div>
                       <div className="flex-1">
                         <label className="text-xs text-cyan-300/70 font-mono mb-1 block">MY PURCHASE PRICE</label>
                         <input
