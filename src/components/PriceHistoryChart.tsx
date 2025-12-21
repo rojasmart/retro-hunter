@@ -28,6 +28,67 @@ export default function PriceHistoryChart({ priceHistory, currentPrices, addedAt
   // If no price history, create initial data point with current prices
   const historyData = priceHistory && priceHistory.length > 0 ? priceHistory : [{ date: new Date(addedAt), ...currentPrices }];
 
+  // Calculate price changes (current vs initial/first)
+  const getPriceChange = (priceType: keyof typeof currentPrices) => {
+    if (!historyData || historyData.length < 2) return null;
+
+    // Compare current (last) with initial (first)
+    const current = historyData[historyData.length - 1][priceType];
+    const initial = historyData[0][priceType];
+
+    console.log(`${priceType}: Initial=${initial}, Current=${current}`);
+
+    if (!current || !initial) return null;
+
+    const change = current - initial;
+    const percentChange = ((change / initial) * 100).toFixed(1);
+
+    console.log(`${priceType}: Change=${change}, Percent=${percentChange}%, Direction=${change > 0 ? "up" : change < 0 ? "down" : "neutral"}`);
+
+    return {
+      change,
+      percentChange,
+      direction: change > 0 ? "up" : change < 0 ? "down" : "neutral",
+    };
+  };
+
+  const newChange = getPriceChange("newPrice");
+  const looseChange = getPriceChange("loosePrice");
+  const gradedChange = getPriceChange("gradedPrice");
+  const completeChange = getPriceChange("completePrice");
+
+  // Render price change indicator
+  const renderPriceIndicator = (change: any, price?: number) => {
+    if (!price) return null;
+
+    if (!change) {
+      return <span className="text-blue-400 text-[9px] ml-1">—</span>;
+    }
+
+    const { direction, percentChange, change: changeValue } = change;
+
+    if (direction === "up") {
+      return (
+        <span className="inline-flex items-center text-green-400 text-[9px] ml-1" title={`Aumentou ${percentChange}%`}>
+          ▲ +{percentChange}%
+        </span>
+      );
+    } else if (direction === "down") {
+      return (
+        <span className="inline-flex items-center text-red-400 text-[9px] ml-1" title={`Diminuiu ${Math.abs(parseFloat(percentChange))}%`}>
+          ▼ {percentChange}%
+        </span>
+      );
+    } else {
+      // neutral (sem mudança)
+      return (
+        <span className="text-blue-400 text-[9px] ml-1" title="Sem alteração">
+          — 0%
+        </span>
+      );
+    }
+  };
+
   // Prepare series data
   const series = [
     {
@@ -176,7 +237,50 @@ export default function PriceHistoryChart({ priceHistory, currentPrices, addedAt
 
   return (
     <div className="w-full">
-      <Chart options={options} series={series} type="area" height={180} />
+      {/* Price Labels with Indicators */}
+      <div className="flex items-center justify-around text-xs mb-4">
+        {currentPrices.newPrice && (
+          <div className="text-center">
+            <div className="text-green-400/60 text-[10px] mb-1">New</div>
+            <div className="text-green-400 font-bold flex items-center justify-center">
+              $ {currentPrices.newPrice.toFixed(2)}
+              {renderPriceIndicator(newChange, currentPrices.newPrice)}
+            </div>
+          </div>
+        )}
+        {currentPrices.loosePrice && (
+          <div className="text-center">
+            <div className="text-red-400/60 text-[10px] mb-1">Loose</div>
+            <div className="text-red-400 font-bold flex items-center justify-center">
+              $ {currentPrices.loosePrice.toFixed(2)}
+              {renderPriceIndicator(looseChange, currentPrices.loosePrice)}
+            </div>
+          </div>
+        )}
+        {currentPrices.gradedPrice && (
+          <div className="text-center">
+            <div className="text-blue-400/60 text-[10px] mb-1">Graded</div>
+            <div className="text-blue-400 font-bold flex items-center justify-center">
+              $ {currentPrices.gradedPrice.toFixed(2)}
+              {renderPriceIndicator(gradedChange, currentPrices.gradedPrice)}
+            </div>
+          </div>
+        )}
+        {currentPrices.completePrice && (
+          <div className="text-center">
+            <div className="text-yellow-400/60 text-[10px] mb-1">Complete</div>
+            <div className="text-yellow-400 font-bold flex items-center justify-center">
+              $ {currentPrices.completePrice.toFixed(2)}
+              {renderPriceIndicator(completeChange, currentPrices.completePrice)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Chart */}
+      <div className="pt-3 border-t border-blue-400/20">
+        <Chart options={options} series={series} type="area" height={180} />
+      </div>
     </div>
   );
 }

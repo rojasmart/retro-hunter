@@ -416,7 +416,7 @@ export default function MyCollectionPage() {
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  <span>Update All Prices</span>
+                  <span>Update Prices</span>
                 </button>
                 <button
                   onClick={() => setIsAddingGame(true)}
@@ -770,47 +770,17 @@ export default function MyCollectionPage() {
                           <div className="p-4 bg-blue-900/20 rounded-lg border border-blue-400/30">
                             <p className="text-xs font-medium text-blue-300 mb-3">Price Analysis Market:</p>
 
-                            {/* Price Labels */}
-                            <div className="flex items-center justify-around text-xs mb-4">
-                              {game.newPrice && (
-                                <div className="text-center">
-                                  <div className="text-green-400/60 text-[10px] mb-1">New</div>
-                                  <div className="text-green-400 font-bold">$ {game.newPrice.toFixed(2)}</div>
-                                </div>
-                              )}
-                              {game.loosePrice && (
-                                <div className="text-center">
-                                  <div className="text-red-400/60 text-[10px] mb-1">Loose</div>
-                                  <div className="text-red-400 font-bold">$ {game.loosePrice.toFixed(2)}</div>
-                                </div>
-                              )}
-                              {game.gradedPrice && (
-                                <div className="text-center">
-                                  <div className="text-blue-400/60 text-[10px] mb-1">Graded</div>
-                                  <div className="text-blue-400 font-bold">$ {game.gradedPrice.toFixed(2)}</div>
-                                </div>
-                              )}
-                              {game.completePrice && (
-                                <div className="text-center">
-                                  <div className="text-yellow-400/60 text-[10px] mb-1">Complete</div>
-                                  <div className="text-yellow-400 font-bold">$ {game.completePrice.toFixed(2)}</div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Price History Chart - Full Width */}
-                            <div className="pt-3 border-t border-blue-400/20">
-                              <PriceHistoryChart
-                                priceHistory={game.priceHistory}
-                                currentPrices={{
-                                  newPrice: game.newPrice,
-                                  loosePrice: game.loosePrice,
-                                  gradedPrice: game.gradedPrice,
-                                  completePrice: game.completePrice,
-                                }}
-                                addedAt={game.addedAt}
-                              />
-                            </div>
+                            {/* Price History Chart with Indicators */}
+                            <PriceHistoryChart
+                              priceHistory={game.priceHistory}
+                              currentPrices={{
+                                newPrice: game.newPrice,
+                                loosePrice: game.loosePrice,
+                                gradedPrice: game.gradedPrice,
+                                completePrice: game.completePrice,
+                              }}
+                              addedAt={game.addedAt}
+                            />
                           </div>
                         )}
 
@@ -819,7 +789,7 @@ export default function MyCollectionPage() {
 
                         {/* Added Date and Delete Button */}
                         <div className="mt-3 flex items-center justify-between">
-                          <p className="text-xs text-cyan-400/60">Adicionado em {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
+                          <p className="text-xs text-cyan-400/60">Added on {new Date(game.addedAt).toLocaleDateString("pt-BR")}</p>
                           <button onClick={() => handleRemoveGame(game.id)} className="text-red-400 hover:text-red-300 transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path

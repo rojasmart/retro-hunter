@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     console.log('Collection POST saved game:', JSON.stringify(game.toObject(), null, 2));
 
     return NextResponse.json({ 
-      message: 'Jogo adicionado à coleção',
+      message: 'Game added to collection',
       game 
     });
 
