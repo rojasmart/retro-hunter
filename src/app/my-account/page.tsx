@@ -79,12 +79,12 @@ export default function MyAccountPage() {
         {/* Fixed Header */}
         <header className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700 z-50">
           {/* Logo e Mensagem */}
-          <div className="flex items-center space-x-4">
+          <a href="/" className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               RETRO HUNTER
             </h1>
             <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
-          </div>
+          </a>
 
           {/* Auth */}
           <div className="flex items-center">
