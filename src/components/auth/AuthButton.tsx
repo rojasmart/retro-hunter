@@ -79,11 +79,11 @@ export default function AuthButton() {
     <>
       <div className="flex items-center space-x-2">
         <button onClick={() => setIsModalOpen(true)} className="text-sm text-blue-600 hover:text-blue-700 font-medium focus:outline-none">
-          Entrar
+          Login
         </button>
         <span className="text-gray-400">|</span>
         <button onClick={() => setIsModalOpen(true)} className="text-sm text-green-600 hover:text-green-700 font-medium focus:outline-none">
-          Registrar
+          Register
         </button>
       </div>
 
