@@ -46,7 +46,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }: Au
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md relative">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">{mode === "login" ? "Entrar" : "Criar conta"}</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{mode === "login" ? "Logging in..." : "Creating account..."}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -65,7 +65,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }: Au
 
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 rounded-b-lg">
-          <p className="text-xs text-gray-500 text-center">Ao continuar, você concorda com nossos termos de uso e política de privacidade.</p>
+          <p className="text-xs text-gray-500 text-center">By continuing, you agree to our Terms of Service and Privacy Policy.</p>
         </div>
       </div>
     </div>

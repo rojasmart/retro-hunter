@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { GameResult, Platform } from "@/lib/types";
 import { PLATFORM_CONFIGS } from "@/lib/config/platforms";
 import { AdvancedOCR } from "@/components/AdvancedOCR";
@@ -431,8 +432,14 @@ export default function Home() {
           <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
         </a>
 
-        {/* Auth */}
-        <div className="flex items-center">
+        {/* Navigation and Auth */}
+        <div className="flex items-center space-x-6">
+          <Link href="/about" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+            About
+          </Link>
+          <Link href="/pricing" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+            Pricing
+          </Link>
           <AuthButton />
         </div>
       </header>
