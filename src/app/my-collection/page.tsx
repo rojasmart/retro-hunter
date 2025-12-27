@@ -361,7 +361,7 @@ export default function MyCollectionPage() {
 
   return (
     <ProtectedRoute>
-      <div className="w-screen h-screen bg-gray-900 text-white font-mono overflow-hidden">
+      <div className="w-screen h-screen bg-gray-900 text-white overflow-hidden">
         {/* Fixed Header */}
         <header className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700 z-50">
           {/* Logo e Mensagem */}
@@ -369,7 +369,7 @@ export default function MyCollectionPage() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               RETRO HUNTER
             </h1>
-            <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
+            <span className="text-sm text-cyan-300 tracking-wide">Hunt, Decide, Sell</span>
           </a>
 
           {/* Auth */}

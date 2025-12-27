@@ -10,13 +10,13 @@ export default function Pricing() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             RETRO HUNTER
           </h1>
-          <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
+          <span className="text-sm text-cyan-300 tracking-wide">Hunt, Decide, Sell</span>
         </Link>
         <nav className="flex items-center space-x-6">
-          <Link href="/about" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+          <Link href="/about" className="text-cyan-300 hover:text-pink-400 transition-colors">
             About
           </Link>
-          <Link href="/pricing" className="text-pink-400 font-mono font-bold">
+          <Link href="/pricing" className="text-pink-400 font-bold">
             Pricing
           </Link>
           <AuthButton />
@@ -30,7 +30,7 @@ export default function Pricing() {
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent text-center">
               Pricing Plans
             </h1>
-            <p className="text-xl text-cyan-300 text-center mb-12 font-mono">Choose the perfect plan for your retro gaming journey</p>
+            <p className="text-xl text-cyan-300 text-center mb-12">Choose the perfect plan for your retro gaming journey</p>
 
             {/* Pricing Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -155,7 +155,7 @@ export default function Pricing() {
 
             {/* FAQ */}
             <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30">
-              <h2 className="text-3xl font-bold text-pink-400 mb-6 font-mono text-center">Frequently Asked Questions</h2>
+              <h2 className="text-3xl font-bold text-pink-400 mb-6 text-center">Frequently Asked Questions</h2>
               <div className="space-y-6 text-gray-300">
                 <div>
                   <h3 className="text-xl font-bold text-cyan-400 mb-2">Can I change plans later?</h3>

@@ -232,8 +232,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-cyan-300 font-mono tracking-wider flex items-center gap-2">PRICE SEARCH</h2>
-            <p className="text-sm text-cyan-300/80 mt-2 font-mono">Upload an image or type a name to search for price games</p>
+            <h2 className="text-2xl font-bold text-cyan-300 tracking-wider flex items-center gap-2">PRICE SEARCH</h2>
+            <p className="text-sm text-cyan-300/80 mt-2">Upload an image or type a name to search for price games</p>
           </div>
         </div>
       </div>
@@ -267,13 +267,13 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
           <div className="flex gap-3 mt-4">
             <button
               onClick={capturePhoto}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-purple-400/50 font-mono"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-blue-400/50 hover:border-purple-400/50"
             >
               CAPTURE PHOTO
             </button>
             <button
               onClick={stopCamera}
-              className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-gray-400/50 font-mono"
+              className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-gray-400/50 "
             >
               CANCEL
             </button>
@@ -302,8 +302,8 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
         <div className="mb-6">
           <div className="backdrop-blur-sm bg-black/20 rounded-xl p-4 border border-cyan-400/30">
             <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-cyan-300 font-mono">SCANNING IMAGE...</span>
-              <span className="text-pink-400 font-mono font-bold">{progress}%</span>
+              <span className="text-cyan-300">SCANNING IMAGE...</span>
+              <span className="text-pink-400 font-bold">{progress}%</span>
             </div>
             <div className="w-full bg-gray-800/50 rounded-full h-3 border border-cyan-400/30">
               <div
@@ -319,7 +319,7 @@ export function OCRUpload({ onTextExtracted, onSearch, isSearching = false, curr
       {error && (
         <div className="mb-6">
           <div className="backdrop-blur-sm bg-red-900/30 border-2 border-red-400/50 text-red-300 rounded-xl p-4">
-            <p className="font-mono">❌ ERROR: {error}</p>
+            <p>❌ ERROR: {error}</p>
           </div>
         </div>
       )}

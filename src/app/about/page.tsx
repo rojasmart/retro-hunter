@@ -10,13 +10,13 @@ export default function About() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             RETRO HUNTER
           </h1>
-          <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
+          <span className="text-sm text-cyan-300 tracking-wide">Hunt, Decide, Sell</span>
         </Link>
         <nav className="flex items-center space-x-6">
-          <Link href="/about" className="text-pink-400 font-mono font-bold">
+          <Link href="/about" className="text-pink-400 font-bold">
             About
           </Link>
-          <Link href="/pricing" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+          <Link href="/pricing" className="text-cyan-300 hover:text-pink-400 transition-colors">
             Pricing
           </Link>
           <AuthButton />
@@ -34,7 +34,7 @@ export default function About() {
             <div className="space-y-8">
               {/* Mission */}
               <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30">
-                <h2 className="text-3xl font-bold text-pink-400 mb-4 font-mono">Our Mission</h2>
+                <h2 className="text-3xl font-bold text-pink-400 mb-4">Our Mission</h2>
                 <p className="text-gray-300 text-lg leading-relaxed">
                   Retro Hunter was created to help retro game collectors and dealers make informed decisions. We believe that buying, selling, and
                   collecting retro games should be backed by accurate pricing data from multiple sources. Our mission is to provide the most
@@ -44,7 +44,7 @@ export default function About() {
 
               {/* What We Do */}
               <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30">
-                <h2 className="text-3xl font-bold text-pink-400 mb-4 font-mono">What We Do</h2>
+                <h2 className="text-3xl font-bold text-pink-400 mb-4">What We Do</h2>
                 <div className="space-y-4 text-gray-300 text-lg">
                   <p>
                     <span className="text-cyan-400 font-bold">•</span> <strong className="text-white">Price Aggregation:</strong> We gather pricing
@@ -67,7 +67,7 @@ export default function About() {
 
               {/* Why Choose Us */}
               <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30">
-                <h2 className="text-3xl font-bold text-pink-400 mb-4 font-mono">Why Choose Retro Hunter?</h2>
+                <h2 className="text-3xl font-bold text-pink-400 mb-4">Why Choose Retro Hunter?</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-300">
                   <div className="bg-black/30 rounded-xl p-4 border border-cyan-400/20">
                     <h3 className="text-xl font-bold text-cyan-400 mb-2">🎯 Accurate Data</h3>
@@ -90,7 +90,7 @@ export default function About() {
 
               {/* Contact */}
               <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30 text-center">
-                <h2 className="text-3xl font-bold text-pink-400 mb-4 font-mono">Get Started</h2>
+                <h2 className="text-3xl font-bold text-pink-400 mb-4">Get Started</h2>
                 <p className="text-gray-300 text-lg mb-6">Ready to start hunting for the best retro game prices?</p>
                 <Link
                   href="/"

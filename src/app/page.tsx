@@ -120,28 +120,28 @@ const PriceTableAndSlider = ({
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <div className="backdrop-blur-sm bg-black/40 rounded-2xl p-6 border-2 border-cyan-400/50 shadow-2xl">
-          <h2 className="text-center text-3xl font-bold text-cyan-300 mb-4 font-mono tracking-wider">{searchName}</h2>
+          <h2 className="text-center text-3xl font-bold text-cyan-300 mb-4 tracking-wider">{searchName}</h2>
           <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-500 rounded-xl border border-green-400">
-              <div className="text-xs text-white font-mono mb-1">LOWEST</div>
+              <div className="text-xs text-white mb-1">LOWEST</div>
               <div className="text-2xl font-bold text-white">
                 {getCurrencySymbol()} {convertPrice(lowestPrice)}
               </div>
             </div>
             <div className="text-center p-4 bg-red-500 rounded-xl border border-red-400">
-              <div className="text-xs text-white font-mono mb-1">HIGHEST</div>
+              <div className="text-xs text-white mb-1">HIGHEST</div>
               <div className="text-2xl font-bold text-white">
                 {getCurrencySymbol()} {convertPrice(highestPrice)}
               </div>
             </div>
             <div className="text-center p-4 bg-blue-500 rounded-xl border border-blue-400">
-              <div className="text-xs text-white font-mono mb-1">AVERAGE</div>
+              <div className="text-xs text-white mb-1">AVERAGE</div>
               <div className="text-2xl font-bold text-white">
                 {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
               </div>
             </div>
             <div className="text-center p-4 bg-purple-500 rounded-xl border border-purple-400">
-              <div className="text-xs text-white font-mono mb-1">MY PRICE</div>
+              <div className="text-xs text-white mb-1">MY PRICE</div>
               <input
                 type="number"
                 step="0.01"
@@ -156,7 +156,7 @@ const PriceTableAndSlider = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Price Range Filter */}
               <div>
-                <label className="block text-cyan-300 font-mono mb-2 text-sm">Price Range:</label>
+                <label className="block text-cyan-300 mb-2 text-sm">Price Range:</label>
                 <div className="flex space-x-2">
                   <input
                     type="number"
@@ -164,7 +164,7 @@ const PriceTableAndSlider = ({
                     onChange={(e) => setMinPrice(Number(e.target.value))}
                     min={lowestPrice}
                     max={highestPrice}
-                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 text-sm"
                     placeholder="Min"
                   />
                   <input
@@ -173,7 +173,7 @@ const PriceTableAndSlider = ({
                     onChange={(e) => setMaxPrice(Number(e.target.value))}
                     min={lowestPrice}
                     max={highestPrice}
-                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                    className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 text-sm"
                     placeholder="Max"
                   />
                 </div>
@@ -181,11 +181,11 @@ const PriceTableAndSlider = ({
 
               {/* Sort Order Filter */}
               <div>
-                <label className="block text-cyan-300 font-mono mb-2 text-sm">Sort Order:</label>
+                <label className="block text-cyan-300 mb-2 text-sm">Sort Order:</label>
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300  text-sm"
                 >
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
@@ -195,11 +195,11 @@ const PriceTableAndSlider = ({
               {/* Currency Filter */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-cyan-300 font-mono text-sm">Currency:</label>
+                  <label className="block text-cyan-300 text-sm">Currency:</label>
                   <button
                     onClick={fetchExchangeRate}
                     disabled={isLoadingRate}
-                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-mono text-xs rounded transition-all duration-300"
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs rounded transition-all duration-300"
                   >
                     {isLoadingRate ? "⟳" : "Refresh"}
                   </button>
@@ -207,12 +207,12 @@ const PriceTableAndSlider = ({
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as "USD" | "EUR")}
-                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                  className="w-full p-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300  text-sm"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€) - {exchangeRate.toFixed(4)}</option>
                 </select>
-                {isLoadingRate && <div className="text-xs text-cyan-300 mt-1 font-mono">Updating...</div>}
+                {isLoadingRate && <div className="text-xs text-cyan-300 mt-1">Updating...</div>}
               </div>
             </div>
           </div>
@@ -242,11 +242,11 @@ const PriceTableAndSlider = ({
                 />
               </div>
             )}
-            <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 font-mono transition-colors">{item.title}</h3>
+            <h3 className="font-bold text-cyan-300 hover:text-pink-300 text-sm line-clamp-2 mb-2 transition-colors">{item.title}</h3>
             <p className="text-green-400 font-bold text-xl mb-1">
               {getCurrencySymbol()} {convertPrice(item.price)}
             </p>
-            {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300 font-mono">{item.tags[0]}</p>}
+            {item.tags && item.tags.length > 0 && <p className="text-xs text-purple-300">{item.tags[0]}</p>}
           </a>
         ))}
       </div>
@@ -422,22 +422,22 @@ export default function Home() {
   };
 
   return (
-    <div className="w-screen bg-gray-900 text-white font-mono">
+    <div className="w-screen bg-gray-900 text-white">
       <header className="fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md border-b border-gray-700 z-50">
         {/* Logo e Mensagem */}
         <a href="/" className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
             RETRO HUNTER
           </h1>
-          <span className="text-sm text-cyan-300 font-mono tracking-wide">Hunt, Decide, Sell</span>
+          <span className="text-sm text-cyan-300 tracking-wide">Hunt, Decide, Sell</span>
         </a>
 
         {/* Navigation and Auth */}
         <div className="flex items-center space-x-6">
-          <Link href="/about" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+          <Link href="/about" className="text-cyan-300 hover:text-pink-400 transition-colors">
             About
           </Link>
-          <Link href="/pricing" className="text-cyan-300 hover:text-pink-400 transition-colors font-mono">
+          <Link href="/pricing" className="text-cyan-300 hover:text-pink-400 transition-colors">
             Pricing
           </Link>
           <AuthButton />
@@ -456,7 +456,7 @@ export default function Home() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Enter the game name (e.g., Action Fighter)"
-                className="w-full p-4 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-lg"
+                className="w-full p-4 bg-gray-900/80 border-2 border-cyan-400/50 rounded-xl text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 text-lg"
               />
               <button
                 onClick={() => searchEbayOnly()}
@@ -476,8 +476,8 @@ export default function Home() {
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-cyan-400/40">
                 <div className="animate-pulse">
-                  <p className="text-2xl text-cyan-400 font-mono mb-2">🔍 SEARCHING PRICES...</p>
-                  <p className="text-cyan-300 font-mono">Please wait while we fetch the best prices</p>
+                  <p className="text-2xl text-cyan-400 mb-2">🔍 SEARCHING PRICES...</p>
+                  <p className="text-cyan-300">Please wait while we fetch the best prices</p>
                 </div>
               </div>
             </div>
@@ -487,8 +487,8 @@ export default function Home() {
           {!loading && priceData.length > 0 && (
             <div className="mb-8 space-y-4">
               <div className="text-center mb-6">
-                <h3 className="text-3xl font-bold text-cyan-300 font-mono tracking-wider">PRICE INFORMATION</h3>
-                <p className="text-sm text-cyan-300/70 font-mono mt-2">
+                <h3 className="text-3xl font-bold text-cyan-300 tracking-wider">PRICE INFORMATION</h3>
+                <p className="text-sm text-cyan-300/70 mt-2">
                   Found {priceData.length} game{priceData.length > 1 ? "s" : ""}
                 </p>
               </div>
@@ -496,12 +496,12 @@ export default function Home() {
               {/* Success/Error Messages */}
               {addSuccess && (
                 <div className="backdrop-blur-sm bg-green-900/30 border-2 border-green-400/50 text-green-300 rounded-xl p-4 text-center">
-                  <p className="font-mono">✓ {addSuccess}</p>
+                  <p>✓ {addSuccess}</p>
                 </div>
               )}
               {addError && (
                 <div className="backdrop-blur-sm bg-red-900/30 border-2 border-red-400/50 text-red-300 rounded-xl p-4 text-center">
-                  <p className="font-mono">✗ {addError}</p>
+                  <p>✗ {addError}</p>
                 </div>
               )}
 
@@ -510,28 +510,28 @@ export default function Home() {
                   {/* Game Info */}
                   <div className="mb-4 pb-4 border-b border-cyan-400/30">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-2xl font-bold text-pink-400 font-mono">{item.product_name}</h4>
-                      <span className="text-xs bg-purple-600 px-3 py-1 rounded-full font-mono">#{index + 1}</span>
+                      <h4 className="text-2xl font-bold text-pink-400">{item.product_name}</h4>
+                      <span className="text-xs bg-purple-600 px-3 py-1 rounded-full">#{index + 1}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-cyan-300/70 font-mono">Console:</span>
-                        <span className="text-white font-mono ml-2 font-bold">{item.console_name}</span>
+                        <span className="text-cyan-300/70">Console:</span>
+                        <span className="text-white ml-2 font-bold">{item.console_name}</span>
                       </div>
                       <div>
-                        <span className="text-cyan-300/70 font-mono">Release:</span>
-                        <span className="text-white font-mono ml-2 font-bold">{item.release_date || "N/A"}</span>
+                        <span className="text-cyan-300/70">Release:</span>
+                        <span className="text-white ml-2 font-bold">{item.release_date || "N/A"}</span>
                       </div>
                       {item.genre && (
                         <div>
-                          <span className="text-cyan-300/70 font-mono">Genre:</span>
-                          <span className="text-white font-mono ml-2 font-bold">{item.genre}</span>
+                          <span className="text-cyan-300/70">Genre:</span>
+                          <span className="text-white ml-2 font-bold">{item.genre}</span>
                         </div>
                       )}
                       {item.detected_title && (
                         <div>
-                          <span className="text-cyan-300/70 font-mono">Detected as:</span>
-                          <span className="text-yellow-300 font-mono ml-2 font-bold">{item.detected_title}</span>
+                          <span className="text-cyan-300/70">Detected as:</span>
+                          <span className="text-yellow-300 ml-2 font-bold">{item.detected_title}</span>
                         </div>
                       )}
                     </div>
@@ -541,36 +541,36 @@ export default function Home() {
                   <div className="grid grid-cols-5 gap-2 mb-4">
                     {item.prices.loose !== null && (
                       <div className="bg-blue-900/40 rounded-lg p-3 border-2 border-blue-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-[10px] text-blue-300 font-mono mb-1">LOOSE</div>
-                        <div className="text-lg font-bold text-white font-mono">${item.prices.loose.toFixed(2)}</div>
+                        <div className="text-[10px] text-blue-300 mb-1">LOOSE</div>
+                        <div className="text-lg font-bold text-white">${item.prices.loose.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.cib !== null && (
                       <div className="bg-green-900/40 rounded-lg p-3 border-2 border-green-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-[10px] text-green-300 font-mono mb-1">CIB</div>
-                        <div className="text-lg font-bold text-white font-mono">${item.prices.cib.toFixed(2)}</div>
+                        <div className="text-[10px] text-green-300 mb-1">CIB</div>
+                        <div className="text-lg font-bold text-white">${item.prices.cib.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.new !== null && (
                       <div className="bg-purple-900/40 rounded-lg p-3 border-2 border-purple-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-[10px] text-purple-300 font-mono mb-1">NEW</div>
-                        <div className="text-lg font-bold text-white font-mono">${item.prices.new.toFixed(2)}</div>
+                        <div className="text-[10px] text-purple-300 mb-1">NEW</div>
+                        <div className="text-lg font-bold text-white">${item.prices.new.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.graded !== null && (
                       <div className="bg-yellow-900/40 rounded-lg p-3 border-2 border-yellow-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-[10px] text-yellow-300 font-mono mb-1">GRADED</div>
-                        <div className="text-lg font-bold text-white font-mono">${item.prices.graded.toFixed(2)}</div>
+                        <div className="text-[10px] text-yellow-300 mb-1">GRADED</div>
+                        <div className="text-lg font-bold text-white">${item.prices.graded.toFixed(2)}</div>
                       </div>
                     )}
 
                     {item.prices.box_only !== null && (
                       <div className="bg-gray-900/40 rounded-lg p-3 border-2 border-gray-400/50 transform hover:scale-105 transition-all">
-                        <div className="text-[10px] text-gray-300 font-mono mb-1">BOX</div>
-                        <div className="text-lg font-bold text-white font-mono">${item.prices.box_only.toFixed(2)}</div>
+                        <div className="text-[10px] text-gray-300 mb-1">BOX</div>
+                        <div className="text-lg font-bold text-white">${item.prices.box_only.toFixed(2)}</div>
                       </div>
                     )}
                   </div>
@@ -580,14 +580,14 @@ export default function Home() {
                     <div className="pt-4 border-t border-cyan-400/30 text-sm space-y-2">
                       {item.upc && (
                         <div>
-                          <span className="text-cyan-300/70 font-mono">UPC:</span>
-                          <span className="text-white font-mono ml-2">{item.upc}</span>
+                          <span className="text-cyan-300/70">UPC:</span>
+                          <span className="text-white ml-2">{item.upc}</span>
                         </div>
                       )}
                       {item.asin && (
                         <div>
-                          <span className="text-cyan-300/70 font-mono">ASIN:</span>
-                          <span className="text-white font-mono ml-2">{item.asin}</span>
+                          <span className="text-cyan-300/70">ASIN:</span>
+                          <span className="text-white ml-2">{item.asin}</span>
                         </div>
                       )}
                     </div>
@@ -597,11 +597,11 @@ export default function Home() {
                   <div className="mt-4 pt-4 border-t border-cyan-400/30">
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
-                        <label className="text-xs text-cyan-300/70 font-mono mb-1 block">CONDITION</label>
+                        <label className="text-xs text-cyan-300/70 mb-1 block">CONDITION</label>
                         <select
                           value={gamesCondition[item.id] || "used"}
                           onChange={(e) => setGamesCondition({ ...gamesCondition, [item.id]: e.target.value })}
-                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 text-sm"
                         >
                           <option value="new">New</option>
                           <option value="used">Used</option>
@@ -609,20 +609,20 @@ export default function Home() {
                         </select>
                       </div>
                       <div className="flex-1">
-                        <label className="text-xs text-cyan-300/70 font-mono mb-1 block">MY PURCHASE PRICE</label>
+                        <label className="text-xs text-cyan-300/70 mb-1 block">MY PURCHASE PRICE</label>
                         <input
                           type="number"
                           step="0.01"
                           placeholder="0.00"
                           value={gamesPurchasePrice[item.id] || ""}
                           onChange={(e) => setGamesPurchasePrice({ ...gamesPurchasePrice, [item.id]: Number(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 font-mono text-sm"
+                          className="w-full px-3 py-2 bg-gray-900/80 border-2 border-cyan-400/50 rounded-lg text-cyan-100 placeholder-cyan-300/60 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/50 focus:outline-none transition-all duration-300 text-sm"
                         />
                       </div>
                       <button
                         onClick={() => addToCollection(item)}
                         disabled={addingGameId === item.id}
-                        className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-lg shadow-lg transition-all duration-300 border-2 border-purple-400/50 hover:border-pink-400/50 font-mono text-sm ${
+                        className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-lg shadow-lg transition-all duration-300 border-2 border-purple-400/50 hover:border-pink-400/50 text-sm ${
                           addingGameId === item.id ? "opacity-70 cursor-wait" : ""
                         }`}
                       >
@@ -639,11 +639,11 @@ export default function Home() {
           {!loading && resultados.length === 0 && priceData.length === 0 && nome.trim() && (
             <div className="text-center py-12">
               <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-8 border border-red-400/40">
-                <p className="text-2xl text-red-400 font-mono mb-2">😕 NO DATA FOUND</p>
-                <p className="text-cyan-300 font-mono">
+                <p className="text-2xl text-red-400 mb-2">😕 NO DATA FOUND</p>
+                <p className="text-cyan-300">
                   &gt; No results for &ldquo;<span className="text-pink-400">{nome}</span>&rdquo;
                 </p>
-                <p className="text-sm text-gray-400 mt-2 font-mono">Try different search terms or filters</p>
+                <p className="text-sm text-gray-400 mt-2">Try different search terms or filters</p>
               </div>
             </div>
           )}
