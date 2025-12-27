@@ -115,7 +115,7 @@ const PriceTableAndSlider = ({
   const filteredItems = items
     .filter((item) => item.price >= minPrice && item.price <= maxPrice)
     .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
-  console.log("hello searchName", searchName);
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">

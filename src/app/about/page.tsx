@@ -91,9 +91,7 @@ export default function About() {
               {/* Contact */}
               <section className="backdrop-blur-sm bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-400/30 text-center">
                 <h2 className="text-3xl font-bold text-pink-400 mb-4 font-mono">Get Started</h2>
-                <p className="text-gray-300 text-lg mb-6">
-                  Ready to start hunting for the best retro game prices?
-                </p>
+                <p className="text-gray-300 text-lg mb-6">Ready to start hunting for the best retro game prices?</p>
                 <Link
                   href="/"
                   className="inline-block px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold text-lg rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-pink-400/50"

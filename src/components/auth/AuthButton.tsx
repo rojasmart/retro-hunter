@@ -80,13 +80,13 @@ export default function AuthButton() {
       <div className="flex items-center space-x-3">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-sm font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 border border-cyan-400/50 hover:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-sm font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 border border-cyan-400/50 hover:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 cursor-pointer"
         >
           Login
         </button>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-sm font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 border border-pink-400/50 hover:border-purple-400/50 focus:outline-none focus:ring-2 focus:ring-pink-400/50"
+          className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-sm font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 border border-pink-400/50 hover:border-purple-400/50 focus:outline-none focus:ring-2 focus:ring-pink-400/50 cursor-pointer"
         >
           Register
         </button>
